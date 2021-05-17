@@ -29,3 +29,7 @@
 2.含有定时任务，大部分情况不需要手动触发更新命令
 
 ## 效果
+![Image text](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/0.png)
+![Image text](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/1.png)
+![Image text](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/2.png)
+![Image text](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/3.png)
