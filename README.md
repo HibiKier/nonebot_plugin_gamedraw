@@ -23,7 +23,6 @@
 ## 使用
   1.在bot入口文件添加<br>
     ```python
-    
     nonebot.load_plugin("nonebot_plugin_gamedraw")
     
     ```
