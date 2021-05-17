@@ -22,7 +22,7 @@
 
 ## 使用
   1.请在config.py里指定ttf文件！！！<br>
-  2.默认资源文件夹在data/draw_card/
+  2.默认资源路径是data/draw_card/
 
 ## 注意
 1.第一次启动会下载信息和图片资源<br>
