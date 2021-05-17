@@ -9,8 +9,8 @@
 * 赛马娘
 
 ## 使用
-1.请在config.py里指定ttf文件！！！
-2.默认资源文件夹在data/draw_card/
+  1.请在config.py里指定ttf文件！！！
+  2.默认资源文件夹在data/draw_card/
 
 ## 注意
 1.第一次启动会下载信息和图片资源
