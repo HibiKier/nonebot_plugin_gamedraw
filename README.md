@@ -21,15 +21,19 @@
 '更新赛马娘信息'<br>
 
 ## 使用
-  1.请在config.py里指定ttf文件！！！<br>
-  2.默认资源路径是data/draw_card/
+  1.在bot入口文件添加
+    ```
+    nonebot.load_plugin("nonebot_plugin_gamedraw")
+    ```
+  3.请在config.py里指定ttf文件！！！<br>
 
 ## 注意
 1.第一次启动会下载信息和图片资源<br>
-2.含有定时任务，大部分情况不需要手动触发更新命令
+2.默认资源路径是data/draw_card/
+3.含有定时任务，大部分情况不需要手动触发更新命令
 
 ## 效果
-![Image text](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/0.png)
-![Image text](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/1.png)
-![Image text](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/2.png)
-![Image text](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/3.png)
+![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/0.png)
+![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/1.png)
+![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/2.png)
+![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/3.png)
