@@ -21,10 +21,9 @@
 '更新赛马娘信息'<br>
 
 ## 使用
-  1.在bot入口文件添加<br>
+  1.在bot入口文件添加 \t
     ```python
     nonebot.load_plugin("nonebot_plugin_gamedraw")
-    
     ```
   <br>2.请在config.py里指定ttf文件！！！<br>
 
