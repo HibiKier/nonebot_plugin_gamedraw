@@ -25,7 +25,7 @@
     ```
     nonebot.load_plugin("nonebot_plugin_gamedraw")
     ```
-  <br>2.请在config.py里指定ttf文件！！！<br>
+  
 
 ## 注意
 1.第一次启动会下载信息和图片资源<br>
