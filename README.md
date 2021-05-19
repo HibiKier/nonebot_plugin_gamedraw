@@ -15,12 +15,12 @@
 * 赛马娘
 
 ## 命令
-' .*?方舟[1-9|一][0-9]{0,2}[抽|井]'<br>
-' .*?原神[1-9|一][0-9]{0,2}[抽|井]'<br>
-' .*?马娘卡?[1-9|一][0-9]{0,2}[抽|井]'<br>
+'   .*?方舟[1-9|一][0-9]{0,2}[抽|井]'  <br>
+'   .*?原神[1-9|一][0-9]{0,2}[抽|井]'  <br>
+'   .*?马娘卡?[1-9|一][0-9]{0,2}[抽|井]'  <br>
 赛马娘分为赛马娘N抽（抽马），赛马娘卡N抽（抽卡）
 
-'重置原神抽卡次数'（重置保底）<br>
+'重置原神抽卡'（重置保底）<br>
 '重载方舟卡池'<br>
 
 '更新明日方舟信息'<br>
@@ -34,6 +34,8 @@
     ```
     
 ## 更新：
+### 2021/5/19
+  * 实现 [issues #1](https://github.com/HibiKier/nonebot_plugin_gamedraw/issues/1) 提供的比较完善的抽卡逻辑）感谢# [@Jerry-FaGe](https://github.com/Jerry-FaGe)
 ### 2021/5/18
   * 明日方舟实现爬取游戏公告自动更新当前的up卡池
   
@@ -50,3 +52,4 @@
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/1.png)
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/2.png)
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/3.png)
+
