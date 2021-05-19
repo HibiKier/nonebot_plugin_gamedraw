@@ -44,6 +44,7 @@
 
 ## 效果
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/0.png)
+![](https://raw.githubusercontent.com/HibiKier/nonebot_plugin_gamedraw/main/docs/CM85%40%5B6TG%25%25SEZ5%24T%7DH5A73.png)
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/1.png)
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/2.png)
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/3.png)
