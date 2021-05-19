@@ -73,7 +73,7 @@ class PrtsAnnouncement:
                 char = char.replace('[限定]', '').replace('[', '').replace(']', '')
                 data['up_char'][star][char.strip()] = f'权{weight}'
         # data['time'] = '03月09日16:00 - 05月23日03:59'
-        if is_expired(data):
+        if not is_expired(data):
             data['title'] = ''
         return data
 
@@ -90,13 +90,13 @@ class PrtsAnnouncement:
 
 
 def is_expired(data: dict):
-    end_date = datetime.strptime(
-        str(datetime.now().year) + "-"
-        + data['time'].split('-')[-1].split('日')[-2].
-        replace('月', '-').replace('日', '').strip(), '%Y-%m-%d').date()
+    times = data['time'].split('-')
+    for i in range(len(times)):
+        times[i] = str(datetime.now().year) + '-' + times[i].split('日')[0].strip().replace('月', '-')
+    start_date = datetime.strptime(times[0], '%Y-%m-%d').date()
+    end_date = datetime.strptime(times[1], '%Y-%m-%d').date()
     now = datetime.now().date()
-    return now > end_date
-
+    return start_date < now < end_date
 
 # ad = Announcement('https://wiki.biligame.com/arknights/%E6%96%B0%E9%97%BB%E5%85%AC%E5%91%8A')
 # asyncio.get_event_loop().run_until_complete(check_up_char('prts'))
