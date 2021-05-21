@@ -137,6 +137,7 @@ async def _last_check(data: dict, game_name: str, session: aiohttp.ClientSession
                     obtain = obtain.split('<br/>')
                 elif obtain.find('<br>'):
                     obtain = obtain.split('<br>')
+                print(f'明日方舟获取额外信息....{obtain}')
                 data[key]['获取途径'] = obtain
     # if game_name == 'genshin':
     #     for key in data.keys():
@@ -154,6 +155,7 @@ async def _last_check(data: dict, game_name: str, session: aiohttp.ClientSession
                 r = re.search(r'.*?40px-(.*)图标.png', str(data[keys][key]))
                 if r:
                     data[keys][key] = r.group(1)
+                    print(f'赛马娘额外修改数据....{keys}[{key}]=> {r.group(1)}')
     return data
 
 
