@@ -3,7 +3,7 @@ import os
 import nonebot
 from nonebot.adapters.cqhttp import MessageSegment
 from .update_game_info import update_info
-from .util import download_img, init_star_rst, generate_img, max_card, BaseData, set_list
+from .util import download_img, init_star_rst, generate_img, max_card, BaseData, set_list, get_star
 import random
 from .config import PRETTY_THREE, PRETTY_TWO, DRAW_PATH, PRETTY_ONE
 from dataclasses import dataclass
@@ -71,10 +71,11 @@ async def init_data():
 # 抽取卡池
 def _get_pretty_card(itype):
     global ALL_CHAR, ALL_CARD
-    star = random.sample([3, 2, 1],
-                         counts=[int(PRETTY_THREE * 100), int(PRETTY_TWO * 100),
-                                 int(PRETTY_ONE * 100)],
-                         k=1)[0]
+    # star = random.sample([3, 2, 1],
+    #                      counts=[int(PRETTY_THREE * 100), int(PRETTY_TWO * 100),
+    #                              int(PRETTY_ONE * 100)],
+    #                      k=1)[0]
+    star = get_star([3, 2, 1], [PRETTY_THREE, PRETTY_TWO, PRETTY_ONE])
     chars = [x for x in (ALL_CARD if itype == 'card' else ALL_CHAR) if x.star == star]
     return random.choice(chars), abs(star - 3)
 
