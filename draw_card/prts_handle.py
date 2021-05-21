@@ -5,7 +5,7 @@ import nonebot
 import random
 from .config import PRTS_FIVE_P, PRTS_FOUR_P, PRTS_SIX_P, PRTS_THREE_P, DRAW_PATH
 from .update_game_info import update_info
-from .util import generate_img, init_star_rst, max_card, BaseData, UpEvent, set_list
+from .util import generate_img, init_star_rst, max_card, BaseData, UpEvent, set_list, get_star
 from .init_card_pool import init_game_pool
 from pathlib import Path
 from .announcement import PrtsAnnouncement
@@ -70,10 +70,11 @@ async def init_data():
 
 # 抽取干员
 def _get_operator_card():
-    star = random.sample([6, 5, 4, 3],
-                         counts=[int(PRTS_SIX_P * 100), int(PRTS_FIVE_P * 100),
-                                 int(PRTS_FOUR_P * 100), int(PRTS_THREE_P * 100)],
-                         k=1)[0]
+    # star = random.sample([6, 5, 4, 3],
+    #                      counts=[int(PRTS_SIX_P * 100), int(PRTS_FIVE_P * 100),
+    #                              int(PRTS_FOUR_P * 100), int(PRTS_THREE_P * 100)],
+    #                      k=1)[0]
+    star = get_star([6, 5, 4, 3], [PRTS_SIX_P, PRTS_FIVE_P, PRTS_FOUR_P, PRTS_THREE_P])
     if _CURRENT_POOL_TITLE:
         zooms = [x.zoom for x in UP_OPERATOR if x.star == star]
         zoom = 0
