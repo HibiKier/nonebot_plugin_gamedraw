@@ -34,6 +34,7 @@
     ```
     
 ## 更新：
+### 
 ### 2021/5/19
   * 实现 [issues #1](https://github.com/HibiKier/nonebot_plugin_gamedraw/issues/1) 提供的比较完善的抽卡逻辑）感谢# [@Jerry-FaGe](https://github.com/Jerry-FaGe)
 ### 2021/5/18
