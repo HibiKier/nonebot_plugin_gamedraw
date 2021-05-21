@@ -35,7 +35,7 @@
     
 ## 更新：
 ### 2021/5/21
-  * 将抽卡方法向py3.9以下兼容 [issues #1](https://github.com/HibiKier/nonebot_plugin_gamedraw/issues/2)
+  * 将抽卡方法向py3.9以下兼容 [issues #2](https://github.com/HibiKier/nonebot_plugin_gamedraw/issues/2)
 ### 2021/5/19
   * 实现 [issues #1](https://github.com/HibiKier/nonebot_plugin_gamedraw/issues/1) 提供的比较完善的抽卡逻辑）感谢# [@Jerry-FaGe](https://github.com/Jerry-FaGe)
 ### 2021/5/18
