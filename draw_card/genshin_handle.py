@@ -4,8 +4,8 @@ from nonebot.adapters.cqhttp import MessageSegment
 import nonebot
 import random
 from .update_game_info import update_info
-from .util import generate_img, init_star_rst, BaseData, set_list
-from .config import GENSHIN_FIVE_P, GENSHIN_FOUR_P, GENSHIN_G_FIVE_P, GENSHIN_THREE_P, I72_ADD, DRAW_PATH
+from .util import generate_img, init_star_rst, BaseData, set_list, get_star
+from .config import GENSHIN_FIVE_P, GENSHIN_FOUR_P, GENSHIN_G_FIVE_P, GENSHIN_G_FOUR_P, GENSHIN_THREE_P, I72_ADD, DRAW_PATH
 from dataclasses import dataclass
 from .init_card_pool import init_game_pool
 
@@ -75,16 +75,19 @@ async def init_data():
 def _get_genshin_card(mode: int = 1, add: float = 0.0):
     global ALL_ARM, ALL_CHAR
     if mode == 1:
-        star = random.sample([5, 4, 3],
-                             counts=[int(GENSHIN_FIVE_P * 1000) + int(add * 1000), int(GENSHIN_FOUR_P * 1000),
-                                     int(GENSHIN_THREE_P * 1000)],
-                             k=1)[0]
+        star = get_star([5, 4, 3], [GENSHIN_FIVE_P, GENSHIN_FOUR_P, GENSHIN_THREE_P])
+        # star = random.sample([5, 4, 3],
+        #                      counts=[int(GENSHIN_FIVE_P * 1000) + int(add * 1000), int(GENSHIN_FOUR_P * 1000),
+        #                              int(GENSHIN_THREE_P * 1000)],
+        #                      k=1)[0]
     elif mode == 2:
-        star = random.sample([5, 4],
-                             counts=[int(GENSHIN_G_FIVE_P * 1000) + int(add * 1000), int(GENSHIN_FOUR_P * 1000)],
-                             k=1)[0]
+        star = get_star([5, 4], [GENSHIN_G_FIVE_P, GENSHIN_G_FOUR_P])
+        # star = random.sample([5, 4],
+        #                      counts=[int(GENSHIN_G_FIVE_P * 1000) + int(add * 1000), int(GENSHIN_FOUR_P * 1000)],
+        #                      k=1)[0]
     else:
         star = 5
+    # print(f'star: {star}')
     chars = [x for x in (ALL_ARM if random.random() < 0.5 or star == 3 else ALL_CHAR) if x.star == star]
     return random.choice(chars), abs(star - 5)
 
