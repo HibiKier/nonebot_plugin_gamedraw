@@ -10,6 +10,7 @@ from .config import path_dict, DRAW_PATH
 import nonebot
 import pypinyin
 from .create_img import CreateImg
+import random
 from dataclasses import dataclass
 try:
     import ujson as json
@@ -180,4 +181,22 @@ def set_list(lst: List[BaseData]) -> list:
             tmp.append(x)
             name_lst.append(x.name)
     return tmp
+
+
+def get_star(star_lst: List[int], probability_lst: List[float]) -> int:
+    rand = random.random()
+    tmp = probability_lst[0]
+    add = 0
+    tmp_lst = [(0, probability_lst[0])]
+    for i in range(1, len(probability_lst) - 1):
+        add += probability_lst[i - 1]
+        tmp_lst.append((tmp_lst[i - 1][1], probability_lst[i] + add))
+        tmp += probability_lst[i]
+    tmp_lst.append((tmp_lst[-1][1], 1))
+    # print(tmp_lst)
+    for i in range(len(tmp_lst)):
+        if tmp_lst[i][0] <= rand <= tmp_lst[i][1]:
+            return star_lst[i]
+
+
 
