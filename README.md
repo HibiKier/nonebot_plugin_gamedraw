@@ -34,6 +34,8 @@
     ```
     
 ## 更新：
+### 2021/5/23
+  * 修复明日方舟卡池无法区分 商店限定 的问题[issues #3](https://github.com/HibiKier/nonebot_plugin_gamedraw/issues/3)
 ### 2021/5/21
   * 将抽卡方法向py3.9以下兼容 [issues #2](https://github.com/HibiKier/nonebot_plugin_gamedraw/issues/2)
 ### 2021/5/19
