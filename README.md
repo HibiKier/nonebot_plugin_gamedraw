@@ -50,6 +50,10 @@
 3.含有定时任务，大部分情况不需要手动触发更新命令<br>
 4.若图片缺失，抽卡时则会以全黑的头像替代（一般是正式服还未上线的角色或物品）
 
+## Todo
+
+  * 坎公骑冠剑
+
 ## 效果
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/0.png)
 ![](https://raw.githubusercontent.com/HibiKier/nonebot_plugin_gamedraw/main/docs/CM85%40%5B6TG%25%25SEZ5%24T%7DH5A73.png)
