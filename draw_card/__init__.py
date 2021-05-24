@@ -27,13 +27,6 @@ guardian = on_regex('.*?坎公骑冠剑武?器?[1-9|一][0-9]{0,2}[抽|井]', pr
 guardian_update = on_keyword({'更新坎公骑冠剑信息'}, permission=SUPERUSER, priority=1, block=True)
 
 
-test = on_keyword({'test'}, permission=SUPERUSER, priority=1, block=True)
-
-
-@test.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
-    await update_guardian_info()
-
 
 @prts.handle()
 async def _(bot: Bot, event: MessageEvent, state: T_State):
