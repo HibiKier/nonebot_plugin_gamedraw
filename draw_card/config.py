@@ -1,5 +1,6 @@
 import nonebot
 from pathlib import Path
+
 try:
     import ujson as json
 except ModuleNotFoundError:
@@ -43,7 +44,6 @@ GUARDIAN_TWO_ARMS_P = 0.58
 GUARDIAN_EXCLUSIVE_ARMS_UP_P = 0.01
 GUARDIAN_EXCLUSIVE_ARMS_OTHER_P = 0.02
 
-
 path_dict = {
     'genshin': '原神',
     'prts': '明日方舟',
@@ -51,63 +51,50 @@ path_dict = {
     'guardian': '坎公骑冠剑',
 }
 
-
 _draw_config = Path() / "data" / "draw_card" / "draw_card_config" / "draw_card_config.json"
-
 
 driver: nonebot.Driver = nonebot.get_driver()
 
 
 @driver.on_startup
 def check_config():
-    global PRTS_SIX_P, PRTS_FOUR_P, PRTS_FIVE_P, PRTS_THREE_P, GENSHIN_G_FIVE_P,\
-        GENSHIN_G_FOUR_P, GENSHIN_FOUR_P, GENSHIN_FIVE_P, I72_ADD, path_dict, PRETTY_THREE_P,\
-        PRETTY_ONE_P, PRETTY_TWO_P, GENSHIN_THREE_P
+    global PRTS_SIX_P, PRTS_FOUR_P, PRTS_FIVE_P, PRTS_THREE_P, GENSHIN_G_FIVE_P, \
+        GENSHIN_G_FOUR_P, GENSHIN_FOUR_P, GENSHIN_FIVE_P, I72_ADD, path_dict, PRETTY_THREE_P, \
+        PRETTY_ONE_P, PRETTY_TWO_P, GENSHIN_THREE_P, GUARDIAN_THREE_CHAR_P, GUARDIAN_TWO_CHAR_P, GUARDIAN_ONE_CHAR_P, \
+        GUARDIAN_THREE_CHAR_UP_P, GUARDIAN_THREE_CHAR_OTHER_P, GUARDIAN_EXCLUSIVE_ARMS_P, GUARDIAN_FIVE_ARMS_P, \
+        GUARDIAN_FOUR_ARMS_P, GUARDIAN_THREE_ARMS_P, GUARDIAN_TWO_ARMS_P,\
+        GUARDIAN_EXCLUSIVE_ARMS_UP_P, GUARDIAN_EXCLUSIVE_ARMS_OTHER_P
     if _draw_config.exists():
         data = json.load(open(_draw_config, 'r', encoding='utf8'))
-        try:
-            PRTS_SIX_P = float(data['prts']['six'])
-            PRTS_FIVE_P = float(data['prts']['five'])
-            PRTS_FOUR_P = float(data['prts']['four'])
-            PRTS_THREE_P = float(data['prts']['three'])
-        except KeyError:
-            data['prts'] = {}
-            data['prts']['six'] = PRTS_SIX_P
-            data['prts']['five'] = PRTS_FIVE_P
-            data['prts']['four'] = PRTS_FOUR_P
-            data['prts']['three'] = PRTS_THREE_P
+        PRTS_SIX_P = float(data['prts']['six'])
+        PRTS_FIVE_P = float(data['prts']['five'])
+        PRTS_FOUR_P = float(data['prts']['four'])
+        PRTS_THREE_P = float(data['prts']['three'])
 
-        try:
-            GENSHIN_FIVE_P = float(data['genshin']['five_char'])
-            GENSHIN_FOUR_P = float(data['genshin']['four_char'])
-            GENSHIN_THREE_P = float(data['genshin']['three_char'])
-            GENSHIN_G_FIVE_P = float(data['genshin']['five_weapon'])
-            GENSHIN_G_FOUR_P = float(data['genshin']['four_weapon'])
-            I72_ADD = float(data['genshin']['72_add'])
-        except KeyError:
-            data['genshin'] = {}
-            data['genshin']['five_char'] = GENSHIN_FIVE_P
-            data['genshin']['four_char'] = GENSHIN_FOUR_P
-            data['genshin']['three_char'] = GENSHIN_THREE_P
-            data['genshin']['five_weapon'] = GENSHIN_G_FIVE_P
-            data['genshin']['four_weapon'] = GENSHIN_G_FOUR_P
-            data['genshin']['72_add'] = I72_ADD
+        GENSHIN_FIVE_P = float(data['genshin']['five_char'])
+        GENSHIN_FOUR_P = float(data['genshin']['four_char'])
+        GENSHIN_THREE_P = float(data['genshin']['three_char'])
+        GENSHIN_G_FIVE_P = float(data['genshin']['five_weapon'])
+        GENSHIN_G_FOUR_P = float(data['genshin']['four_weapon'])
+        I72_ADD = float(data['genshin']['72_add'])
 
-        try:
-            PRETTY_THREE_P = float(data['pretty']['three'])
-            PRETTY_TWO_P = float(data['pretty']['two'])
-            PRETTY_ONE_P = float(data['pretty']['one'])
-        except KeyError:
-            data['pretty'] = {}
-            data['pretty']['three'] = PRETTY_THREE_P
-            data['pretty']['two'] = PRETTY_TWO_P
-            data['pretty']['one'] = PRETTY_ONE_P
+        PRETTY_THREE_P = float(data['pretty']['three'])
+        PRETTY_TWO_P = float(data['pretty']['two'])
+        PRETTY_ONE_P = float(data['pretty']['one'])
 
-        data['path_dict'] = {}
-        data['path_dict']['genshin'] = '原神'
-        data['path_dict']['prts'] = '明日方舟'
-        data['path_dict']['genshin'] = '赛马娘'
-        data['path_dict']['genshin'] = '坎公骑冠剑'
+        GUARDIAN_THREE_CHAR_P = float(data['guardian']['GUARDIAN_THREE_CHAR_P'])
+        GUARDIAN_TWO_CHAR_P = float(data['guardian']['GUARDIAN_TWO_CHAR_P'])
+        GUARDIAN_ONE_CHAR_P = float(data['guardian']['GUARDIAN_ONE_CHAR_P'])
+        GUARDIAN_THREE_CHAR_UP_P = float(data['guardian']['GUARDIAN_THREE_CHAR_UP_P'])
+        GUARDIAN_THREE_CHAR_OTHER_P = float(data['guardian']['GUARDIAN_THREE_CHAR_OTHER_P'])
+        GUARDIAN_EXCLUSIVE_ARMS_P = float(data['guardian']['GUARDIAN_EXCLUSIVE_ARMS_P'])
+        GUARDIAN_FIVE_ARMS_P = float(data['guardian']['GUARDIAN_FIVE_ARMS_P'])
+        GUARDIAN_FOUR_ARMS_P = float(data['guardian']['GUARDIAN_FOUR_ARMS_P'])
+        GUARDIAN_THREE_ARMS_P = float(data['guardian']['GUARDIAN_THREE_ARMS_P'])
+        GUARDIAN_TWO_ARMS_P = float(data['guardian']['GUARDIAN_TWO_ARMS_P'])
+        GUARDIAN_EXCLUSIVE_ARMS_UP_P = float(data['guardian']['GUARDIAN_EXCLUSIVE_ARMS_UP_P'])
+        GUARDIAN_EXCLUSIVE_ARMS_OTHER_P = float(data['guardian']['GUARDIAN_EXCLUSIVE_ARMS_OTHER_P'])
+
     else:
         _draw_config.parent.mkdir(parents=True, exist_ok=True)
         data = {
@@ -158,12 +145,3 @@ def check_config():
             }
         }
     json.dump(data, open(_draw_config, 'w', encoding='utf8'), indent=4, ensure_ascii=False)
-
-
-
-
-
-
-
-
-
