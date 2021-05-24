@@ -26,12 +26,7 @@ async def update_info(url: str, game_name: str, info_list: list = None) -> 'dict
         async with aiohttp.ClientSession(headers=headers) as session:
             async with session.get(url, timeout=7) as response:
                 soup = BeautifulSoup(await response.text(), 'lxml')
-                max_count = 0
-                _tbody = None
-                for tbody in soup.find_all('tbody'):
-                    if len(tbody.find_all('tr')) > max_count:
-                        _tbody = tbody
-                        max_count = len(tbody.find_all('tr'))
+                _tbody = get_tbody(soup, game_name, url)
                 trs = _tbody.find_all('tr')
                 att_dict, start_index, index = init_attr(game_name)
                 if game_name == 'guardian':
@@ -218,4 +213,23 @@ def replace_name(member_dict: dict, game_name: str):
     if game_name == 'pretty_card':
         name = member_dict['中文名']
     return name
+
+
+# 拿到tbody，不同游戏tbody可能不同
+def get_tbody(soup: bs4.BeautifulSoup, game_name: str, url: str):
+    max_count = 0
+    _tbody = None
+    if game_name == 'guardian_arms':
+        if url[-2:] == '盾牌':
+            div = soup.find('div', {'class': 'resp-tabs-container'}).find_all('div', {'class': 'resp-tab-content'})[1]
+            _tbody = div.find('tbody')
+        else:
+            div = soup.find('div', {'class': 'resp-tabs-container'}).find_all('div', {'class': 'resp-tab-content'})[0]
+            _tbody = div.find('table', {'id': 'CardSelectTr'}).find('tbody')
+    else:
+        for tbody in soup.find_all('tbody'):
+            if len(tbody.find_all('tr')) > max_count:
+                _tbody = tbody
+                max_count = len(tbody.find_all('tr'))
+    return _tbody
 
