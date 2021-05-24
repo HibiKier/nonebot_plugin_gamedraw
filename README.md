@@ -62,6 +62,8 @@
 ## Todo
 
   * 各池子的UP（大概）
+  * PRC公主连结
+  * 卡池开关（可以选择是否下载卡池数据）
 
 ## 效果
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/0.png)
