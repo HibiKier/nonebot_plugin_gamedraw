@@ -60,6 +60,7 @@
 ## Todo
 
   * 各池子的UP（大概）
+  * 修复坎公骑冠剑缺失盾牌
 
 ## 效果
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/0.png)
