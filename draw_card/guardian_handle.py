@@ -73,8 +73,6 @@ async def init_data():
             guardian_arms_dict = json.load(f)
         ALL_CHAR = init_game_pool('guardian', guardian_char_dict, GuardianChar)
         ALL_ARMS = init_game_pool('guardian_arms', guardian_arms_dict, GuardianArms)
-    # print(ALL_CHAR)
-    # print(ALL_ARMS)
 
 
 # 抽取卡池
