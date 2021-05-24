@@ -42,7 +42,7 @@
 ## 更新：
 ### 2021/5/24
   * 修复了明日方舟文本资料获取途径含有html文本的信息
-  * 坎公骑冠剑！
+  * 坎公骑冠剑！！！
 ### 2021/5/23
   * 修复明日方舟卡池无法区分 商店限定 的问题 [issues #3](https://github.com/HibiKier/nonebot_plugin_gamedraw/issues/3)
 ### 2021/5/21
