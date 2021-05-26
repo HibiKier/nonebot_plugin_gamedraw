@@ -46,8 +46,7 @@
 ## 使用
   ```
   1.是否需要变更资源路径嘛？（默认路径 data/draw_card/）
-    如果需要变更路径，在.env文件中添加DRAW_PATH绝对路径
-    
+    如果需要变更路径，在.env文件中添加DRAW_PATH绝对路径【注：如果你的项目开启了debug冷重载，建议更换路径！】
     示例：
       DRAW_PATH = "D:/xxx/data/draw_card/"
    
