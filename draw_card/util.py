@@ -122,7 +122,7 @@ def _pst(h: int, img_list: list, game_name: str, color_list: list):
     return card_img
 
 
-def init_star_rst(star_list: list, cnlist: list, max_star_list: list, max_star_olist: list, up_list: list = None) -> str:
+def init_star_rst(star_list: list, cnlist: list, max_star_list: list, max_star_index_list: list, up_list: list = None) -> str:
     if not up_list:
         up_list = []
     rst = ''
@@ -132,9 +132,9 @@ def init_star_rst(star_list: list, cnlist: list, max_star_list: list, max_star_o
     rst += '\n'
     for i in range(len(max_star_list)):
         if max_star_list[i] in up_list:
-            rst += f'第 {max_star_olist[i]+1} 抽获取UP {max_star_list[i]}\n'
+            rst += f'第 {max_star_index_list[i]+1} 抽获取UP {max_star_list[i]}\n'
         else:
-            rst += f'第 {max_star_olist[i]+1} 抽获取 {max_star_list[i]}\n'
+            rst += f'第 {max_star_index_list[i]+1} 抽获取 {max_star_list[i]}\n'
     return rst
 
 
@@ -215,4 +215,19 @@ def format_card_information(count: int, star_list: List[int], func, pool_name: s
             obj_dict[obj.name] = 1
         obj_list.append(obj)
     return obj_list, obj_dict, max_star_lst, star_list, max_index_lst
+
+
+# 检测次数是否合法
+def check_num(num: str, max_num: int) -> 'str, bool':
+    if is_number(num):
+        try:
+            num = int(num)
+        except ValueError:
+            return '必！须！是！数！字！', False
+    if num > max_num:
+        return '一井都满不足不了你嘛！快爬开！', False
+    if num < 1:
+        return '虚空抽卡？？？', False
+    else:
+        return str(num), True
 

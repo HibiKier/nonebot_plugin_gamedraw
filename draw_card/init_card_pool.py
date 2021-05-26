@@ -5,7 +5,6 @@ def init_game_pool(game: str, data: dict, Operator: Any):
     tmp_lst = []
     if game == 'prts':
         for key in data.keys():
-            # print(f'{key}: {data[key]["获取途径"]}')
             limited = False
             recruit_only = False
             event_only = False
@@ -35,5 +34,11 @@ def init_game_pool(game: str, data: dict, Operator: Any):
     if game in ['guardian', 'guardian_arms']:
         for key in data.keys():
             tmp_lst.append(Operator(name=data[key]['名称'], star=int(data[key]['星级']), limited=False))
+    if game == 'prc':
+        for key in data.keys():
+            limited = False
+            if key.find('（') != -1:
+                limited = True
+            tmp_lst.append(Operator(name=data[key]['名称'], star=int(data[key]['星级']), limited=limited))
     return tmp_lst
 

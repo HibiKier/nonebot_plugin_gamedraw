@@ -2,8 +2,8 @@ import aiohttp
 from bs4 import BeautifulSoup
 import re
 from datetime import datetime
+from .config import DRAW_PATH
 from pathlib import Path
-
 try:
     import ujson as json
 except ModuleNotFoundError:
@@ -11,7 +11,7 @@ except ModuleNotFoundError:
 
 headers = {'User-Agent': '"Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)"'}
 
-up_char_file = Path() / "data" / "draw_card" / "draw_card_up" / "prts_up_char.json"
+up_char_file = Path(DRAW_PATH + "/draw_card_up/prts_up_char.json")
 
 prts_url = "https://wiki.biligame.com/arknights/%E6%96%B0%E9%97%BB%E5%85%AC%E5%91%8A"
 

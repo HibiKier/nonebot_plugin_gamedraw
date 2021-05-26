@@ -1,4 +1,4 @@
-import ujson as json
+
 import os
 from nonebot.adapters.cqhttp import MessageSegment
 import nonebot
@@ -6,9 +6,13 @@ import random
 from .update_game_info import update_info
 from .util import generate_img, init_star_rst, BaseData, set_list, get_star
 from .config import GENSHIN_FIVE_P, GENSHIN_FOUR_P, GENSHIN_G_FIVE_P, GENSHIN_G_FOUR_P, GENSHIN_THREE_P, I72_ADD, \
-    DRAW_PATH
+    DRAW_PATH, GENSHIN_FLAG
 from dataclasses import dataclass
 from .init_card_pool import init_game_pool
+try:
+    import ujson as json
+except ModuleNotFoundError:
+    import json
 
 driver: nonebot.Driver = nonebot.get_driver()
 
@@ -28,14 +32,12 @@ class GenshinChar(BaseData):
 async def genshin_draw(user_id: int, count: int):
     #                   0      1      2
     cnlist = ['★★★★★', '★★★★', '★★★']
-    star_list = [0, 0, 0]
-    genshin_list, five_list, five_olist, five_dict, star_list = _format_card_information(count, user_id)
-    rst = init_star_rst(star_list, cnlist, five_list, five_olist)
-    print(five_list)
+    char_list, five_list, five_index_list, char_dict, star_list = _format_card_information(count, user_id)
+    rst = init_star_rst(star_list, cnlist, five_list, five_index_list)
     temp = ''
     if count > 90:
-        genshin_list = set_list(genshin_list)
-    return MessageSegment.image("base64://" + await generate_img(genshin_list, 'genshin', star_list)) + '\n' + rst[
+        char_list = set_list(char_list)
+    return MessageSegment.image("base64://" + await generate_img(char_list, 'genshin', star_list)) + '\n' + rst[
                                                                                                                :-1] + \
            temp[:-1] + f'\n距离保底发还剩 {90 - genshin_count[user_id] if genshin_count.get(user_id) else "^"} 抽' \
            + "\n【五星：0.6%，四星：5.1%\n第72抽开始五星概率每抽加0.585%】"
@@ -61,15 +63,16 @@ async def update_genshin_info():
 @driver.on_startup
 async def init_data():
     global ALL_CHAR, ALL_ARMS
-    if not os.path.exists(DRAW_PATH + 'genshin.json') or not os.path.exists(DRAW_PATH + 'genshin_arms.json'):
-        await update_genshin_info()
-    else:
-        with open(DRAW_PATH + 'genshin.json', 'r', encoding='utf8') as f:
-            genshin_dict = json.load(f)
-        with open(DRAW_PATH + 'genshin_arms.json', 'r', encoding='utf8') as f:
-            genshin_ARMS_dict = json.load(f)
-        ALL_CHAR = init_game_pool('genshin', genshin_dict, GenshinChar)
-        ALL_ARMS = init_game_pool('genshin', genshin_ARMS_dict, GenshinChar)
+    if GENSHIN_FLAG:
+        if not os.path.exists(DRAW_PATH + 'genshin.json') or not os.path.exists(DRAW_PATH + 'genshin_arms.json'):
+            await update_genshin_info()
+        else:
+            with open(DRAW_PATH + 'genshin.json', 'r', encoding='utf8') as f:
+                genshin_dict = json.load(f)
+            with open(DRAW_PATH + 'genshin_arms.json', 'r', encoding='utf8') as f:
+                genshin_ARMS_dict = json.load(f)
+            ALL_CHAR = init_game_pool('genshin', genshin_dict, GenshinChar)
+            ALL_ARMS = init_game_pool('genshin', genshin_ARMS_dict, GenshinChar)
 
 
 # 抽取卡池
@@ -86,7 +89,7 @@ def _get_genshin_card(mode: int = 1, add: float = 0.0):
 
 
 def _format_card_information(_count: int, user_id):
-    genshin_list = []
+    char_list = []
     star_list = [0, 0, 0]
     five_index_list = []
     five_list = []
@@ -130,11 +133,11 @@ def _format_card_information(_count: int, user_id):
                 five_dict[char.name] += 1
             except KeyError:
                 five_dict[char.name] = 1
-        genshin_list.append(char)
+        char_list.append(char)
     if _count <= 90:
         genshin_count[user_id] = f_count
         genshin_pl_count[user_id] = count
-    return genshin_list, five_list, five_index_list, five_dict, star_list
+    return char_list, five_list, five_index_list, five_dict, star_list
 
 
 def reset_count(user_id: int):

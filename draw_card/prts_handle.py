@@ -1,15 +1,19 @@
-import ujson as json
+
 import os
 from nonebot.adapters.cqhttp import MessageSegment
 import nonebot
 import random
-from .config import PRTS_FIVE_P, PRTS_FOUR_P, PRTS_SIX_P, PRTS_THREE_P, DRAW_PATH
+from .config import PRTS_FIVE_P, PRTS_FOUR_P, PRTS_SIX_P, PRTS_THREE_P, DRAW_PATH, PRTS_FLAG
 from .update_game_info import update_info
 from .util import generate_img, init_star_rst, max_card, BaseData, UpEvent, set_list, get_star, format_card_information
 from .init_card_pool import init_game_pool
 from pathlib import Path
 from .announcement import PrtsAnnouncement
 from dataclasses import dataclass
+try:
+    import ujson as json
+except ModuleNotFoundError:
+    import json
 
 driver: nonebot.Driver = nonebot.get_driver()
 
@@ -60,13 +64,14 @@ async def update_prts_info():
 @driver.on_startup
 async def init_data():
     global prts_dict, ALL_OPERATOR
-    if not os.path.exists(DRAW_PATH + 'prts.json'):
-        await update_prts_info()
-    else:
-        with open(DRAW_PATH + 'prts.json', 'r', encoding='utf8') as f:
-            prts_dict = json.load(f)
-        ALL_OPERATOR = init_game_pool('prts', prts_dict, Operator)
-    await _init_up_char()
+    if PRTS_FLAG:
+        if not os.path.exists(DRAW_PATH + 'prts.json'):
+            await update_prts_info()
+        else:
+            with open(DRAW_PATH + 'prts.json', 'r', encoding='utf8') as f:
+                prts_dict = json.load(f)
+            ALL_OPERATOR = init_game_pool('prts', prts_dict, Operator)
+        await _init_up_char()
 
 
 # 抽取干员

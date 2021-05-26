@@ -1,4 +1,4 @@
-import ujson as json
+
 import os
 import nonebot
 from nonebot.adapters.cqhttp import MessageSegment
@@ -9,9 +9,13 @@ import random
 from .config import DRAW_PATH, GUARDIAN_ONE_CHAR_P, GUARDIAN_TWO_CHAR_P, GUARDIAN_THREE_CHAR_P, \
     GUARDIAN_THREE_CHAR_UP_P, GUARDIAN_TWO_ARMS_P, GUARDIAN_FIVE_ARMS_P, GUARDIAN_THREE_CHAR_OTHER_P, \
     GUARDIAN_FOUR_ARMS_P, GUARDIAN_THREE_ARMS_P, GUARDIAN_EXCLUSIVE_ARMS_P, GUARDIAN_EXCLUSIVE_ARMS_UP_P, \
-    GUARDIAN_EXCLUSIVE_ARMS_OTHER_P
+    GUARDIAN_EXCLUSIVE_ARMS_OTHER_P, GUARDIAN_FLAG
 from dataclasses import dataclass
 from .init_card_pool import init_game_pool
+try:
+    import ujson as json
+except ModuleNotFoundError:
+    import json
 
 driver: nonebot.Driver = nonebot.get_driver()
 
@@ -64,15 +68,16 @@ async def update_guardian_info():
 @driver.on_startup
 async def init_data():
     global ALL_CHAR, ALL_ARMS
-    if not os.path.exists(DRAW_PATH + 'guardian.json') or not os.path.exists(DRAW_PATH + 'guardian_arms.json'):
-        await update_guardian_info()
-    else:
-        with open(DRAW_PATH + 'guardian.json', 'r', encoding='utf8') as f:
-            guardian_char_dict = json.load(f)
-        with open(DRAW_PATH + 'guardian_arms.json', 'r', encoding='utf8') as f:
-            guardian_arms_dict = json.load(f)
-        ALL_CHAR = init_game_pool('guardian', guardian_char_dict, GuardianChar)
-        ALL_ARMS = init_game_pool('guardian_arms', guardian_arms_dict, GuardianArms)
+    if GUARDIAN_FLAG:
+        if not os.path.exists(DRAW_PATH + 'guardian.json') or not os.path.exists(DRAW_PATH + 'guardian_arms.json'):
+            await update_guardian_info()
+        else:
+            with open(DRAW_PATH + 'guardian.json', 'r', encoding='utf8') as f:
+                guardian_char_dict = json.load(f)
+            with open(DRAW_PATH + 'guardian_arms.json', 'r', encoding='utf8') as f:
+                guardian_arms_dict = json.load(f)
+            ALL_CHAR = init_game_pool('guardian', guardian_char_dict, GuardianChar)
+            ALL_ARMS = init_game_pool('guardian_arms', guardian_arms_dict, GuardianArms)
 
 
 # 抽取卡池
