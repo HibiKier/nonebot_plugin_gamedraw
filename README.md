@@ -40,27 +40,23 @@
 '更新prc信息'<br>
 
 ## 使用
-  1.是否需要变更路径嘛？（默认路径 data/draw_card/）
   ```
+  1.是否需要变更路径嘛？（默认路径 data/draw_card/）
     如果需要变更路径，在.env文件中添加DRAW_PATH绝对路径
     示例：
     DRAW_PATH = "D:/xxx/data/draw_card/"
-    ```
    
   2.是否需要关闭某些抽卡呢？（即不下载资源不使用对应抽卡命令）
-    ```
     # 不设置默认为True
     PRTS_FLAG = False       # 明日方舟
     GENSHIN_FLAG = False    # 原神
     PRETTY_FLAG= False      # 赛马娘
     GUARDIAN_FLAG = False   # 坎公骑冠剑
     PRC_FLAG = False        # 公主连结
-  ```
   
   3.在bot入口文件添加
-    ```
     nonebot.load_plugin("nonebot_plugin_gamedraw")
-    ```
+  ```
     
 ## 更新：
 ### 2021/5/26
