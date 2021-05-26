@@ -25,7 +25,7 @@
 '   .* ?原神[1-9|一][0-9]{0,2}[抽|井]'  <br>
 '   .* ?马娘卡?[1-9|一][0-9]{0,2}[抽|井]'  <br>
 '   .* ?坎公骑冠剑武?器?[1-9|一][0-9]{0,2}[抽|井]'<br>
-'   .*?(prc|公主连结|公主连接|公主链接)[1-9|一][0-9]{0,2}[抽|井]'<br>
+'   .*?(pcr|公主连结|公主连接|公主链接)[1-9|一][0-9]{0,2}[抽|井]'<br>
 <br>
 
 #### 注：
@@ -41,22 +41,24 @@
 '更新原神信息'<br>
 '更新赛马娘信息'<br>
 '更新赛坎公骑冠剑信息'<br>
-'更新prc信息'<br>
+'更新pcr信息'<br>
 
 ## 使用
   ```
   1.是否需要变更资源路径嘛？（默认路径 data/draw_card/）
     如果需要变更路径，在.env文件中添加DRAW_PATH绝对路径
+    
     示例：
-    DRAW_PATH = "D:/xxx/data/draw_card/"
+      DRAW_PATH = "D:/xxx/data/draw_card/"
    
   2.是否需要关闭某些抽卡呢？（即不下载资源不使用对应抽卡命令）
     # 不设置默认为True
+    
     PRTS_FLAG = False       # 明日方舟
     GENSHIN_FLAG = False    # 原神
     PRETTY_FLAG= False      # 赛马娘
     GUARDIAN_FLAG = False   # 坎公骑冠剑
-    PRC_FLAG = False        # 公主连结
+    PCR_FLAG = False        # 公主连结
   
   3.在bot入口文件添加
     nonebot.load_plugin("nonebot_plugin_gamedraw")
