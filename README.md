@@ -53,7 +53,7 @@
    
   2.是否需要关闭某些抽卡呢？（即不下载资源不使用对应抽卡命令）
     如果需要关闭某些卡池，在.env文件中添加对应的卡池FLAG并设置为False
-    # 不设置默认为True
+    # 不添加或不设置默认为True
     
     PRTS_FLAG = False       # 明日方舟
     GENSHIN_FLAG = False    # 原神
