@@ -10,7 +10,7 @@ from .pcr_handle import update_pcr_info, pcr_draw
 from .update_game_info import update_info
 from .util import is_number, check_num
 from .rule import is_switch
-from .config import PRTS_FLAG, PRETTY_FLAG, GUARDIAN_FLAG, GENSHIN_FLAG
+from .config import PRTS_FLAG, PRETTY_FLAG, GUARDIAN_FLAG, GENSHIN_FLAG, PCR_FLAG
 import re
 
 scheduler = require('nonebot_plugin_apscheduler').scheduler
@@ -205,6 +205,11 @@ async def _():
     try:
         if GUARDIAN_FLAG:
             await update_guardian_info()
+    except Exception as e:
+        pass
+    try:
+        if PCR_FLAG:
+            await update_pcr_info()
     except Exception as e:
         pass
 
