@@ -114,4 +114,5 @@
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/5.png)
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/6.png)
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/prc.png)
+![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/bl.png)
 
