@@ -32,13 +32,6 @@ guardian_update = on_keyword({'更新坎公骑冠剑信息'}, permission=SUPERUS
 pcr = on_regex('.*?(pcr|公主连结|公主连接|公主链接)[1-9|一][0-9]{0,2}[抽|井]', rule=is_switch('pcr'), priority=5, block=True)
 pcr_update = on_keyword({'更新pcr信息', '更新公主连结信息'}, permission=SUPERUSER, priority=1, block=True)
 
-test = on_keyword({'test'}, permission=SUPERUSER, priority=1, block=True)
-
-
-@test.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
-    await update_pcr_info()
-
 
 @prts.handle()
 async def _(bot: Bot, event: MessageEvent, state: T_State):
