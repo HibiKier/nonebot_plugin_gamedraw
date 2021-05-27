@@ -19,7 +19,7 @@ PRTS_FLAG = False if str(nonebot.get_driver().config.prts_flag).lower() == 'fals
 GENSHIN_FLAG = False if str(nonebot.get_driver().config.genshin_flag).lower() == 'false' else True
 PRETTY_FLAG = False if str(nonebot.get_driver().config.pretty_flag).lower() == 'false' else True
 GUARDIAN_FLAG = False if str(nonebot.get_driver().config.guardian_flag).lower() == 'false' else True
-PCR_FLAG = False if str(nonebot.get_driver().config.PCR_flag).lower() == 'false' else True
+PCR_FLAG = False if str(nonebot.get_driver().config.pcr_flag).lower() == 'false' else True
 
 # 方舟概率
 PRTS_SIX_P = 0.02
