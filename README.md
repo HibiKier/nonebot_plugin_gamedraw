@@ -67,7 +67,7 @@
     AZUR_FLAG = False       # 碧蓝航线
   
   3.是否需要更改一些其他配置呢？（不添加或不设置默认为 False）
-    PCR_TAI = True          # 使用台服卡池（即添加国服未时装角色）删除原json文件再重启bot自动更新即可
+    PCR_TAI = True          # 公主连结使用台服卡池（即添加国服未时装角色）删除原json文件再重启bot自动更新即可
     
   4.在bot入口文件添加
     nonebot.load_plugin("nonebot_plugin_gamedraw")
