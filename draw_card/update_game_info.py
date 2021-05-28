@@ -53,7 +53,7 @@ async def update_info(url: str, game_name: str, info_list: list = None) -> 'dict
                         member_dict = intermediate_check(member_dict, key, game_name, td)
                     avatar_img = await _modify_avatar_url(session, game_name, member_dict["名称"])
                     member_dict['头像'] = avatar_img if avatar_img else member_dict['头像']
-                    name = replace_name(member_dict, game_name)
+                    member_dict, name = replace_update_name(member_dict, game_name)
                     await download_img(member_dict['头像'], game_name, name)
                     data[name] = member_dict
                     print(f'{name} is update...')
@@ -201,6 +201,7 @@ def init_attr(game_name: str):
     return att_dict, start_index, index
 
 
+# 解析key
 def parse_key(key: str, game_name):
     attr = ''
     if game_name == 'genshin_arms':
@@ -211,10 +212,21 @@ def parse_key(key: str, game_name):
     return key, attr
 
 
-def replace_name(member_dict: dict, game_name: str):
+# 拿到名称
+def replace_update_name(member_dict: dict, game_name: str):
     name = member_dict['名称']
     if game_name == 'pretty_card':
         name = member_dict['中文名']
+        name = remove_prohibited_str(name)
+        member_dict['中文名'] = name
+    else:
+        name = remove_prohibited_str(name)
+        member_dict['名称'] = name
+    return member_dict, name
+
+
+# 移除windows下特殊字符
+def remove_prohibited_str(name: str):
     if platform.system().lower() == 'windows':
         tmp = ''
         for i in name:
