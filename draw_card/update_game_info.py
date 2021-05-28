@@ -147,7 +147,7 @@ async def _last_check(data: dict, game_name: str, session: aiohttp.ClientSession
                             if r:
                                 text += r.group(1) + ' '
                         obtain[i] = obtain[i].split('<a')[0] + text[:-1] + obtain[i].split('</a>')[-1]
-                print(f'明日方舟获取额外信息....{obtain}')
+                print(f'明日方舟获取额外信息 {key}....{obtain}')
                 data[key]['获取途径'] = obtain
     # if game_name == 'genshin':
     #     for key in data.keys():
