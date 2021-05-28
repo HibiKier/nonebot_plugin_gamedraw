@@ -62,6 +62,6 @@ class CreateImg:
         buf = BytesIO()
         self.markImg.save(buf, format='PNG')
         base64_str = base64.b64encode(buf.getvalue()).decode()
-        return 'base64://' + base64_str
+        return base64_str
 
 
