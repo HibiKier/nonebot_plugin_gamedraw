@@ -16,30 +16,34 @@ driver: nonebot.Driver = nonebot.get_driver()
 @driver.on_startup
 async def async_update_game():
     tasks = []
-    init_lst = []
+    init_lst = [init_pcr_data, init_pretty_data, init_azur_data, init_prts_data, init_genshin_data, init_guardian_data]
     if PRTS_FLAG and not os.path.exists(DRAW_PATH + 'prts.json'):
         tasks.append(asyncio.ensure_future(update_prts_info()))
+        init_lst.remove(init_prts_data)
 
     if PRETTY_FLAG and (not os.path.exists(DRAW_PATH + 'pretty.json') or
                         not os.path.exists(DRAW_PATH + 'pretty_card.json')):
         tasks.append(asyncio.ensure_future(update_pretty_info()))
+        init_lst.remove(init_pretty_data)
 
     if GUARDIAN_FLAG and not os.path.exists(DRAW_PATH + 'guardian.json'):
         tasks.append(asyncio.ensure_future(update_guardian_info()))
 
     if PCR_FLAG and not os.path.exists(DRAW_PATH + 'pcr.json'):
         tasks.append(asyncio.ensure_future(update_pcr_info()))
+        init_lst.remove(init_pcr_data)
 
     if GENSHIN_FLAG and (not os.path.exists(DRAW_PATH + 'genshin.json') or
                          not os.path.exists(DRAW_PATH + 'genshin_arms.json')):
         tasks.append(asyncio.ensure_future(update_genshin_info()))
+        init_lst.remove(init_genshin_data)
 
     if AZUR_FLAG and not os.path.exists(DRAW_PATH + 'azur.json'):
         tasks.append(asyncio.ensure_future(update_azur_info()))
+        init_lst.remove(init_azur_data)
 
     await asyncio.gather(*tasks)
-    for func in [init_pcr_data, init_pretty_data, init_azur_data,
-                 init_prts_data, init_genshin_data, init_guardian_data]:
+    for func in init_lst:
         await func()
 
 
