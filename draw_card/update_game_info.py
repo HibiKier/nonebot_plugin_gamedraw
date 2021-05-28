@@ -5,6 +5,7 @@ from asyncio.exceptions import TimeoutError
 from bs4 import BeautifulSoup
 from .util import download_img
 from urllib.parse import unquote
+import platform
 import bs4
 import re
 try:
@@ -214,6 +215,12 @@ def replace_name(member_dict: dict, game_name: str):
     name = member_dict['名称']
     if game_name == 'pretty_card':
         name = member_dict['中文名']
+    if platform.system().lower() == 'windows':
+        tmp = ''
+        for i in name:
+            if i not in ['\\', '/', ':', '*', '?', '"', '<', '>', '|']:
+                tmp += i
+        name = tmp
     return name
 
 
@@ -234,24 +241,3 @@ def get_tbody(soup: bs4.BeautifulSoup, game_name: str, url: str):
                 _tbody = tbody
                 max_count = len(tbody.find_all('tr'))
     return _tbody
-
-
-# async def update_tai_pcr_info():
-#     url = 'https://pcredivewiki.tw/Character'
-#     async with aiohttp.ClientSession(headers=headers) as session:
-#         async with session.get(url, timeout=7) as response:
-#             soup = BeautifulSoup(await response.text(), 'lxml')
-#             divs = soup.find('div', {'class': 'item-box'}).find_all('div')[1:]
-#             star = 3
-#             for div in divs:
-#                 char_divs = div.find_all('div')
-#                 member_dict = {'头像': '', '名称': '', '星级': star}
-#                 for char in char_divs:
-#                     member_dict['头像'] = "https://pcredivewiki.tw//" + char.find('img')['src']
-#                     member_dict['名称'] = char.find('small').text
-#                     print(member_dict)
-#                 star -= 1
-#
-#
-#
-# asyncio.get_event_loop().run_until_complete(update_tai_pcr_info())
