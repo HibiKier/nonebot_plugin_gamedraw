@@ -69,7 +69,7 @@
   3.是否需要更改一些其他配置呢？（不添加或不设置默认为 False）
     在.env文件中添加对应 属性 并设置为True
     
-    PCR_TAI = True          # 公主连结使用台服卡池（即添加国服未时装角色）删除原json文件再重启bot自动更新即可
+    PCR_TAI = True          # 公主连结使用台服卡池（即添加国服未时装角色）删除原pcr.json文件再重启bot自动更新即可
     
   4.在bot入口文件添加
     nonebot.load_plugin("nonebot_plugin_gamedraw")
