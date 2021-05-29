@@ -43,7 +43,7 @@ def init_game_pool(game: str, data: dict, Operator: Any):
     if game == 'azur':
         for key in data.keys():
             limited = False
-            if int(data[key]['星级']) > 4:
+            if int(data[key]['星级']) > 4 or key.find('兵装') != -1 or key[-1] == '改' or key.find('布里') != -1:
                 limited = True
             tmp_lst.append(Operator(name=data[key]['名称'], star=int(data[key]['星级']), limited=limited, itype=data[key]['类型']))
     return tmp_lst
