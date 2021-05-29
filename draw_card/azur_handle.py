@@ -62,6 +62,6 @@ def _get_azur_card(pool_name: str):
     else:
         itype = ['维修', '潜艇', '重巡', '轻航', '航母']
     star = get_star([4, 3, 2, 1], [AZUR_FOUR_P, AZUR_THREE_P, AZUR_TWO_P, AZUR_ONE_P])
-    chars = [x for x in ALL_CHAR if x.star == star and x.itype in itype]
+    chars = [x for x in ALL_CHAR if x.star == star and x.itype in itype and not x.limited]
     return random.choice(chars), 4 - star
 
