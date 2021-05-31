@@ -61,8 +61,7 @@ def _get_fgo_card(mode: int = 1):
         star = get_star([8, 7, 6, 5, 4, 3], [FGO_SERVANT_FIVE_P, FGO_SERVANT_FOUR_P, FGO_SERVANT_THREE_P,
                                              FGO_CARD_FIVE_P, FGO_CARD_FOUR_P, FGO_CARD_THREE_P])
     elif mode == 2:
-        star = get_star([8, 7, 6, 5, 4], [FGO_SERVANT_FIVE_P, FGO_SERVANT_FOUR_P, FGO_SERVANT_THREE_P,
-                                          FGO_CARD_FIVE_P, FGO_CARD_FOUR_P])
+        star = get_star([5, 4], [FGO_CARD_FIVE_P, FGO_CARD_FOUR_P])
     else:
         star = get_star([8, 7, 6], [FGO_SERVANT_FIVE_P, FGO_SERVANT_FOUR_P, FGO_SERVANT_THREE_P])
     if star > 5:
