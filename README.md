@@ -141,4 +141,5 @@
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/prc.png)
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/azur.png)
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/fgo.png)
+![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/yys.png)
 
