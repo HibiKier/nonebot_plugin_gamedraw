@@ -9,6 +9,7 @@
   坎公骑冠剑：混合抽卡  
   公主连结（国/台）：只区分了节日限定  
   碧蓝航线：区分了限定/科研（大概）  
+  命运-冠位指定（FGO）：区分了限定  
 <br>
 
 抓取的资料包含角色的属性等，如果你希望做一个查看角色武器资料的话或许可以帮上忙）
@@ -20,6 +21,7 @@
 * 坎公骑冠剑
 * 公主连结（国/台）
 * 碧蓝航线
+* 命运-冠位指定（FGO）
 
 ## 命令
 ### 抽卡命令
@@ -29,6 +31,7 @@
 '   .* ?坎公骑冠剑武?器?[1-9|一][0-9]{0,2}[抽|井]'  
 '   .* ?(pcr|公主连结|公主连接|公主链接|公主焊接)[1-9|一][0-9]{0,2}[抽|井]'  
 '   .* ?碧蓝航?线?(轻型|重型|特型)池?[1-9|一][0-9]{0,2}[抽]'  
+'   .* ?fgo[1-9|一][0-9]{0,2}[抽]'  
 <br>
 
 #### 注：
@@ -47,6 +50,7 @@
 '更新赛坎公骑冠剑信息'  
 '更新pcr信息'  
 '更新碧蓝航线信息'  
+'更新fgo信息'  
 
 ## 使用
   ```
@@ -65,6 +69,7 @@
     GUARDIAN_FLAG = False   # 坎公骑冠剑
     PCR_FLAG = False        # 公主连结
     AZUR_FLAG = False       # 碧蓝航线
+    FGO_FLAG = False        # 命运-冠位指定（FGO）
   
   3.是否需要更改一些其他配置呢？（不添加或不设置默认为 False）
     在.env文件中添加对应 属性 并设置为True
@@ -76,6 +81,10 @@
   ```
     
 ## 更新：
+### 2021 5/31
+  * 将 明日方舟 获取额外数据（招募方式）改为异步多任务访问
+  * 为 碧蓝航线 抽卡图片添加头像外框（更清晰的显示品质）【注：若之前已存在azur.json，删除该文件重启即刻下载头像框图片（不下载抽卡也不会报错）】   
+  * 命运-冠位指定（FGO）！！！
 ### 2021/5/29
   * 碧蓝航线 重新区分了 限定（大部分应该都区分了）
 ### 2021/5/28
@@ -83,7 +92,7 @@
   * 修复当处于Windows系统时，下载图片的名称若包含 \/:*?"<>| 导致报错（现会将字符串中的禁止字符删除）
 ### 2021/5/27
   * 公主连结区分国服/台服
-  * 启动时下载资源改为异步下载（提速！）
+  * 启动时下载资源改为异步多任务下载（提速！）
   * 碧蓝航线！！！
 ### 2021/5/26
   * 添加更改路径的配置
@@ -123,5 +132,6 @@
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/5.png)
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/6.png)
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/prc.png)
-![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/bl.png)
+![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/azur.png)
+![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/fgo.png)
 
