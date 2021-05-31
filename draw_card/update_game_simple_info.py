@@ -33,7 +33,7 @@ async def update_simple_info(url: str, game_name: str) -> 'dict, int':
                         for char in contents:
                             data = await retrieve_char_data(char, game_name, data, index)
                         index += 1
-                data = await _last_check(data, 'azur')
+                data = await _last_check(data, game_name)
     except TimeoutError:
         print(f'更新 {game_name} 超时...')
         return {}, 999
@@ -48,19 +48,23 @@ def get_char_divs(soup: bs4.BeautifulSoup, game_name: str) -> bs4.element.Result
         return soup.find_all('div', {'class': 'tabbertab'})
     if game_name == 'azur':
         return soup.find_all('div', {'class': 'resp-tabs'})
+    if game_name == 'onmyoji':
+        return soup.find_all('div', {'class': 'shishen_container'})
 
 
 # 拿到所有类型
 def get_type_lst(div: bs4.element.Tag, game_name: str):
     if game_name in ['pcr', 'azur']:
         return div.find('div', {'class': 'resp-tabs-container'}).find_all('div', {'class': 'resp-tab-content'})
+    if game_name == 'onmyoji':
+        return [div.find('div', {'class': 'shishen_wrap clearfix'})]
 
 
 # 获取所有角色div
 def get_char_lst_contents(char_lst: bs4.element.Tag, game_name: str):
     contents = []
     # print(len(char_lst.find_all('tr')))
-    if game_name == 'pcr':
+    if game_name in ['pcr', 'onmyoji']:
         contents = char_lst.contents
     if game_name == 'azur':
         contents = char_lst.find('table').find('tbody').contents[-1].find('td').contents
@@ -136,6 +140,11 @@ async def retrieve_char_data(char: bs4.element.Tag, game_name: str, data: dict, 
             star = 6
         member_dict['星级'] = star
         member_dict['类型'] = azur_type[str(index)]
+    if game_name == 'onmyoji':
+        member_dict = {
+            '头像': unquote(char.find('img')['src']),
+            '名称': char.find('span', {'class': 'name'}).text
+        }
     await download_img(member_dict['头像'], game_name, member_dict['名称'])
     data[member_dict['名称']] = member_dict
     print(f'{member_dict["名称"]} is update...')
