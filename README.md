@@ -69,7 +69,7 @@
     
     PRTS_FLAG = False       # 明日方舟
     GENSHIN_FLAG = False    # 原神
-    PRETTY_FLAG = False      # 赛马娘
+    PRETTY_FLAG = False     # 赛马娘
     GUARDIAN_FLAG = False   # 坎公骑冠剑
     PCR_FLAG = False        # 公主连结
     AZUR_FLAG = False       # 碧蓝航线
