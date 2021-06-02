@@ -45,7 +45,7 @@
 #### 注：
 
 ```seq
-赛马娘->赛马娘N抽
+赛马娘->赛马娘N抽： 66666
 赛马娘->赛马娘卡N抽
 Note right of Bob: Bob thinks
 Bob-->Alice: I am good thanks!
