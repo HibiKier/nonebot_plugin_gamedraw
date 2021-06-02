@@ -45,11 +45,11 @@
 #### 注：
 
 ```seq
-赛马娘->赛马娘N抽： 66666
-赛马娘->赛马娘卡N抽
+Alice->Bob: Hello Bob, how are you?
 Note right of Bob: Bob thinks
 Bob-->Alice: I am good thanks!
 ```
+
 赛马娘分为 赛马娘N抽（抽马），赛马娘卡N抽（抽卡）  
 坎公骑冠剑分为 坎公骑冠剑N抽（角色池），坎公骑冠剑武器N抽（武器池）  
 碧蓝航线分为 碧蓝航线轻型 碧蓝航线重型 碧蓝航线特型，对应3个池子  
