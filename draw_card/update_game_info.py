@@ -139,22 +139,31 @@ async def _last_check(data: dict, game_name: str, session: aiohttp.ClientSession
         for x in asyResult:
             for key in x.keys():
                 data[key]['获取途径'] = x[key]['获取途径']
-    # if game_name == 'genshin':
-    #     for key in data.keys():
-    #         async with session.get(f'https://wiki.biligame.com/ys/{key}', timeout=7) as res:
-    #             soup = BeautifulSoup(await res.text(), 'lxml')
-    #             trs = soup.find('div', {'class': 'poke-bg'}).find('table').find('tbody').find_all('tr')
-    #             for tr in trs:
-    #                 if tr.find('th').text.find('常驻/限定') != -1:
-    #                     data[key]['常驻/限定'] = tr.find('td').text
-    #                     break
+    if game_name == 'genshin':
+        for key in data.keys():
+            async with session.get(f'https://wiki.biligame.com/ys/{key}', timeout=7) as res:
+                soup = BeautifulSoup(await res.text(), 'lxml')
+                _trs = ''
+                for table in soup.find_all('table', {'class': 'wikitable'}):
+                    if str(table).find('常驻/限定') != -1:
+                        _trs = table.find('tbody').find_all('tr')
+                        break
+                for tr in _trs:
+                    if str(tr).find('限定UP') != -1:
+                        data[key]['常驻/限定'] = '限定UP'
+                        print(f'原神获取额外数据 {key}...{data[key]["常驻/限定"]}')
+                        break
+                    elif str(tr).find('常驻UP') != -1:
+                        data[key]['常驻/限定'] = '常驻UP'
+                        print(f'原神获取额外数据 {key}...{data[key]["常驻/限定"]}')
+                        break
     if game_name == 'pretty':
         for keys in data.keys():
             for key in data[keys].keys():
                 r = re.search(r'.*?40px-(.*)图标.png', str(data[keys][key]))
                 if r:
                     data[keys][key] = r.group(1)
-                    print(f'赛马娘额外修改数据....{keys}[{key}]=> {r.group(1)}')
+                    print(f'赛马娘额外修改数据...{keys}[{key}]=> {r.group(1)}')
     if game_name == 'guardian':
         for keys in data.keys():
             for key in data[keys].keys():
@@ -265,7 +274,7 @@ async def _async_update_prts_extra_info(url: str, key: str, session: aiohttp.Cli
                             if r:
                                 text += r.group(1) + ' '
                         obtain[i] = obtain[i].split('<a')[0] + text[:-1] + obtain[i].split('</a>')[-1]
-                print(f'明日方舟获取额外信息 {key}....{obtain}')
+                print(f'明日方舟获取额外信息 {key}...{obtain}')
                 x = {key: {}}
                 x[key]['获取途径'] = obtain
                 return x

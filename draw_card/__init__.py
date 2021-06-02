@@ -24,7 +24,7 @@ prts = on_regex(r'.*?方舟[1-9|一][0-9]{0,2}[抽|井]', rule=is_switch('prts')
 prts_update = on_keyword({'更新方舟信息', '更新明日方舟信息'}, permission=SUPERUSER, priority=1, block=True)
 prts_reload = on_keyword({'重载方舟卡池'}, priority=1, block=True)
 
-genshin = on_regex('.*?原神[1-9|一][0-9]{0,2}[抽|井]', rule=is_switch('genshin'), priority=5, block=True)
+genshin = on_regex('.*?原神(武器|角色)?池?[1-9|一][0-9]{0,2}[抽|井]', rule=is_switch('genshin'), priority=5, block=True)
 genshin_reset = on_keyword({'重置原神抽卡'}, priority=1, block=True)
 genshin_update = on_keyword({'更新原神信息'}, permission=SUPERUSER, priority=1, block=True)
 
@@ -72,17 +72,25 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
 @genshin.handle()
 async def _(bot: Bot, event: MessageEvent, state: T_State):
     msg = str(event.get_message()).strip()
-    if msg in ['原神一井', '原神1井']:
-        num = 180
-    else:
-        rmsg = re.search(r'.*?原神(.*)抽', msg)
-        if rmsg:
-            num, flag = check_num(rmsg.group(1), 180)
+    rmsg = re.search(r'.*?原神(武器|角色)?池?(.*)[抽|井]', msg)
+    if rmsg:
+        pool_name = rmsg.group(1)
+        if pool_name == '武器':
+            pool_name = 'arms'
+        elif pool_name == '角色':
+            pool_name = 'char'
+        else:
+            pool_name = ''
+        num = rmsg.group(2)
+        if msg.find('一井') != -1 or msg.find('1井') != -1:
+            num = 180
+        else:
+            num, flag = check_num(num, 180)
             if not flag:
                 await genshin.finish(num, at_sender=True)
-        else:
-            return
-    await genshin.send(await genshin_draw(event.user_id, int(num)), at_sender=True)
+    else:
+        return
+    await genshin.send(await genshin_draw(event.user_id, int(num), pool_name), at_sender=True)
 
 
 @genshin_reset.handle()

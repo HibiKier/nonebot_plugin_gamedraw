@@ -24,7 +24,17 @@ def init_game_pool(game: str, data: dict, Operator: Any):
         for key in data.keys():
             if key.find('旅行者') != -1:
                 continue
-            tmp_lst.append(Operator(name=key, star=int(data[key]['稀有度'][:1]), limited=False))
+            limited = False
+            if data[key]['常驻/限定'] == '限定UP':
+                limited = True
+            tmp_lst.append(Operator(name=key, star=int(data[key]['稀有度'][:1]), limited=limited))
+    if game == 'genshin_arms':
+        for key in data.keys():
+            if data[key]['获取途径'].find('祈愿') != -1:
+                limited = False
+                if data[key]['获取途径'].find('限定祈愿') != -1:
+                    limited = True
+                tmp_lst.append(Operator(name=key, star=int(data[key]['稀有度'][:1]), limited=limited))
     if game == 'pretty':
         for key in data.keys():
             tmp_lst.append(Operator(name=key, star=data[key]['初始星级'], limited=False))

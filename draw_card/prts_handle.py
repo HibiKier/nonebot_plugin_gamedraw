@@ -10,7 +10,6 @@ from .init_card_pool import init_game_pool
 from pathlib import Path
 from .announcement import PrtsAnnouncement
 from dataclasses import dataclass
-import asyncio
 try:
     import ujson as json
 except ModuleNotFoundError:
@@ -60,6 +59,7 @@ async def update_prts_info():
     if code == 200:
         prts_dict = data
         ALL_OPERATOR = init_game_pool('prts', prts_dict, Operator)
+        await _init_up_char()
 
 
 async def init_prts_data():

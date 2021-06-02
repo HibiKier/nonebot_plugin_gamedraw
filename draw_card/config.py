@@ -325,7 +325,6 @@ def check_config():
             ONMYOJI_SR = float(data['onmyoji']['ONMYOJI_SR'])
             ONMYOJI_R = float(data['onmyoji']['ONMYOJI_R'])
         except KeyError:
-            data['onmyoji'] = {}
             data['onmyoji']['ONMYOJI_SP'] = config_default_data['onmyoji']['ONMYOJI_SP']
             data['onmyoji']['ONMYOJI_SSR'] = config_default_data['onmyoji']['ONMYOJI_SSR']
             data['onmyoji']['ONMYOJI_SR'] = config_default_data['onmyoji']['ONMYOJI_SR']
