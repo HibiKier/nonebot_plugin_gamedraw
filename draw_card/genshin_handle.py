@@ -199,6 +199,8 @@ def reset_count(user_id: int):
 # 获取up和概率
 async def _init_up_char():
     global _CURRENT_CHAR_POOL_TITLE, _CURRENT_ARMS_POOL_TITLE, UP_CHAR, UP_ARMS, POOL_IMG
+    UP_CHAR = []
+    UP_ARMS = []
     up_char_dict = await GenshinAnnouncement.update_up_char()
     _CURRENT_CHAR_POOL_TITLE = up_char_dict['char']['title']
     _CURRENT_ARMS_POOL_TITLE = up_char_dict['arms']['title']

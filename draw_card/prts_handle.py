@@ -109,7 +109,8 @@ def _get_operator_card():
 
 # 获取up干员和概率
 async def _init_up_char():
-    global _CURRENT_POOL_TITLE, POOL_IMG
+    global _CURRENT_POOL_TITLE, POOL_IMG, UP_OPERATOR
+    UP_OPERATOR = []
     up_char_dict = await PrtsAnnouncement.update_up_char()
     _CURRENT_POOL_TITLE = up_char_dict['title']
     if _CURRENT_POOL_TITLE:
