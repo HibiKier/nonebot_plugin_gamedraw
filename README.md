@@ -158,6 +158,7 @@
 ## Todo
 
   * 各池子的UP（大概）
+  * 抽卡统计
 
 ## 效果
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/0.png)
