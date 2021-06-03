@@ -29,6 +29,7 @@ UP_ARMS = []
 
 _CURRENT_CHAR_POOL_TITLE = ''
 _CURRENT_ARMS_POOL_TITLE = ''
+POOL_IMG = ''
 
 
 @dataclass
@@ -197,10 +198,13 @@ def reset_count(user_id: int):
 
 # 获取up和概率
 async def _init_up_char():
-    global _CURRENT_CHAR_POOL_TITLE, _CURRENT_ARMS_POOL_TITLE, UP_CHAR, UP_ARMS
+    global _CURRENT_CHAR_POOL_TITLE, _CURRENT_ARMS_POOL_TITLE, UP_CHAR, UP_ARMS, POOL_IMG
     up_char_dict = await GenshinAnnouncement.update_up_char()
     _CURRENT_CHAR_POOL_TITLE = up_char_dict['char']['title']
     _CURRENT_ARMS_POOL_TITLE = up_char_dict['arms']['title']
+    if _CURRENT_CHAR_POOL_TITLE and _CURRENT_ARMS_POOL_TITLE:
+        POOL_IMG = MessageSegment.image(up_char_dict['char']['pool_img']) + \
+                   MessageSegment.image(up_char_dict['arms']['pool_img'])
     print(f'成功获取原神当前up信息...当前up池: {_CURRENT_CHAR_POOL_TITLE} & {_CURRENT_ARMS_POOL_TITLE}')
     for key in up_char_dict.keys():
         for star in up_char_dict[key]['up_char'].keys():
@@ -213,5 +217,10 @@ async def _init_up_char():
                 UP_ARMS.append(UpEvent(star=int(star), operators=up_char_lst, zoom=0))
 
 
-async def reload_pool():
+async def reload_genshin_pool():
     await _init_up_char()
+    return f'当前UP池子：{_CURRENT_CHAR_POOL_TITLE} & {_CURRENT_ARMS_POOL_TITLE} {POOL_IMG}'
+
+
+
+

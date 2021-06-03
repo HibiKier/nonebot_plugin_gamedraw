@@ -23,6 +23,7 @@ prts_dict = {}
 UP_OPERATOR = []
 ALL_OPERATOR = []
 _CURRENT_POOL_TITLE = ''
+POOL_IMG = ''
 
 
 @dataclass
@@ -108,9 +109,11 @@ def _get_operator_card():
 
 # 获取up干员和概率
 async def _init_up_char():
-    global _CURRENT_POOL_TITLE
+    global _CURRENT_POOL_TITLE, POOL_IMG
     up_char_dict = await PrtsAnnouncement.update_up_char()
     _CURRENT_POOL_TITLE = up_char_dict['title']
+    if _CURRENT_POOL_TITLE:
+        POOL_IMG = MessageSegment.image(up_char_dict['pool_img'])
     up_char_dict = up_char_dict['up_char']
     print(f'成功获取明日方舟当前up信息...当前up池: {_CURRENT_POOL_TITLE}')
     average_dict = {'6': {}, '5': {}, '4': {}}
@@ -129,5 +132,6 @@ async def _init_up_char():
             UP_OPERATOR.append(UpEvent(star=int(star), operators=average_dict[star][str_zoom], zoom=zoom))
 
 
-async def reload_pool():
+async def reload_prts_pool():
     await _init_up_char()
+    return f'当前UP池：{_CURRENT_POOL_TITLE} {POOL_IMG}'

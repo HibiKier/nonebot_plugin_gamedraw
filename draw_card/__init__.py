@@ -1,9 +1,9 @@
 from nonebot import on_regex, require, on_keyword
-from nonebot.adapters.cqhttp import Bot, MessageEvent
+from nonebot.adapters.cqhttp import Bot, MessageEvent, Message
 from nonebot.permission import SUPERUSER
 from nonebot.typing import T_State
-from .genshin_handle import genshin_draw, update_genshin_info, reset_count
-from .prts_handle import update_prts_info, prts_draw, reload_pool
+from .genshin_handle import genshin_draw, update_genshin_info, reset_count, reload_genshin_pool
+from .prts_handle import update_prts_info, prts_draw, reload_prts_pool
 from .pretty_handle import update_pretty_info, pretty_draw
 from .guardian_handle import update_guardian_info, guardian_draw
 from .pcr_handle import update_pcr_info, pcr_draw
@@ -22,11 +22,12 @@ scheduler = require('nonebot_plugin_apscheduler').scheduler
 
 prts = on_regex(r'.*?方舟[1-9|一][0-9]{0,2}[抽|井]', rule=is_switch('prts'), priority=5, block=True)
 prts_update = on_keyword({'更新方舟信息', '更新明日方舟信息'}, permission=SUPERUSER, priority=1, block=True)
-prts_reload = on_keyword({'重载方舟卡池'}, priority=1, block=True)
+prts_up_reload = on_keyword({'重载方舟卡池'}, priority=1, block=True)
 
 genshin = on_regex('.*?原神(武器|角色)?池?[1-9|一][0-9]{0,2}[抽|井]', rule=is_switch('genshin'), priority=5, block=True)
-genshin_reset = on_keyword({'重置原神抽卡'}, priority=1, block=True)
 genshin_update = on_keyword({'更新原神信息'}, permission=SUPERUSER, priority=1, block=True)
+genshin_reset = on_keyword({'重置原神抽卡'}, priority=1, block=True)
+genshin_up_reload = on_keyword({'重载原神卡池'}, priority=1, block=True)
 
 pretty = on_regex('.*?马娘卡?[1-9|一][0-9]{0,2}[抽|井]', rule=is_switch('pretty'), priority=5, block=True)
 pretty_update = on_keyword({'更新马娘信息', '更新赛马娘信息'}, permission=SUPERUSER, priority=1, block=True)
@@ -63,10 +64,10 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
     await prts.send(await prts_draw(int(num)), at_sender=True)
 
 
-@prts_reload.handle()
+@prts_up_reload.handle()
 async def _(bot: Bot, event: MessageEvent, state: T_State):
-    await reload_pool()
-    await prts_reload.finish('重载完成！')
+    text = await reload_prts_pool()
+    await prts_up_reload.finish(Message(f'重载完成！\n{text}'))
 
 
 @genshin.handle()
@@ -91,6 +92,12 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
     else:
         return
     await genshin.send(await genshin_draw(event.user_id, int(num), pool_name), at_sender=True)
+
+
+@genshin_up_reload.handle()
+async def _(bot: Bot, event: MessageEvent, state: T_State):
+    text = await reload_genshin_pool()
+    await genshin_reset.finish(Message(f'重载成功！\n{text}'))
 
 
 @genshin_reset.handle()
@@ -207,7 +214,6 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
 @prts_update.handle()
 async def _(bot: Bot, event: MessageEvent, state: T_State):
     await update_prts_info()
-    await reload_pool()
     await prts_update.finish('更新完成！')
 
 
@@ -280,7 +286,7 @@ async def _():
     await asyncio.gather(*tasks)
 
 
-# 每天四点重载up卡池
+# 每天四点重载方舟up卡池
 @scheduler.scheduled_job(
     'cron',
     hour=4,
@@ -288,4 +294,17 @@ async def _():
 )
 async def _():
     if PRTS_FLAG:
-        await reload_pool()
+        await reload_prts_pool()
+
+
+# 每天下午六点点重载原神up卡池
+@scheduler.scheduled_job(
+    'cron',
+    hour=18,
+    minute=1,
+)
+async def _():
+    if PRTS_FLAG:
+        await reload_genshin_pool()
+
+
