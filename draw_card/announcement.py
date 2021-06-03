@@ -143,6 +143,7 @@ class GenshinAnnouncement:
 
     @staticmethod
     async def update_up_char():
+        genshin_up_char.parent.mkdir(exist_ok=True, parents=True)
         data = {
             'char': {'up_char': {'5': {}, '4': {}}, 'title': '', 'time': '', 'pool_img': ''},
             'arms': {'up_char': {'5': {}, '4': {}}, 'title': '', 'time': '', 'pool_img': ''}
