@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import asyncio
 from .util import download_img
 from urllib.parse import unquote
-import platform
+from .util import remove_prohibited_str
 import bs4
 import re
 try:
@@ -223,16 +223,6 @@ def replace_update_name(member_dict: dict, game_name: str):
         member_dict['名称'] = name
     return member_dict, name
 
-
-# 移除windows下特殊字符
-def remove_prohibited_str(name: str):
-    if platform.system().lower() == 'windows':
-        tmp = ''
-        for i in name:
-            if i not in ['\\', '/', ':', '*', '?', '"', '<', '>', '|']:
-                tmp += i
-        name = tmp
-    return name
 
 
 # 拿到tbody，不同游戏tbody可能不同

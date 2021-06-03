@@ -1,30 +1,30 @@
 import nonebot
 from pathlib import Path
-from configs.path_config import DATA_PATH
-from configs.config import FGO_FLAG, PCR_FLAG, AZUR_FLAG, PRTS_FLAG,\
-    PRETTY_FLAG, GUARDIAN_FLAG, GENSHIN_FLAG, ONMYOJI_FLAG, PCR_TAI
 try:
     import ujson as json
 except ModuleNotFoundError:
     import json
 
 
-DRAW_PATH = DATA_PATH + '/draw_card/'
+DRAW_PATH = nonebot.get_driver().config.draw_path
+
+if not DRAW_PATH:
+    DRAW_PATH = str(Path("data/draw_card").absolute()) + '/'
 
 _draw_config = Path(rf"{DRAW_PATH}/draw_card_config/draw_card_config.json")
 
 
 # 开关
-PRTS_FLAG = PRTS_FLAG
-GENSHIN_FLAG = GENSHIN_FLAG
-PRETTY_FLAG = PRETTY_FLAG
-GUARDIAN_FLAG = GUARDIAN_FLAG
-PCR_FLAG = PCR_FLAG
-AZUR_FLAG = AZUR_FLAG
-FGO_FLAG = FGO_FLAG
-ONMYOJI_FLAG = ONMYOJI_FLAG
+PRTS_FLAG = False if str(nonebot.get_driver().config.prts_flag).lower() == 'false' else True
+GENSHIN_FLAG = False if str(nonebot.get_driver().config.genshin_flag).lower() == 'false' else True
+PRETTY_FLAG = False if str(nonebot.get_driver().config.pretty_flag).lower() == 'false' else True
+GUARDIAN_FLAG = False if str(nonebot.get_driver().config.guardian_flag).lower() == 'false' else True
+PCR_FLAG = False if str(nonebot.get_driver().config.pcr_flag).lower() == 'false' else True
+AZUR_FLAG = False if str(nonebot.get_driver().config.azur_flag).lower() == 'false' else True
+FGO_FLAG = False if str(nonebot.get_driver().config.fgo_flag).lower() == 'false' else True
+ONMYOJI_FLAG = False if str(nonebot.get_driver().config.onmyoji_flag).lower() == 'false' else True
 
-PCR_TAI = PCR_TAI
+PCR_TAI = True if str(nonebot.get_driver().config.pcr_tai).lower() == 'true' else False
 
 # 方舟概率
 PRTS_SIX_P = 0.02

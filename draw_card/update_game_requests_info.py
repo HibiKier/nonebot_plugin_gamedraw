@@ -3,6 +3,7 @@ from .config import DRAW_PATH
 from asyncio.exceptions import TimeoutError
 from .util import download_img
 from bs4 import BeautifulSoup
+from .util import remove_prohibited_str
 import platform
 import asyncio
 try:
@@ -114,17 +115,6 @@ async def _last_check(data: dict, game_name: str, session: aiohttp.ClientSession
                 data[key]['头像'] = "https:" + soup.find('div', {'class': 'pic_wrap'}).find('img')['src']
                 await download_img(data[key]['头像'], game_name, key)
     return data
-
-
-# 移除windows下特殊字符
-def remove_prohibited_str(name: str):
-    if platform.system().lower() == 'windows':
-        tmp = ''
-        for i in name:
-            if i not in ['\\', '/', ':', '*', '?', '"', '<', '>', '|']:
-                tmp += i
-        name = tmp
-    return name
 
 
 async def _async_update_fgo_extra_info(url: str, key: str, _id: str, session: aiohttp.ClientSession):

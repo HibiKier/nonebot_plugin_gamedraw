@@ -3,6 +3,7 @@ from .config import DRAW_PATH
 from asyncio.exceptions import TimeoutError
 from bs4 import BeautifulSoup
 from .util import download_img
+from .util import remove_prohibited_str
 from urllib.parse import unquote
 import bs4
 
@@ -110,7 +111,7 @@ async def retrieve_char_data(char: bs4.element.Tag, game_name: str, data: dict, 
     member_dict = {}
     if game_name == 'pcr':
         member_dict = {
-            '头像': unquote(char.find('img', {'class': 'img-kk'})['src']),
+            '头像': remove_prohibited_str(unquote(char.find('img', {'class': 'img-kk'})['src'])),
             '名称': char.find('a')['title'],
             '星级': 3 - index}
     if game_name == 'azur':
@@ -120,7 +121,7 @@ async def retrieve_char_data(char: bs4.element.Tag, game_name: str, data: dict, 
             member_dict['头像'] = unquote(str(avatar_img['srcset']).split(' ')[-2])
         except KeyError:
             member_dict['头像'] = unquote(str(avatar_img['src']).split(' ')[-2])
-        member_dict['名称'] = str(avatar_img['alt'])[: str(avatar_img['alt']).find('头像')]
+        member_dict['名称'] = remove_prohibited_str(str(avatar_img['alt'])[: str(avatar_img['alt']).find('头像')])
         star = char.find('div').find('img')['alt']
         if star == '舰娘头像外框普通.png':
             star = 1

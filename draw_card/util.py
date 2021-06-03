@@ -1,4 +1,4 @@
-import os
+import platform
 import aiohttp
 import aiofiles
 from asyncio.exceptions import TimeoutError
@@ -242,4 +242,17 @@ def check_num(num: str, max_num: int) -> 'str, bool':
         return '虚空抽卡？？？', False
     else:
         return str(num), True
+
+
+# 移除windows和linux下特殊字符
+def remove_prohibited_str(name: str):
+    if platform.system().lower() == 'windows':
+        tmp = ''
+        for i in name:
+            if i not in ['\\', '/', ':', '*', '?', '"', '<', '>', '|']:
+                tmp += i
+        name = tmp
+    else:
+        name = name.replace('/', '')
+    return name
 
