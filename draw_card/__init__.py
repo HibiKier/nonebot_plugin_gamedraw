@@ -182,7 +182,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
             await azur.finish(num, at_sender=True)
     else:
         return
-    await azur.send(await azur_draw(int(num), pool_name))
+    await azur.send(await azur_draw(int(num), pool_name), at_sender=True)
 
 
 @fgo.handle()
@@ -195,7 +195,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
             await fgo.finish(num, at_sender=True)
     else:
         return
-    await fgo.send(await fgo_draw(int(num)))
+    await fgo.send(await fgo_draw(int(num)), at_sender=True)
 
 
 @onmyoji.handle()
@@ -208,7 +208,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
             await onmyoji.finish(num, at_sender=True)
     else:
         return
-    await onmyoji.send(await onmyoji_draw(int(num)))
+    await onmyoji.send(await onmyoji_draw(int(num)), at_sender=True)
 
 
 @prts_update.handle()
