@@ -253,6 +253,6 @@ def remove_prohibited_str(name: str):
                 tmp += i
         name = tmp
     else:
-        name = name.replace('/', '')
+        name = name.replace('/', '\\')
     return name
 

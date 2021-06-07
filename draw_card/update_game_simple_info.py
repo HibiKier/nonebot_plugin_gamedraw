@@ -6,6 +6,7 @@ from .util import download_img
 from .util import remove_prohibited_str
 from urllib.parse import unquote
 import bs4
+import asyncio
 
 try:
     import ujson as json
@@ -34,7 +35,7 @@ async def update_simple_info(url: str, game_name: str) -> 'dict, int':
                         for char in contents:
                             data = await retrieve_char_data(char, game_name, data, index)
                         index += 1
-                data = await _last_check(data, game_name)
+            data = await _last_check(data, game_name, session)
     except TimeoutError:
         print(f'更新 {game_name} 超时...')
         return {}, 999
@@ -69,7 +70,7 @@ def get_char_lst_contents(char_lst: bs4.element.Tag, game_name: str):
 
 
 # 额外数据
-async def _last_check(data: dict, game_name: str) -> dict:
+async def _last_check(data: dict, game_name: str, session: aiohttp.ClientSession) -> dict:
     if game_name == 'azur':
         idx = 1
         for url in [
@@ -84,9 +85,14 @@ async def _last_check(data: dict, game_name: str) -> dict:
         ]:
             await download_img(url, 'azur', f'{idx}_star')
             idx += 1
-
+        tasks = []
+        for key in data.keys():
+            tasks.append(asyncio.ensure_future(_async_update_azur_extra_info(key, session)))
+        asyResult = await asyncio.gather(*tasks)
+        for x in asyResult:
+            for key in x.keys():
+                data[key]['获取途径'] = x[key]['获取途径']
     return data
-
 
 
 azur_type = {
@@ -111,8 +117,8 @@ async def retrieve_char_data(char: bs4.element.Tag, game_name: str, data: dict, 
     member_dict = {}
     if game_name == 'pcr':
         member_dict = {
-            '头像': remove_prohibited_str(unquote(char.find('img', {'class': 'img-kk'})['src'])),
-            '名称': char.find('a')['title'],
+            '头像': unquote(char.find('img', {'class': 'img-kk'})['src']),
+            '名称': remove_prohibited_str(char.find('a')['title']),
             '星级': 3 - index}
     if game_name == 'azur':
         char = char.find('td').find('div')
@@ -141,3 +147,26 @@ async def retrieve_char_data(char: bs4.element.Tag, game_name: str, data: dict, 
     data[member_dict['名称']] = member_dict
     print(f'{member_dict["名称"]} is update...')
     return data
+
+
+async def _async_update_azur_extra_info(key: str, session: aiohttp.ClientSession):
+    if key[-1] == '改':
+        return {key: {'获取途径': ['无法建造']}}
+    for i in range(20):
+        try:
+            async with session.get(f'https://wiki.biligame.com/blhx/{key}', timeout=7) as res:
+                soup = BeautifulSoup(await res.text(), 'lxml')
+                construction_time = str(soup.find('table', {'class': 'wikitable sv-general'}).find('tbody'))
+                x = {key: {'获取途径': []}}
+                if construction_time.find('无法建造') != -1:
+                    x[key]['获取途径'].append('无法建造')
+                elif construction_time.find('活动已关闭') != -1:
+                    x[key]['获取途径'].append('活动限定')
+                else:
+                    x[key]['获取途径'].append('可以建造')
+                print(f'碧蓝航线获取额外信息 {key}...{x[key]["获取途径"]}')
+                return x
+        except TimeoutError:
+            print(f'访问 https://wiki.biligame.com/blhx/{key} 第 {i}次 超时...已再次访问')
+    return {}
+

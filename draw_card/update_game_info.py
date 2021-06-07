@@ -131,10 +131,9 @@ async def _modify_avatar_url(session: aiohttp.ClientSession, game_name: str, cha
 # 数据最后处理（是否需要额外数据或处理数据）
 async def _last_check(data: dict, game_name: str, session: aiohttp.ClientSession):
     if game_name == 'prts':
-        url = 'https://wiki.biligame.com/arknights/'
         tasks = []
         for key in data.keys():
-            tasks.append(asyncio.ensure_future(_async_update_prts_extra_info(url, key, session)))
+            tasks.append(asyncio.ensure_future(_async_update_prts_extra_info(key, session)))
         asyResult = await asyncio.gather(*tasks)
         for x in asyResult:
             for key in x.keys():
@@ -224,7 +223,6 @@ def replace_update_name(member_dict: dict, game_name: str):
     return member_dict, name
 
 
-
 # 拿到tbody，不同游戏tbody可能不同
 def get_tbody(soup: bs4.BeautifulSoup, game_name: str, url: str):
     max_count = 0
@@ -244,7 +242,7 @@ def get_tbody(soup: bs4.BeautifulSoup, game_name: str, url: str):
     return _tbody
 
 
-async def _async_update_prts_extra_info(url: str, key: str, session: aiohttp.ClientSession):
+async def _async_update_prts_extra_info(key: str, session: aiohttp.ClientSession):
     for i in range(10):
         try:
             async with session.get(f'https://wiki.biligame.com/arknights/{key}', timeout=7) as res:
@@ -269,6 +267,6 @@ async def _async_update_prts_extra_info(url: str, key: str, session: aiohttp.Cli
                 x[key]['获取途径'] = obtain
                 return x
         except TimeoutError:
-            print(f'访问{url}{key} 第 {i}次 超时...已再次访问')
+            print(f'访问 https://wiki.biligame.com/arknights/{key} 第 {i}次 超时...已再次访问')
     return {}
 

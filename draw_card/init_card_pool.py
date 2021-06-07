@@ -53,9 +53,10 @@ def init_game_pool(game: str, data: dict, Operator: Any):
     if game == 'azur':
         for key in data.keys():
             limited = False
-            if int(data[key]['星级']) > 4 or key.find('兵装') != -1 or key[-1] == '改' or key.find('布里') != -1:
+            if '可以建造' not in data[key]['获取途径']:
                 limited = True
-            tmp_lst.append(Operator(name=data[key]['名称'], star=int(data[key]['星级']), limited=limited, itype=data[key]['类型']))
+            tmp_lst.append(Operator(name=data[key]['名称'], star=int(data[key]['星级']),
+                                    limited=limited, itype=data[key]['类型']))
     if game in ['fgo', 'fgo_card']:
         for key in data.keys():
             limited = False
