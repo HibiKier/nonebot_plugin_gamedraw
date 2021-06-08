@@ -162,7 +162,7 @@
 
   * 各池子的UP（大概）
   * 抽卡统计
-  * 已知问题：并发数过多导致多次访问失败，数据更新不完全（未修复前重复更新可以有效）
+  * 已知问题：并发数过多导致多次访问失败，数据更新不完全（未修复前重新更新可以有效）
 
 ## 效果
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/0.png)
