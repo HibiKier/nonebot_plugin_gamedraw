@@ -118,6 +118,10 @@
  * 重载卡池时会发送当前的卡池名称与图片
  * 添加原神每日重载卡池的定时任务与手动触发命令
  * 修复Linux系统下字符 '/'（现会将字符串中的禁止字符删除）
+
+<details>
+<summary>更久前的更新</summary>
+
 ### 2021/6/2
   * 原神实现自动更新当前UP池子（角色和武器），并将抽卡命令分为 原神N抽（常驻），原神武器N抽（武器UP），原神角色N抽（角色UP），当没有UP池时，所有命令都会指向常驻池【注：需要删除原 genshin.json，更新下载额外数据】
 ### 2021/5/31
@@ -150,6 +154,8 @@
   * 实现 [issues #1](https://github.com/HibiKier/nonebot_plugin_gamedraw/issues/1) 提供的比较完善的抽卡逻辑）感谢# [@Jerry-FaGe](https://github.com/Jerry-FaGe)
 ### 2021/5/18
   * 明日方舟实现爬取游戏公告自动更新当前的up卡池
+ 
+ </details>
   
 
 ## 注意
