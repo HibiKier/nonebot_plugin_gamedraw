@@ -1,10 +1,12 @@
 # nonebot_plugin_gamedraw
 
 ## 介绍
-基于爬取wiki实现自动更新的抽卡插件（阴阳师爬取自官网）
- 
 
+基于爬取wiki实现自动更新的抽卡插件（阴阳师爬取自官网）  
+ 
 某一些卡池抓取的资料包含角色的属性等，如果你希望做一个查看角色武器资料的话或许可以帮上忙）
+
+**注意：此requirements不包含nonebot2及依赖以及nonebot_plugin_apscheduler(定时任务)插件**
 
 ## 目前支持的抽卡
 * 原神
@@ -116,6 +118,7 @@
  * 添加配置项SEMAPHORE，用于限制并发数(并发数过高会导致数据更新不完全，需要删除xxx.json重新更新)
  * 区分赛马娘支援卡限定
  * 添加赛马娘UP卡池（测试）
+ * 添加了一个requirements[issues #8](https://github.com/HibiKier/nonebot_plugin_gamedraw/issues/8)
 
 ### 2021/6/13
  * 重新区分了 明日方舟 限定
