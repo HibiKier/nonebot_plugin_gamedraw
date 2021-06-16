@@ -1,5 +1,4 @@
 
-import os
 from nonebot.adapters.cqhttp import MessageSegment
 import nonebot
 import random
@@ -45,8 +44,8 @@ async def prts_draw(count: int = 300):
     rst = init_star_rst(star_list, cnlist, six_list, six_index_list, up_list)
     if count > 90:
         operator_list = set_list(operator_list)
-    pool_info = "当前up池: " if _CURRENT_POOL_TITLE else ""
-    return pool_info + _CURRENT_POOL_TITLE + MessageSegment.image(
+    pool_info = f"当前up池: {_CURRENT_POOL_TITLE}" if _CURRENT_POOL_TITLE else ""
+    return pool_info + MessageSegment.image(
         "base64://" + await generate_img(operator_list, 'prts', star_list)) \
            + '\n' + rst[:-1] + '\n' + max_card(operator_dict)
 

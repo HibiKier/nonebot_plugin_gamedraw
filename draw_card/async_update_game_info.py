@@ -54,10 +54,13 @@ async def async_update_game():
     if ONMYOJI_FLAG and not os.path.exists(DRAW_PATH + 'onmyoji.json'):
         tasks.append(asyncio.ensure_future(update_onmyoji_info()))
         init_lst.remove(init_onmyoji_data)
-
-    await asyncio.gather(*tasks)
-    for func in init_lst:
-        await func()
+    try:
+        await asyncio.gather(*tasks)
+        for func in init_lst:
+            await func()
+    except asyncio.exceptions.CancelledError:
+        print('更新异常：CancelledError，再次更新...')
+        await async_update_game()
 
 
 

@@ -1,0 +1,16 @@
+aiofiles==0.7.0
+aiohttp==3.7.4.post0
+async-timeout==3.0.1
+attrs==21.2.0
+beautifulsoup4==4.9.3
+bs4==0.0.1
+chardet==4.0.0
+idna==3.2
+multidict==5.1.0
+Pillow==8.2.0
+pypinyin==0.42.0
+soupsieve==2.2.1
+typing-extensions==3.10.0.0
+ujson==4.0.2
+yarl==1.6.3
+lxml==4.6.3

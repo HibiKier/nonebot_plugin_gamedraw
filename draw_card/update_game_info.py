@@ -3,7 +3,6 @@ import aiohttp
 from .config import DRAW_PATH
 from asyncio.exceptions import TimeoutError
 from bs4 import BeautifulSoup
-import asyncio
 from .util import download_img
 from urllib.parse import unquote
 from .util import remove_prohibited_str
@@ -156,6 +155,10 @@ async def _last_check(data: dict, game_name: str, session: aiohttp.ClientSession
                         data[key]['常驻/限定'] = '常驻UP'
                         print(f'原神获取额外数据 {key}...{data[key]["常驻/限定"]}')
                         break
+                    else:
+                        data[key]['常驻/限定'] = '未知'
+                        print(f'原神获取额外数据 {key}...{data[key]["常驻/限定"]}')
+                        break
     if game_name == 'pretty':
         for keys in data.keys():
             for key in data[keys].keys():
@@ -186,6 +189,13 @@ def intermediate_check(member_dict: dict, key: str, game_name: str, td: bs4.elem
     if game_name == 'pretty':
         if key == '初始星级':
             member_dict['初始星级'] = len(td.find_all('img'))
+    if game_name == 'pretty_card':
+        if key == '获取方式':
+            obtain = []
+            for x in str(td.text).replace('\n', '').strip().split('、'):
+                if x:
+                    obtain.append(x)
+            member_dict['获取方式'] = obtain
     if game_name == 'guardian':
         if key == '头像':
             member_dict['星级'] = str(td.find('span').find('img')['alt'])[-5]
@@ -250,31 +260,31 @@ def get_tbody(soup: bs4.BeautifulSoup, game_name: str, url: str):
     return _tbody
 
 
-async def _async_update_prts_extra_info(key: str, session: aiohttp.ClientSession):
-    for i in range(10):
-        try:
-            async with session.get(f'https://wiki.biligame.com/arknights/{key}', timeout=7) as res:
-                soup = BeautifulSoup(await res.text(), 'lxml')
-                obtain = str(soup.find('table', {'class': 'wikitable'}).find('tbody').find_all('td')[-1])
-                obtain = re.search(r'<td.*?>([\s\S]*)</.*?', obtain).group(1)
-                obtain = obtain[:-1] if obtain[-1] == '\n' else obtain
-                if obtain.find('<br/>'):
-                    obtain = obtain.split('<br/>')
-                elif obtain.find('<br>'):
-                    obtain = obtain.split('<br>')
-                for i in range(len(obtain)):
-                    if obtain[i].find('<a') != -1:
-                        text = ''
-                        for msg in obtain[i].split('</a>'):
-                            r = re.search('>(.*)', msg)
-                            if r:
-                                text += r.group(1) + ' '
-                        obtain[i] = obtain[i].split('<a')[0] + text[:-1] + obtain[i].split('</a>')[-1]
-                print(f'明日方舟获取额外信息 {key}...{obtain}')
-                x = {key: {}}
-                x[key]['获取途径'] = obtain
-                return x
-        except TimeoutError:
-            print(f'访问 https://wiki.biligame.com/arknights/{key} 第 {i}次 超时...已再次访问')
-    return {}
+# async def _async_update_prts_extra_info(key: str, session: aiohttp.ClientSession):
+#     for i in range(10):
+#         try:
+#             async with session.get(f'https://wiki.biligame.com/arknights/{key}', timeout=7) as res:
+#                 soup = BeautifulSoup(await res.text(), 'lxml')
+#                 obtain = str(soup.find('table', {'class': 'wikitable'}).find('tbody').find_all('td')[-1])
+#                 obtain = re.search(r'<td.*?>([\s\S]*)</.*?', obtain).group(1)
+#                 obtain = obtain[:-1] if obtain[-1] == '\n' else obtain
+#                 if obtain.find('<br/>'):
+#                     obtain = obtain.split('<br/>')
+#                 elif obtain.find('<br>'):
+#                     obtain = obtain.split('<br>')
+#                 for i in range(len(obtain)):
+#                     if obtain[i].find('<a') != -1:
+#                         text = ''
+#                         for msg in obtain[i].split('</a>'):
+#                             r = re.search('>(.*)', msg)
+#                             if r:
+#                                 text += r.group(1) + ' '
+#                         obtain[i] = obtain[i].split('<a')[0] + text[:-1] + obtain[i].split('</a>')[-1]
+#                 print(f'明日方舟获取额外信息 {key}...{obtain}')
+#                 x = {key: {}}
+#                 x[key]['获取途径'] = obtain
+#                 return x
+#         except TimeoutError:
+#             print(f'访问 https://wiki.biligame.com/arknights/{key} 第 {i}次 超时...已再次访问')
+#     return {}
 

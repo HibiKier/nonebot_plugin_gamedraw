@@ -24,6 +24,7 @@ AZUR_FLAG = False if str(nonebot.get_driver().config.azur_flag).lower() == 'fals
 FGO_FLAG = False if str(nonebot.get_driver().config.fgo_flag).lower() == 'false' else True
 ONMYOJI_FLAG = False if str(nonebot.get_driver().config.onmyoji_flag).lower() == 'false' else True
 
+SEMAPHORE = 10 if not nonebot.get_driver().config.semaphore else int(nonebot.get_driver().config.semaphore)
 PCR_TAI = True if str(nonebot.get_driver().config.pcr_tai).lower() == 'true' else False
 
 # 方舟概率

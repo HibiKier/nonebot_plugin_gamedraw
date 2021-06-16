@@ -4,6 +4,7 @@ import re
 from datetime import datetime
 from .config import DRAW_PATH
 from pathlib import Path
+
 try:
     import ujson as json
 except ModuleNotFoundError:
@@ -13,9 +14,11 @@ headers = {'User-Agent': '"Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Te
 
 prts_up_char = Path(DRAW_PATH + "/draw_card_up/prts_up_char.json")
 genshin_up_char = Path(DRAW_PATH + "/draw_card_up/genshin_up_char.json")
+pretty_up_char = Path(DRAW_PATH + "/draw_card_up/pretty_up_char.json")
 
 prts_url = "https://wiki.biligame.com/arknights/%E6%96%B0%E9%97%BB%E5%85%AC%E5%91%8A"
 genshin_url = "https://wiki.biligame.com/ys/%E7%A5%88%E6%84%BF"
+pretty_url = "https://wiki.biligame.com/umamusume/%E5%85%AC%E5%91%8A"
 
 
 # 是否过时
@@ -32,12 +35,15 @@ def is_expired(data: dict):
 # 检查写入
 def check_write(data: dict, up_char_file, game_name: str = ''):
     tmp = data
-    if game_name == 'genshin':
+    if game_name in ['genshin', 'pretty']:
         tmp = data['char']
     if not is_expired(tmp):
-        if game_name == 'genshin':
+        if game_name in ['genshin']:
             data['char']['title'] = ''
             data['arms']['title'] = ''
+        elif game_name in ['pretty']:
+            data['char']['title'] = ''
+            data['card']['title'] = ''
         else:
             data['title'] = ''
     else:
@@ -50,7 +56,7 @@ def check_write(data: dict, up_char_file, game_name: str = ''):
         with open(up_char_file, 'r', encoding='utf8') as f:
             old_data = json.load(f)
             tmp = old_data
-            if game_name == 'genshin':
+            if game_name in ['genshin', 'pretty']:
                 tmp = old_data['char']
         if is_expired(tmp):
             return old_data
@@ -192,4 +198,87 @@ class GenshinAnnouncement:
         return check_write(data, genshin_up_char, 'genshin')
 
 
+class PrettyAnnouncement:
+    @staticmethod
+    async def get_announcement_text():
+        async with aiohttp.ClientSession(headers=headers) as session:
+            async with session.get(pretty_url, timeout=7) as res:
+                soup = BeautifulSoup(await res.text(), 'lxml')
+                divs = soup.find('div', {'id': 'mw-content-text'}).find('div').find_all('div')
+                for div in divs:
+                    a = div.find('a')
+                    try:
+                        title = a['title']
+                    except (KeyError, TypeError):
+                        continue
+                    if title.find('新角色追加') != -1:
+                        url = a['href']
+                        break
+            async with session.get(f'https://wiki.biligame.com/{url}', timeout=7) as res:
+                return await res.text(), title[:-2]
 
+    @staticmethod
+    async def update_up_char():
+        data = {
+            'char': {'up_char': {'3': {}, '2': {}, '1': {}}, 'title': '', 'time': '', 'pool_img': ''},
+            'card': {'up_char': {'3': {}, '2': {}, '1': {}}, 'title': '', 'time': '', 'pool_img': ''}
+        }
+        try:
+            text, title = await PrettyAnnouncement.get_announcement_text()
+            soup = BeautifulSoup(text, 'lxml')
+            context = soup.find('div', {'class': 'toc-sticky'})
+            if not context:
+                context = soup.find('div', {'class': 'mw-parser-output'})
+            data['char']['title'] = title
+            data['card']['title'] = title
+            time = str(context.find_all('big')[1].text)
+            time = time.replace('～', '-').replace('/', '月').split(' ')
+            time = time[0] + '日 ' + time[1] + ' - ' + time[3] + '日 ' + time[4]
+            data['char']['time'] = time
+            data['card']['time'] = time
+            for p in context.find_all('p'):
+                if str(p).find('当期UP赛马娘') != -1:
+                    data['char']['pool_img'] = p.find('img')['src']
+                    r = re.findall(r'.*?当期UP赛马娘([\s\S]*)＜奖励内容＞.*?', str(p))
+                    if r:
+                        for x in r:
+                            x = str(x).split('\n')
+                            for msg in x:
+                                if msg.find('★') != -1:
+                                    msg = msg.replace('<br/>', '')
+                                    msg = msg.split(' ')
+                                    if (star := len(msg[0].strip())) == 3:
+                                        data['char']['up_char']['3'][msg[1]] = '70'
+                                    elif star == 2:
+                                        data['char']['up_char']['2'][msg[1]] = '70'
+                                    elif star == 1:
+                                        data['char']['up_char']['1'][msg[1]] = '70'
+                if str(p).find('（当期UP对象）') != -1 and str(p).find('赛马娘') == -1:
+                    data['card']['pool_img'] = p.find('img')['src']
+                    r = re.search(r'■全?新?支援卡（当期UP对象）([\s\S]*)</p>', str(p))
+                    if r:
+                        rmsg = r.group(1)
+                        rmsg = rmsg.split('<br/>')
+                        for x in rmsg[1:]:
+                            x = x.replace('\n', '').replace('・', '')
+                            x = x.split(' ')
+                            if x[0] == 'SSR':
+                                data['card']['up_char']['3'][x[1]] = '70'
+                            if x[0] == 'SR':
+                                data['card']['up_char']['2'][x[1]] = '70'
+                            if x[0] == 'R':
+                                data['card']['up_char']['1'][x[1]] = '70'
+        except Exception as e:
+            print(f'赛马娘up更新失败 {type(e)}：{e}')
+        # 日文->中文
+        with open(DRAW_PATH + 'pretty_card.json', 'r', encoding='utf8') as f:
+            all_data = json.load(f)
+        for star in data['card']['up_char'].keys():
+            for name in list(data['card']['up_char'][star].keys()):
+                char_name = name.split(']')[1].strip()
+                tp_name = name[name.find('['): name.find(']') + 1].strip().replace('[', '【').replace(']', '】')
+                for x in all_data.keys():
+                    if all_data[x]['名称'].find(tp_name) != -1 and all_data[x]['关联角色'] == char_name:
+                        data['card']['up_char'][star].pop(name)
+                        data['card']['up_char'][star][all_data[x]['中文名']] = '70'
+        return check_write(data, pretty_up_char, 'pretty')

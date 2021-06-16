@@ -1,5 +1,4 @@
 import ujson as json
-import os
 from nonebot.adapters.cqhttp import MessageSegment
 import nonebot
 import random

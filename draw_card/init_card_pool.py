@@ -42,7 +42,12 @@ def init_game_pool(game: str, data: dict, Operator: Any):
             tmp_lst.append(Operator(name=key, star=data[key]['初始星级'], limited=False))
     if game == 'pretty_card':
         for key in data.keys():
-            tmp_lst.append(Operator(name=data[key]['中文名'], star=len(data[key]['稀有度']), limited=False))
+            limited = False
+            if '卡池' not in data[key]['获取方式']:
+                limited = True
+            if not data[key]['获取方式']:
+                limited = False
+            tmp_lst.append(Operator(name=data[key]['中文名'], star=len(data[key]['稀有度']), limited=limited))
     if game in ['guardian', 'guardian_arms']:
         for key in data.keys():
             tmp_lst.append(Operator(name=data[key]['名称'], star=int(data[key]['星级']), limited=False))
@@ -75,5 +80,6 @@ def init_game_pool(game: str, data: dict, Operator: Any):
                        '灶门祢豆子', '灶门炭治郎']:
                 limited = True
             tmp_lst.append(Operator(name=data[key]['名称'], star=data[key]['星级'], limited=limited))
+    # print(tmp_lst)
     return tmp_lst
 

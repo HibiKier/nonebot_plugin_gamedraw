@@ -8,6 +8,7 @@ from pathlib import Path
 from .config import path_dict, DRAW_PATH
 import nonebot
 import pypinyin
+from PIL import UnidentifiedImageError
 from .create_img import CreateImg
 import random
 from dataclasses import dataclass
@@ -125,7 +126,13 @@ def _pst(h: int, img_list: list, game_name: str, background_list: list):
                 bk.paste(b, (1, 5))
                 b = bk
             else:
-                b = CreateImg(100, 100, background=img)
+                try:
+                    b = CreateImg(100, 100, background=img)
+                except UnidentifiedImageError as e:
+                    print(f'无法识别图片 已删除图片，下次更新重新下载... e：{e}')
+                    if os.path.exists(img):
+                        os.remove(img)
+                    b = CreateImg(100, 100, color='black')
         except FileNotFoundError:
             print(f'{img} not exists')
             b = CreateImg(100, 100, color='black')
