@@ -194,6 +194,7 @@
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/genshin_up_reload.png)
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/2.png)
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/3.png)
+ ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/reload_pretty_pool.png)
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/5.png)
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/6.png)
 ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/prc.png)
