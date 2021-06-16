@@ -119,6 +119,7 @@
  * 区分赛马娘支援卡限定
  * 添加赛马娘UP卡池（测试）
  * 添加了一个requirements [issues #8](https://github.com/HibiKier/nonebot_plugin_gamedraw/issues/8)
+ * 修复 当资源图片无法打开时，会删除并在下次更新时下载
 
 ### 2021/6/13
  * 重新区分了 明日方舟 限定
