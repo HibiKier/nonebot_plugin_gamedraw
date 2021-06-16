@@ -118,7 +118,7 @@
  * 添加配置项SEMAPHORE，用于限制并发数(并发数过高会导致数据更新不完全，需要删除xxx.json重新更新)
  * 区分赛马娘支援卡限定
  * 添加赛马娘UP卡池（测试）
- * 添加了一个requirements[issues #8](https://github.com/HibiKier/nonebot_plugin_gamedraw/issues/8)
+ * 添加了一个requirements [issues #8](https://github.com/HibiKier/nonebot_plugin_gamedraw/issues/8)
 
 ### 2021/6/13
  * 重新区分了 明日方舟 限定
