@@ -304,6 +304,17 @@ async def _():
         await reload_prts_pool()
 
 
+# 每天四点重载赛马娘up卡池
+@scheduler.scheduled_job(
+    'cron',
+    hour=4,
+    minute=1,
+)
+async def _():
+    if PRETTY_FLAG:
+        await reload_pretty_pool()
+
+
 # 每天下午六点点重载原神up卡池
 @scheduler.scheduled_job(
     'cron',
