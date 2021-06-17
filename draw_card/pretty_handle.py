@@ -123,7 +123,6 @@ def _get_pretty_card(pool_name: str):
         if random.random() < 1 / len(all_char_lst) * (0.7 / 0.1385):
             all_up_star = [x.operators for x in up_data if x.star == star][0]
             acquire_operator = random.choice(all_up_star)
-            print(acquire_operator)
             if pool_name == 'char':
                 acquire_operator = acquire_operator.split(']')[1]
             acquire_operator = [x for x in data if x.name == acquire_operator][0]
