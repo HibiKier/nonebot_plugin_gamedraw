@@ -120,6 +120,7 @@
  * 添加赛马娘UP卡池（测试）
  * 添加了一个requirements [issues #8](https://github.com/HibiKier/nonebot_plugin_gamedraw/issues/8)
  * 修复 当资源图片无法打开时，会删除并在下次更新时下载
+ * 修复 当原神 限定/常驻UP 属于未知时不会在数据中更新该角色的 限定/常驻UP 数据
 
 ### 2021/6/13
  * 重新区分了 明日方舟 限定
