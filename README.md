@@ -106,7 +106,7 @@
     在.env文件中添加对应 属性 并设置为True
     
     PCR_TAI = True          # 公主连结使用台服卡池（即添加国服未时装角色）删除原pcr.json文件再重启bot自动更新即可
-    SEMAPHORE=10            # 限制并发数量(主要是 碧蓝航线 和 FGO 数据)
+    SEMAPHORE = 10            # 限制并发数量(主要是 碧蓝航线 和 FGO 数据)
     
   4.在bot入口文件添加
     nonebot.load_plugin("nonebot_plugin_gamedraw")
