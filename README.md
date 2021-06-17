@@ -106,7 +106,7 @@
     在.env文件中添加对应 属性 并设置为True
     
     PCR_TAI = True          # 公主连结使用台服卡池（即添加国服未时装角色）删除原pcr.json文件再重启bot自动更新即可
-    SEMAPHORE = 10            # 限制并发数量(主要是 碧蓝航线 和 FGO 数据)
+    SEMAPHORE = 5           # 限制并发数量(主要是 碧蓝航线 和 FGO 数据)
     
   4.在bot入口文件添加
     nonebot.load_plugin("nonebot_plugin_gamedraw")
@@ -120,7 +120,8 @@
  * 添加赛马娘UP卡池（测试）
  * 添加了一个requirements [issues #8](https://github.com/HibiKier/nonebot_plugin_gamedraw/issues/8)
  * 修复 当资源图片无法打开时，会删除并在下次更新时下载
- * 修复 当原神 限定/常驻UP 属于未知时不会在数据中更新该角色的 限定/常驻UP 数据
+ * 修复 当原神 限定/常驻UP 属于 未知 时不会在数据中更新该角色的 限定/常驻UP 数据
+ * 修改SEMAPHORE默认值为 5
 
 ### 2021/6/13
  * 重新区分了 明日方舟 限定
