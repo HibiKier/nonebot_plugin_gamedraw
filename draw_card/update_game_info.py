@@ -147,16 +147,13 @@ async def _last_check(data: dict, game_name: str, session: aiohttp.ClientSession
                         _trs = table.find('tbody').find_all('tr')
                         break
                 for tr in _trs:
+                    data[key]['常驻/限定'] = '未知'
                     if str(tr).find('限定UP') != -1:
                         data[key]['常驻/限定'] = '限定UP'
                         print(f'原神获取额外数据 {key}...{data[key]["常驻/限定"]}')
                         break
                     elif str(tr).find('常驻UP') != -1:
                         data[key]['常驻/限定'] = '常驻UP'
-                        print(f'原神获取额外数据 {key}...{data[key]["常驻/限定"]}')
-                        break
-                    else:
-                        data[key]['常驻/限定'] = '未知'
                         print(f'原神获取额外数据 {key}...{data[key]["常驻/限定"]}')
                         break
     if game_name == 'pretty':
