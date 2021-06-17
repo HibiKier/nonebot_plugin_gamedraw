@@ -120,7 +120,7 @@
  * 添加赛马娘UP卡池（测试）
  * 添加了一个requirements [issues #8](https://github.com/HibiKier/nonebot_plugin_gamedraw/issues/8)
  * 修复 当资源图片无法打开时，会删除并在下次更新时下载
- * 修复 当原神 限定/常驻UP 属于 未知 时不会在数据中更新该角色的 限定/常驻UP 数据
+ * 修复 当原神 限定/常驻UP 属于 未知 时不会在数据中更新该角色的 限定/常驻UP 数据导致报错
  * 修复 当更新UP卡池失败时会使用上一次更新的 UP卡池数据(会判断是否在开启时间内)
  * 修改SEMAPHORE默认值为 5
 
