@@ -6,7 +6,7 @@
  
 某一些卡池抓取的资料包含角色的属性等，如果你希望做一个查看角色武器资料的话或许可以帮上忙）
 
-**注意：此requirements不包含nonebot2及依赖以及nonebot_plugin_apscheduler(定时任务)插件**
+**注意：此requirements不包含nonebot2及依赖以及 [nonebot_plugin_apscheduler](https://github.com/nonebot/plugin-apscheduler) (定时任务)插件**
 
 ## 目前支持的抽卡
 * 原神
