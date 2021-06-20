@@ -161,7 +161,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
         else:
             return
     await guardian.send(await guardian_draw(int(num), pool_name), at_sender=True)
-    
+
 
 @guardian_up_reload.handle()
 async def _(bot: Bot, event: MessageEvent, state: T_State):
@@ -331,5 +331,17 @@ async def _():
 async def _():
     if PRTS_FLAG:
         await reload_genshin_pool()
+        
+
+# 重载坎公骑冠剑卡池
+@scheduler.scheduled_job(
+    'cron',
+    hour=4,
+    minute=1,
+)
+async def _():
+    if GUARDIAN_FLAG:
+        await reload_guardian_pool()
+
 
 
