@@ -16,10 +16,12 @@ headers = {'User-Agent': '"Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Te
 prts_up_char = Path(DRAW_PATH + "/draw_card_up/prts_up_char.json")
 genshin_up_char = Path(DRAW_PATH + "/draw_card_up/genshin_up_char.json")
 pretty_up_char = Path(DRAW_PATH + "/draw_card_up/pretty_up_char.json")
+guardian_up_char = Path(DRAW_PATH + "/draw_card_up/guardian_up_char.json")
 
 prts_url = "https://wiki.biligame.com/arknights/%E6%96%B0%E9%97%BB%E5%85%AC%E5%91%8A"
 genshin_url = "https://wiki.biligame.com/ys/%E7%A5%88%E6%84%BF"
 pretty_url = "https://wiki.biligame.com/umamusume/%E5%85%AC%E5%91%8A"
+guardian_url = "https://wiki.biligame.com/gt/%E9%A6%96%E9%A1%B5"
 
 
 # 是否过时
@@ -36,10 +38,10 @@ def is_expired(data: dict):
 # 检查写入
 def check_write(data: dict, up_char_file, game_name: str = ''):
     tmp = data
-    if game_name in ['genshin', 'pretty']:
+    if game_name in ['genshin', 'pretty', 'guardian']:
         tmp = data['char']
     if not is_expired(tmp):
-        if game_name in ['genshin']:
+        if game_name in ['genshin', 'guardian']:
             data['char']['title'] = ''
             data['arms']['title'] = ''
         elif game_name in ['pretty']:
@@ -57,7 +59,7 @@ def check_write(data: dict, up_char_file, game_name: str = ''):
         with open(up_char_file, 'r', encoding='utf8') as f:
             old_data = json.load(f)
             tmp = old_data
-            if game_name in ['genshin', 'pretty']:
+            if game_name in ['genshin', 'pretty', 'guardian']:
                 tmp = old_data['char']
         if is_expired(tmp):
             return old_data
@@ -296,3 +298,69 @@ class PrettyAnnouncement:
         except Exception as e:
             print(f'赛马娘up更新失败 {type(e)}：{e}')
         return check_write(data, pretty_up_char, 'pretty')
+
+
+class GuardianAnnouncement:
+
+    @staticmethod
+    async def get_announcement_text():
+        async with aiohttp.ClientSession(headers=headers) as session:
+            async with session.get(guardian_url, timeout=7) as res:
+                return await res.text()
+
+    @staticmethod
+    async def update_up_char():
+        data = {
+            'char': {'up_char': {'3': {}}, 'title': '', 'time': '', 'pool_img': ''},
+            'arms': {'up_char': {'5': {}}, 'title': '', 'time': '', 'pool_img': ''}
+        }
+        try:
+            text = await GuardianAnnouncement.get_announcement_text()
+            soup = BeautifulSoup(text, 'lxml')
+            context = soup.select('div.col-sm-3:nth-child(3) > div:nth-child(2) > div:nth-child(1) '
+                                  '> div:nth-child(2) > div:nth-child(3) > font:nth-child(1)')[0]
+            title = context.find('p').find('b').text
+            tmp = title.split('，')
+            time = ''
+            for msg in tmp:
+                r = re.search(r'[从|至](.*)(开始|结束)', msg)
+                if r:
+                    time += r.group(1).strip() + ' - '
+            time = time[:-3]
+            title = time.split(' - ')[0] + 'UP卡池'
+            data['char']['title'] = title
+            data['arms']['title'] = title
+            data['char']['time'] = time
+            data['arms']['time'] = time
+            start_idx = -1
+            end_idx = -1
+            index = 0
+            divs = context.find_all('div')
+            for x in divs:
+                if x.text == '角色':
+                    start_idx = index
+                if x.text == '武器':
+                    end_idx = index
+                    break
+                index += 1
+            for x in divs[start_idx+1: end_idx]:
+                name = x.find('p').find_all('a')[-1].text
+                data['char']['up_char']['3'][name] = '0'
+            for x in divs[end_idx+1:]:
+                name = x.find('p').find_all('a')[-1].text
+                data['arms']['up_char']['5'][name] = '0'
+        except TimeoutError:
+            print(f'更新坎公骑冠剑UP池信息超时...')
+            with open(pretty_up_char, 'r', encoding='utf8') as f:
+                data = json.load(f)
+        except Exception as e:
+            print(f'坎公骑冠剑up更新失败 {type(e)}：{e}')
+        return check_write(data, guardian_up_char, 'guardian')
+
+
+
+
+
+
+
+
