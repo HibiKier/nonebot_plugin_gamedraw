@@ -5,7 +5,7 @@ from nonebot.typing import T_State
 from .genshin_handle import genshin_draw, update_genshin_info, reset_count, reload_genshin_pool
 from .prts_handle import update_prts_info, prts_draw, reload_prts_pool
 from .pretty_handle import update_pretty_info, pretty_draw, reload_pretty_pool
-from .guardian_handle import update_guardian_info, guardian_draw
+from .guardian_handle import update_guardian_info, guardian_draw, reload_guardian_pool
 from .pcr_handle import update_pcr_info, pcr_draw
 from .azur_handle import update_azur_info, azur_draw
 from .fgo_handle import update_fgo_info, fgo_draw
@@ -35,6 +35,7 @@ pretty_up_reload = on_keyword({'重载赛马娘卡池'}, priority=1, block=True)
 
 guardian = on_regex('.*?坎公骑冠剑武?器?[1-9|一][0-9]{0,2}[抽|井]', rule=is_switch('guardian'), priority=5, block=True)
 guardian_update = on_keyword({'更新坎公骑冠剑信息'}, permission=SUPERUSER, priority=1, block=True)
+guardian_up_reload = on_keyword({'重载坎公骑冠剑卡池'}, priority=1, block=True)
 
 pcr = on_regex('.*?(pcr|公主连结|公主连接|公主链接|公主焊接)[1-9|一][0-9]{0,2}[抽|井]', rule=is_switch('pcr'), priority=5, block=True)
 pcr_update = on_keyword({'更新pcr信息', '更新公主连结信息'}, permission=SUPERUSER, priority=1, block=True)
@@ -160,6 +161,12 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
         else:
             return
     await guardian.send(await guardian_draw(int(num), pool_name), at_sender=True)
+    
+
+@guardian_up_reload.handle()
+async def _(bot: Bot, event: MessageEvent, state: T_State):
+    text = await reload_guardian_pool()
+    await genshin_reset.finish(Message(f'重载成功！\n{text}'))
 
 
 @pcr.handle()
