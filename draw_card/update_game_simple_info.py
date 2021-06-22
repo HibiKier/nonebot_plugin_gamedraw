@@ -33,7 +33,7 @@ async def update_simple_info(url: str, game_name: str) -> 'dict, int':
                     for char_lst in type_lst:
                         contents = get_char_lst_contents(char_lst, game_name)
                         for char in contents:
-                            data = await retrieve_char_data(char, game_name, data, index)
+                            data = await retrieve_char_data(char, game_name, data, session, index)
                         index += 1
             data = await _last_check(data, game_name, session)
     except TimeoutError:
@@ -114,7 +114,7 @@ azur_type = {
 
 
 # 整理数据
-async def retrieve_char_data(char: bs4.element.Tag, game_name: str, data: dict, index: int = 0) -> dict:
+async def retrieve_char_data(char: bs4.element.Tag, game_name: str, data: dict, session: aiohttp.ClientSession, index: int = 0) -> dict:
     member_dict = {}
     if game_name == 'pcr':
         member_dict = {
@@ -125,10 +125,16 @@ async def retrieve_char_data(char: bs4.element.Tag, game_name: str, data: dict, 
         char = char.find('td').find('div')
         avatar_img = char.find('a').find('img')
         try:
+            member_dict['名称'] = remove_prohibited_str(str(avatar_img['alt'])[: str(avatar_img['alt']).find('头像')])
+        except TypeError:
+            member_dict['名称'] = char.find('a')['title'][:-4]
+        try:
             member_dict['头像'] = unquote(str(avatar_img['srcset']).split(' ')[-2])
         except KeyError:
             member_dict['头像'] = unquote(str(avatar_img['src']).split(' ')[-2])
-        member_dict['名称'] = remove_prohibited_str(str(avatar_img['alt'])[: str(avatar_img['alt']).find('头像')])
+        except TypeError:
+            member_dict['头像'] = "img link not find..."
+            print(f'{member_dict["名称"]} 图片缺失....')
         star = char.find('div').find('img')['alt']
         if star == '舰娘头像外框普通.png':
             star = 1
