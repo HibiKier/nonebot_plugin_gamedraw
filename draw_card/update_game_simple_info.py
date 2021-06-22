@@ -164,15 +164,19 @@ async def _async_update_azur_extra_info(key: str, session: aiohttp.ClientSession
             try:
                 async with session.get(f'https://wiki.biligame.com/blhx/{key}', timeout=7) as res:
                     soup = BeautifulSoup(await res.text(), 'lxml')
-                    construction_time = str(soup.find('table', {'class': 'wikitable sv-general'}).find('tbody'))
-                    x = {key: {'获取途径': []}}
-                    if construction_time.find('无法建造') != -1:
-                        x[key]['获取途径'].append('无法建造')
-                    elif construction_time.find('活动已关闭') != -1:
-                        x[key]['获取途径'].append('活动限定')
-                    else:
-                        x[key]['获取途径'].append('可以建造')
-                    print(f'碧蓝航线获取额外信息 {key}...{x[key]["获取途径"]}')
+                    try:
+                        construction_time = str(soup.find('table', {'class': 'wikitable sv-general'}).find('tbody'))
+                        x = {key: {'获取途径': []}}
+                        if construction_time.find('无法建造') != -1:
+                            x[key]['获取途径'].append('无法建造')
+                        elif construction_time.find('活动已关闭') != -1:
+                            x[key]['获取途径'].append('活动限定')
+                        else:
+                            x[key]['获取途径'].append('可以建造')
+                        print(f'碧蓝航线获取额外信息 {key}...{x[key]["获取途径"]}')
+                    except AttributeError:
+                        x[key]['获取途径'] = []
+                        print(f'碧蓝航线获取额外信息错误 {key}...{[]}')
                     return x
             except TimeoutError:
                 print(f'访问 https://wiki.biligame.com/blhx/{key} 第 {i}次 超时...已再次访问')
