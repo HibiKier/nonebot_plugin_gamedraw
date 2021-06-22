@@ -175,7 +175,7 @@ async def _async_update_azur_extra_info(key: str, session: aiohttp.ClientSession
                             x[key]['获取途径'].append('可以建造')
                         print(f'碧蓝航线获取额外信息 {key}...{x[key]["获取途径"]}')
                     except AttributeError:
-                        x[key]['获取途径'] = []
+                        x = {key: {'获取途径': []}}
                         print(f'碧蓝航线获取额外信息错误 {key}...{[]}')
                     return x
             except TimeoutError:
