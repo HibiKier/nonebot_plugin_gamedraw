@@ -258,28 +258,30 @@ class PrettyAnnouncement:
                             for msg in x:
                                 if msg.find('★') != -1:
                                     msg = msg.replace('<br/>', '')
-                                    msg = msg.split(' ')
-                                    if (star := len(msg[0].strip())) == 3:
-                                        data['char']['up_char']['3'][msg[1]] = '70'
+                                    char_name = msg[msg.find('['):].strip()
+                                    if (star := len(msg[:msg.find('[')].strip())) == 3:
+                                        data['char']['up_char']['3'][char_name] = '70'
                                     elif star == 2:
-                                        data['char']['up_char']['2'][msg[1]] = '70'
+                                        data['char']['up_char']['2'][char_name] = '70'
                                     elif star == 1:
-                                        data['char']['up_char']['1'][msg[1]] = '70'
+                                        data['char']['up_char']['1'][char_name] = '70'
                 if str(p).find('（当期UP对象）') != -1 and str(p).find('赛马娘') == -1:
                     data['card']['pool_img'] = p.find('img')['src']
                     r = re.search(r'■全?新?支援卡（当期UP对象）([\s\S]*)</p>', str(p))
                     if r:
-                        rmsg = r.group(1)
+                        rmsg = r.group(1).strip()
                         rmsg = rmsg.split('<br/>')
-                        for x in rmsg[1:]:
+                        rmsg = [x for x in rmsg if x]
+                        for x in rmsg:
                             x = x.replace('\n', '').replace('・', '')
-                            x = x.split(' ')
-                            if x[0] == 'SSR':
-                                data['card']['up_char']['3'][x[1]] = '70'
-                            if x[0] == 'SR':
-                                data['card']['up_char']['2'][x[1]] = '70'
-                            if x[0] == 'R':
-                                data['card']['up_char']['1'][x[1]] = '70'
+                            star = x[:x.find('[')].strip()
+                            char_name = x[x.find('['):].strip()
+                            if star == 'SSR':
+                                data['card']['up_char']['3'][char_name] = '70'
+                            if star == 'SR':
+                                data['card']['up_char']['2'][char_name] = '70'
+                            if star == 'R':
+                                data['card']['up_char']['1'][char_name] = '70'
             # 日文->中文
             with open(DRAW_PATH + 'pretty_card.json', 'r', encoding='utf8') as f:
                 all_data = json.load(f)
