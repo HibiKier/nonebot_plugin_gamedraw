@@ -1,5 +1,5 @@
 
-from nonebot.adapters.cqhttp import MessageSegment
+from nonebot.adapters.cqhttp import MessageSegment, Message
 import nonebot
 import random
 from .config import PRTS_FIVE_P, PRTS_FOUR_P, PRTS_SIX_P, PRTS_THREE_P, DRAW_PATH, PRTS_FLAG
@@ -166,4 +166,4 @@ async def _init_up_char():
 
 async def reload_prts_pool():
     await _init_up_char()
-    return f'当前UP池：{_CURRENT_POOL_TITLE} {POOL_IMG}'
+    return Message(f'当前UP池：{_CURRENT_POOL_TITLE} {POOL_IMG}')

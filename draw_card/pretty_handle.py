@@ -1,6 +1,6 @@
 
 import nonebot
-from nonebot.adapters.cqhttp import MessageSegment
+from nonebot.adapters.cqhttp import MessageSegment, Message
 from .announcement import PrettyAnnouncement
 from .update_game_info import update_info
 from .util import init_star_rst, generate_img, max_card, BaseData, \
@@ -91,7 +91,7 @@ async def update_pretty_info():
     data, code = await update_info(url, 'pretty_card')
     if code == 200:
         ALL_CARD = init_game_pool('pretty_card', data, PrettyChar)
-        await _pretty_init_up_char()
+    await _pretty_init_up_char()
 
 
 async def init_pretty_data():

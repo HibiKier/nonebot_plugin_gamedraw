@@ -1,9 +1,9 @@
 import os
-from nonebot.adapters.cqhttp import MessageSegment
+from nonebot.adapters.cqhttp import MessageSegment, Message
 import nonebot
 import random
 from .update_game_info import update_info
-from .util import generate_img, init_star_rst, BaseData, set_list, get_star, UpEvent, init_up_char
+from .util import generate_img, init_star_rst, BaseData, set_list, get_star, init_up_char
 from .config import GENSHIN_FIVE_P, GENSHIN_FOUR_P, GENSHIN_G_FIVE_P, GENSHIN_G_FOUR_P, GENSHIN_THREE_P, I72_ADD, \
     DRAW_PATH, GENSHIN_FLAG
 from dataclasses import dataclass
@@ -206,7 +206,7 @@ async def _genshin_init_up_char():
 
 async def reload_genshin_pool():
     await _genshin_init_up_char()
-    return f'当前UP池子：{_CURRENT_CHAR_POOL_TITLE} & {_CURRENT_ARMS_POOL_TITLE} {POOL_IMG}'
+    return Message(f'当前UP池子：{_CURRENT_CHAR_POOL_TITLE} & {_CURRENT_ARMS_POOL_TITLE} {POOL_IMG}')
 
 
 

@@ -1,10 +1,10 @@
 
 import os
 import nonebot
-from nonebot.adapters.cqhttp import MessageSegment
+from nonebot.adapters.cqhttp import MessageSegment, Message
 from .update_game_info import update_info
 from .util import init_star_rst, generate_img, max_card, BaseData,\
-    set_list, get_star, format_card_information, UpEvent, init_up_char
+    set_list, get_star, format_card_information, init_up_char
 import random
 from .config import DRAW_PATH, GUARDIAN_ONE_CHAR_P, GUARDIAN_TWO_CHAR_P, GUARDIAN_THREE_CHAR_P, \
     GUARDIAN_THREE_CHAR_UP_P, GUARDIAN_TWO_ARMS_P, GUARDIAN_FIVE_ARMS_P, GUARDIAN_THREE_CHAR_OTHER_P, \
@@ -159,7 +159,7 @@ async def _guardian_init_up_char():
 
 async def reload_guardian_pool():
     await _guardian_init_up_char()
-    return f'当前UP池子：{_CURRENT_CHAR_POOL_TITLE} & {_CURRENT_ARMS_POOL_TITLE} {POOL_IMG}'
+    return Message(f'当前UP池子：{_CURRENT_CHAR_POOL_TITLE} & {_CURRENT_ARMS_POOL_TITLE}')
 
 
 
