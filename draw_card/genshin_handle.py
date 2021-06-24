@@ -3,7 +3,7 @@ from nonebot.adapters.cqhttp import MessageSegment
 import nonebot
 import random
 from .update_game_info import update_info
-from .util import generate_img, init_star_rst, BaseData, set_list, get_star, UpEvent
+from .util import generate_img, init_star_rst, BaseData, set_list, get_star, UpEvent, init_up_char
 from .config import GENSHIN_FIVE_P, GENSHIN_FOUR_P, GENSHIN_G_FIVE_P, GENSHIN_G_FOUR_P, GENSHIN_THREE_P, I72_ADD, \
     DRAW_PATH, GENSHIN_FLAG
 from dataclasses import dataclass
@@ -15,6 +15,8 @@ except ModuleNotFoundError:
     import json
 
 driver: nonebot.Driver = nonebot.get_driver()
+
+announcement = GenshinAnnouncement()
 
 genshin_five = {}
 genshin_count = {}
@@ -81,7 +83,7 @@ async def update_genshin_info():
                                                          '攻击力（MAX）', '副属性（MAX）', '技能'])
     if code == 200:
         ALL_ARMS = init_game_pool('genshin_arms', data, GenshinChar)
-    await _init_up_char()
+    await _genshin_init_up_char()
 
 
 async def init_genshin_data():
@@ -96,7 +98,7 @@ async def init_genshin_data():
                 genshin_ARMS_dict = json.load(f)
             ALL_CHAR = init_game_pool('genshin', genshin_dict, GenshinChar)
             ALL_ARMS = init_game_pool('genshin_arms', genshin_ARMS_dict, GenshinChar)
-        await _init_up_char()
+        await _genshin_init_up_char()
 
 
 # 抽取卡池
@@ -197,30 +199,13 @@ def reset_count(user_id: int):
 
 
 # 获取up和概率
-async def _init_up_char():
+async def _genshin_init_up_char():
     global _CURRENT_CHAR_POOL_TITLE, _CURRENT_ARMS_POOL_TITLE, UP_CHAR, UP_ARMS, POOL_IMG
-    UP_CHAR = []
-    UP_ARMS = []
-    up_char_dict = await GenshinAnnouncement.update_up_char()
-    _CURRENT_CHAR_POOL_TITLE = up_char_dict['char']['title']
-    _CURRENT_ARMS_POOL_TITLE = up_char_dict['arms']['title']
-    if _CURRENT_CHAR_POOL_TITLE and _CURRENT_ARMS_POOL_TITLE:
-        POOL_IMG = MessageSegment.image(up_char_dict['char']['pool_img']) + \
-                   MessageSegment.image(up_char_dict['arms']['pool_img'])
-    print(f'成功获取原神当前up信息...当前up池: {_CURRENT_CHAR_POOL_TITLE} & {_CURRENT_ARMS_POOL_TITLE}')
-    for key in up_char_dict.keys():
-        for star in up_char_dict[key]['up_char'].keys():
-            up_char_lst = []
-            for char in up_char_dict[key]['up_char'][star].keys():
-                up_char_lst.append(char)
-            if key == 'char':
-                UP_CHAR.append(UpEvent(star=int(star), operators=up_char_lst, zoom=0))
-            else:
-                UP_ARMS.append(UpEvent(star=int(star), operators=up_char_lst, zoom=0))
+    _CURRENT_CHAR_POOL_TITLE, _CURRENT_ARMS_POOL_TITLE, POOL_IMG, UP_CHAR, UP_ARMS = await init_up_char(announcement)
 
 
 async def reload_genshin_pool():
-    await _init_up_char()
+    await _genshin_init_up_char()
     return f'当前UP池子：{_CURRENT_CHAR_POOL_TITLE} & {_CURRENT_ARMS_POOL_TITLE} {POOL_IMG}'
 
 

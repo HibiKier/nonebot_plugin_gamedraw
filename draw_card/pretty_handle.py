@@ -4,7 +4,7 @@ from nonebot.adapters.cqhttp import MessageSegment
 from .announcement import PrettyAnnouncement
 from .update_game_info import update_info
 from .util import init_star_rst, generate_img, max_card, BaseData, \
-    set_list, get_star, format_card_information, UpEvent
+    set_list, get_star, format_card_information, init_up_char
 import random
 from .config import PRETTY_THREE_P, PRETTY_TWO_P, DRAW_PATH, PRETTY_ONE_P, PRETTY_FLAG
 from dataclasses import dataclass
@@ -16,6 +16,8 @@ except ModuleNotFoundError:
     import json
 
 driver: nonebot.Driver = nonebot.get_driver()
+
+announcement = PrettyAnnouncement()
 
 ALL_CHAR = []
 ALL_CARD = []
@@ -89,7 +91,7 @@ async def update_pretty_info():
     data, code = await update_info(url, 'pretty_card')
     if code == 200:
         ALL_CARD = init_game_pool('pretty_card', data, PrettyChar)
-        await _init_up_char()
+        await _pretty_init_up_char()
 
 
 async def init_pretty_data():
@@ -101,13 +103,16 @@ async def init_pretty_data():
             pretty_card_dict = json.load(f)
         ALL_CHAR = init_game_pool('pretty', pretty_char_dict, PrettyChar)
         ALL_CARD = init_game_pool('pretty_card', pretty_card_dict, PrettyChar)
-        await _init_up_char()
+        await _pretty_init_up_char()
 
 
 # 抽取卡池
-def _get_pretty_card(pool_name: str):
+def _get_pretty_card(pool_name: str, mode: int = 1):
     global ALL_CHAR, ALL_CARD, _CURRENT_CHAR_POOL_TITLE, _CURRENT_CARD_POOL_TITLE
-    star = get_star([3, 2, 1], [PRETTY_THREE_P, PRETTY_TWO_P, PRETTY_ONE_P])
+    if mode == 1:
+        star = get_star([3, 2, 1], [PRETTY_THREE_P, PRETTY_TWO_P, PRETTY_ONE_P])
+    else:
+        star = get_star([3, 2], [PRETTY_THREE_P, PRETTY_TWO_P])
     if pool_name == 'card':
         title = _CURRENT_CARD_POOL_TITLE
         up_data = UP_CARD
@@ -125,6 +130,7 @@ def _get_pretty_card(pool_name: str):
             acquire_operator = random.choice(all_up_star)
             if pool_name == 'char':
                 acquire_operator = acquire_operator.split(']')[1]
+            print(acquire_operator)
             acquire_operator = [x for x in data if x.name == acquire_operator][0]
         else:
             acquire_operator = random.choice([x for x in data if x.star == star and not x.limited])
@@ -134,31 +140,12 @@ def _get_pretty_card(pool_name: str):
 
 
 # 获取up和概率
-async def _init_up_char():
+async def _pretty_init_up_char():
     global _CURRENT_CHAR_POOL_TITLE, _CURRENT_CARD_POOL_TITLE, UP_CHAR, UP_CARD, POOL_IMG
-    UP_CHAR = []
-    UP_CARD = []
-    up_char_dict = await PrettyAnnouncement.update_up_char()
-    _CURRENT_CHAR_POOL_TITLE = up_char_dict['char']['title']
-    _CURRENT_CARD_POOL_TITLE = up_char_dict['card']['title']
-    if _CURRENT_CHAR_POOL_TITLE and _CURRENT_CARD_POOL_TITLE:
-        POOL_IMG = MessageSegment.image(up_char_dict['char']['pool_img']) + \
-                   MessageSegment.image(up_char_dict['card']['pool_img'])
-    print(f'成功获取赛马娘当前up信息...当前up池: {_CURRENT_CHAR_POOL_TITLE} & {_CURRENT_CARD_POOL_TITLE}')
-    for key in up_char_dict.keys():
-        for star in up_char_dict[key]['up_char'].keys():
-            up_lst = []
-            for char in up_char_dict[key]['up_char'][star].keys():
-                up_lst.append(char)
-            if key == 'char':
-                if up_lst:
-                    UP_CHAR.append(UpEvent(star=int(star), operators=up_lst, zoom=0))
-            else:
-                if up_lst:
-                    UP_CARD.append(UpEvent(star=int(star), operators=up_lst, zoom=0))
+    _CURRENT_CHAR_POOL_TITLE, _CURRENT_CARD_POOL_TITLE, POOL_IMG, UP_CHAR, UP_CARD = await init_up_char(announcement)
 
 
 async def reload_pretty_pool():
-    await _init_up_char()
+    await _pretty_init_up_char()
     return f'当前UP池子：{_CURRENT_CHAR_POOL_TITLE} & {_CURRENT_CARD_POOL_TITLE} {POOL_IMG}'
 

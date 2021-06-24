@@ -6,7 +6,6 @@ from .config import PRTS_FIVE_P, PRTS_FOUR_P, PRTS_SIX_P, PRTS_THREE_P, DRAW_PAT
 from .update_game_info import update_info
 from .util import generate_img, init_star_rst, max_card, BaseData, UpEvent, set_list, get_star
 from .init_card_pool import init_game_pool
-from pathlib import Path
 from .announcement import PrtsAnnouncement
 from dataclasses import dataclass
 try:
@@ -16,7 +15,7 @@ except ModuleNotFoundError:
 
 driver: nonebot.Driver = nonebot.get_driver()
 
-up_char_file = Path() / "data" / "draw_card" / "draw_card_up" / "prts_up_char.json"
+announcement = PrtsAnnouncement()
 
 prts_dict = {}
 UP_OPERATOR = []
@@ -37,14 +36,21 @@ async def prts_draw(count: int = 300):
     star_list = [0, 0, 0, 0]
     operator_list, operator_dict, six_list, star_list, six_index_list = format_card_information(count, star_list)
     up_list = []
+    tmp = ''
     if _CURRENT_POOL_TITLE:
         for x in UP_OPERATOR:
             for operator in x.operators:
                 up_list.append(operator)
+            if x.star == 6:
+                tmp += f'六星UP：{" ".join(x.operators)} \n'
+            elif x.star == 5:
+                tmp += f'五星UP：{" ".join(x.operators)} \n'
+            elif x.star == 4:
+                tmp += f'四星UP：{" ".join(x.operators)}'
     rst = init_star_rst(star_list, cnlist, six_list, six_index_list, up_list)
     if count > 90:
         operator_list = set_list(operator_list)
-    pool_info = f"当前up池: {_CURRENT_POOL_TITLE}" if _CURRENT_POOL_TITLE else ""
+    pool_info = f"当前up池: {_CURRENT_POOL_TITLE}\n{tmp}" if _CURRENT_POOL_TITLE else ""
     return pool_info + MessageSegment.image(
         "base64://" + await generate_img(operator_list, 'prts', star_list)) \
            + '\n' + rst[:-1] + '\n' + max_card(operator_dict)
@@ -136,11 +142,11 @@ def format_card_information(count: int, star_list: list):
 async def _init_up_char():
     global _CURRENT_POOL_TITLE, POOL_IMG, UP_OPERATOR
     UP_OPERATOR = []
-    up_char_dict = await PrtsAnnouncement.update_up_char()
-    _CURRENT_POOL_TITLE = up_char_dict['title']
+    up_char_dict = await announcement.update_up_char()
+    _CURRENT_POOL_TITLE = up_char_dict['char']['title']
     if _CURRENT_POOL_TITLE:
-        POOL_IMG = MessageSegment.image(up_char_dict['pool_img'])
-    up_char_dict = up_char_dict['up_char']
+        POOL_IMG = MessageSegment.image(up_char_dict['char']['pool_img'])
+    up_char_dict = up_char_dict['char']['up_char']
     print(f'成功获取明日方舟当前up信息...当前up池: {_CURRENT_POOL_TITLE}')
     average_dict = {'6': {}, '5': {}, '4': {}}
     for star in up_char_dict.keys():

@@ -10,6 +10,7 @@ import nonebot
 import pypinyin
 from PIL import UnidentifiedImageError
 from .create_img import CreateImg
+from nonebot.adapters.cqhttp import MessageSegment
 import random
 from dataclasses import dataclass
 import os
@@ -141,6 +142,7 @@ def _pst(h: int, img_list: list, game_name: str, background_list: list):
     return card_img
 
 
+# 初始化输出数据
 def init_star_rst(star_list: list, cnlist: list, max_star_list: list, max_star_index_list: list, up_list: list = None) -> str:
     if not up_list:
         up_list = []
@@ -166,6 +168,43 @@ def max_card(_dict: dict):
     # for name in ThreeHighest:
     #     rst += f'{name} 共投了 {operator_dict[name]} 份简历\n'
     # return rst[:-1]
+
+
+# 获取up和概率
+async def init_up_char(announcement):
+    UP_CHAR = []
+    UP_ARMS = []
+    tmp = ''
+    up_char_dict = await announcement.update_up_char()
+    for x in list(up_char_dict.keys()):
+        tmp += up_char_dict[x]['title'] + '[\n]'
+    tmp = tmp.split('[\n]')
+    _CURRENT_CHAR_POOL_TITLE = tmp[0]
+    if len(up_char_dict) > 1:
+        _CURRENT_ARMS_POOL_TITLE = tmp[1]
+    else:
+        _CURRENT_ARMS_POOL_TITLE = ''
+    POOL_IMG = ''
+    x = [x for x in list(up_char_dict.keys())]
+    if _CURRENT_CHAR_POOL_TITLE:
+        POOL_IMG += MessageSegment.image(up_char_dict[x[0]]['pool_img'])
+    try:
+        if _CURRENT_ARMS_POOL_TITLE:
+            POOL_IMG += MessageSegment.image(up_char_dict[x[1]]['pool_img'])
+    except (IndexError, KeyError):
+        pass
+    print(f'成功获取{announcement.game_name}当前up信息...当前up池: {_CURRENT_CHAR_POOL_TITLE} & {_CURRENT_ARMS_POOL_TITLE}')
+    for key in up_char_dict.keys():
+        for star in up_char_dict[key]['up_char'].keys():
+            up_char_lst = []
+            for char in up_char_dict[key]['up_char'][star].keys():
+                up_char_lst.append(char)
+            if up_char_lst:
+                if key == 'char':
+                    UP_CHAR.append(UpEvent(star=int(star), operators=up_char_lst, zoom=0))
+                else:
+                    UP_ARMS.append(UpEvent(star=int(star), operators=up_char_lst, zoom=0))
+    return _CURRENT_CHAR_POOL_TITLE, _CURRENT_ARMS_POOL_TITLE, POOL_IMG, UP_CHAR, UP_ARMS
 
 
 def is_number(s) -> bool:
@@ -200,6 +239,7 @@ def set_list(lst: List[BaseData]) -> list:
     return tmp
 
 
+# 获取星级
 def get_star(star_lst: List[int], probability_lst: List[float]) -> int:
     rand = random.random()
     add = 0
@@ -214,20 +254,38 @@ def get_star(star_lst: List[int], probability_lst: List[float]) -> int:
 
 
 # 整理数据
-def format_card_information(count: int, star_list: List[int], func, pool_name: str = ''):
+def format_card_information(count: int, star_list: List[int], func, pool_name: str = '', guaranteed: bool = True):
     max_star_lst = []       # 获取的最高星级角色列表
     max_index_lst = []      # 获取最高星级角色的次数
     obj_list = []           # 获取所有角色
     obj_dict = {}           # 获取角色次数字典
+    _count = -1
+    if guaranteed:
+        _count = 0
     for i in range(count):
+        if guaranteed:
+            _count += 1
         if pool_name:
-            obj, code = func(pool_name)
+            if _count == 10:
+                obj, code = func(pool_name, 2)
+                _count = 0
+            else:
+                obj, code = func(pool_name)
         else:
-            obj, code = func()
+            if _count == 10:
+                obj, code = func(mode=2)
+                _count = 0
+            else:
+                obj, code = func()
         star_list[code] += 1
         if code == 0:
             max_star_lst.append(obj.name)
             max_index_lst.append(i)
+            if guaranteed:
+                _count = 0
+        if code == 1:
+            if guaranteed:
+                _count = 0
         try:
             obj_dict[obj.name] += 1
         except KeyError:
