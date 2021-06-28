@@ -245,7 +245,7 @@ class PrettyAnnouncement:
             data['char']['time'] = time
             data['card']['time'] = time
             for p in context.find_all('p'):
-                if str(p).find('当期UP赛马娘') != -1:
+                if str(p).find('当期UP赛马娘') != -1 and str(p).find('■') != -1:
                     data['char']['pool_img'] = p.find('img')['src']
                     r = re.findall(r'.*?当期UP赛马娘([\s\S]*)＜奖励内容＞.*?', str(p))
                     if r:
@@ -261,7 +261,7 @@ class PrettyAnnouncement:
                                         data['char']['up_char']['2'][char_name] = '70'
                                     elif star == 1:
                                         data['char']['up_char']['1'][char_name] = '70'
-                if str(p).find('（当期UP对象）') != -1 and str(p).find('赛马娘') == -1:
+                if str(p).find('（当期UP对象）') != -1 and str(p).find('赛马娘') == -1 and str(p).find('■') != -1:
                     data['card']['pool_img'] = p.find('img')['src']
                     r = re.search(r'■全?新?支援卡（当期UP对象）([\s\S]*)</p>', str(p))
                     if r:
@@ -294,11 +294,11 @@ class PrettyAnnouncement:
             if pretty_up_char.exists():
                 with open(pretty_up_char, 'r', encoding='utf8') as f:
                     data = json.load(f)
-        except Exception as e:
-            print(f'赛马娘up更新未知错误 {type(e)}：{e}')
-            if pretty_up_char.exists():
-                with open(pretty_up_char, 'r', encoding='utf8') as f:
-                    data = json.load(f)
+        # except Exception as e:
+        #     print(f'赛马娘up更新未知错误 {type(e)}：{e}')
+        #     if pretty_up_char.exists():
+        #         with open(pretty_up_char, 'r', encoding='utf8') as f:
+        #             data = json.load(f)
         return check_write(data, pretty_up_char, 'pretty')
 
 
