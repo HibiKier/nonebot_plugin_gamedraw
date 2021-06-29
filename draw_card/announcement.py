@@ -76,6 +76,10 @@ class PrtsAnnouncement:
 
     async def update_up_char(self):
         prts_up_char.parent.mkdir(parents=True, exist_ok=True)
+        with open(prts_up_char, 'r', encoding='utf8') as f:
+            data = json.load(f)
+        if not data.get('char'):
+            prts_up_char.unlink()
         try:
             data = {'char': {'up_char': {'6': {}, '5': {}, '4': {}}, 'title': '', 'time': '', 'pool_img': ''}}
             text = await self._get_announcement_text()
