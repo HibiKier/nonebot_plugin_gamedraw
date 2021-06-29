@@ -201,7 +201,7 @@ class GenshinAnnouncement:
                 with open(genshin_up_char, 'w', encoding='utf8') as wf:
                     json.dump(data, wf, ensure_ascii=False, indent=4)
                 return data
-        return check_write(data, genshin_up_char, 'genshin')
+        return check_write(data, genshin_up_char)
 
 
 class PrettyAnnouncement:
@@ -239,14 +239,31 @@ class PrettyAnnouncement:
                 context = soup.find('div', {'class': 'mw-parser-output'})
             data['char']['title'] = title
             data['card']['title'] = title
-            time = str(context.find_all('big')[1].text)
+            for big in context.find_all('big'):
+                r = re.search(r'\d{1,2}/\d{1,2} \d{1,2}:\d{1,2}', str(big.text))
+                if r:
+                    time = str(big.text)
+                    break
+            else:
+                print('赛马娘UP无法找到活动日期....取消更新UP池子...')
+                return
             time = time.replace('～', '-').replace('/', '月').split(' ')
             time = time[0] + '日 ' + time[1] + ' - ' + time[3] + '日 ' + time[4]
             data['char']['time'] = time
             data['card']['time'] = time
             for p in context.find_all('p'):
                 if str(p).find('当期UP赛马娘') != -1 and str(p).find('■') != -1:
-                    data['char']['pool_img'] = p.find('img')['src']
+                    if not data['char']['pool_img']:
+                        try:
+                            data['char']['pool_img'] = p.find('img')['src']
+                        except TypeError:
+                            for center in context.find_all('center'):
+                                try:
+                                    img = center.find('img')
+                                    if img and str(img['alt']).find('新马娘') != -1 and str(img['alt']).find('总览') == 1:
+                                        data['char']['pool_img'] = img['src']
+                                except (TypeError, KeyError):
+                                    pass
                     r = re.findall(r'.*?当期UP赛马娘([\s\S]*)＜奖励内容＞.*?', str(p))
                     if r:
                         for x in r:
@@ -262,7 +279,18 @@ class PrettyAnnouncement:
                                     elif star == 1:
                                         data['char']['up_char']['1'][char_name] = '70'
                 if str(p).find('（当期UP对象）') != -1 and str(p).find('赛马娘') == -1 and str(p).find('■') != -1:
-                    data['card']['pool_img'] = p.find('img')['src']
+                    # data['card']['pool_img'] = p.find('img')['src']
+                    if not data['char']['pool_img']:
+                        try:
+                            data['char']['pool_img'] = p.find('img')['src']
+                        except TypeError:
+                            for center in context.find_all('center'):
+                                try:
+                                    img = center.find('img')
+                                    if img and str(img['alt']).find('新卡') != -1 and str(img['alt']).find('总览') == 1:
+                                        data['card']['pool_img'] = img['src']
+                                except (TypeError, KeyError):
+                                    pass
                     r = re.search(r'■全?新?支援卡（当期UP对象）([\s\S]*)</p>', str(p))
                     if r:
                         rmsg = r.group(1).strip()
@@ -294,12 +322,12 @@ class PrettyAnnouncement:
             if pretty_up_char.exists():
                 with open(pretty_up_char, 'r', encoding='utf8') as f:
                     data = json.load(f)
-        # except Exception as e:
-        #     print(f'赛马娘up更新未知错误 {type(e)}：{e}')
-        #     if pretty_up_char.exists():
-        #         with open(pretty_up_char, 'r', encoding='utf8') as f:
-        #             data = json.load(f)
-        return check_write(data, pretty_up_char, 'pretty')
+        except Exception as e:
+            print(f'赛马娘up更新未知错误 {type(e)}：{e}')
+            if pretty_up_char.exists():
+                with open(pretty_up_char, 'r', encoding='utf8') as f:
+                    data = json.load(f)
+        return check_write(data, pretty_up_char)
 
 
 class GuardianAnnouncement:
@@ -359,4 +387,4 @@ class GuardianAnnouncement:
                     data = json.load(f)
         except Exception as e:
             print(f'坎公骑冠剑up更新未知错误 {type(e)}：{e}')
-        return check_write(data, guardian_up_char, 'guardian')
+        return check_write(data, guardian_up_char)
