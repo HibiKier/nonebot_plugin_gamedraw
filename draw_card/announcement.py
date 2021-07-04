@@ -5,6 +5,7 @@ from datetime import datetime
 from .config import DRAW_PATH
 from pathlib import Path
 from asyncio.exceptions import TimeoutError
+from nonebot.log import logger
 
 try:
     import ujson as json
@@ -76,10 +77,11 @@ class PrtsAnnouncement:
 
     async def update_up_char(self):
         prts_up_char.parent.mkdir(parents=True, exist_ok=True)
-        with open(prts_up_char, 'r', encoding='utf8') as f:
-            data = json.load(f)
-        if not data.get('char'):
-            prts_up_char.unlink()
+        if prts_up_char.exists():
+            with open(prts_up_char, 'r', encoding='utf8') as f:
+                data = json.load(f)
+            if not data.get('char'):
+                prts_up_char.unlink()
         try:
             data = {'char': {'up_char': {'6': {}, '5': {}, '4': {}}, 'title': '', 'time': '', 'pool_img': ''}}
             text = await self._get_announcement_text()
@@ -130,12 +132,12 @@ class PrtsAnnouncement:
                         if char.strip():
                             data['char']['up_char'][star][char.strip()] = probability
         except TimeoutError:
-            print(f'更新明日方舟UP池信息超时...')
+            logger.warning(f'更新明日方舟UP池信息超时...')
             if prts_up_char.exists():
                 with open(prts_up_char, 'r', encoding='utf8') as f:
                     data = json.load(f)
         except Exception as e:
-            print(f'更新明日方舟未知错误 e：{e}')
+            logger.error(f'更新明日方舟未知错误 e：{e}')
             if prts_up_char.exists():
                 with open(prts_up_char, 'r', encoding='utf8') as f:
                     data = json.load(f)
@@ -191,12 +193,12 @@ class GenshinAnnouncement:
                     char_name = a['title']
                     data[itype]['up_char']['4'][char_name] = "50"
         except TimeoutError:
-            print(f'更新原神UP池信息超时...')
+            logger.warning(f'更新原神UP池信息超时...')
             if genshin_up_char.exists():
                 with open(genshin_up_char, 'r', encoding='utf8') as f:
                     data = json.load(f)
         except Exception as e:
-            print(f'更新原神UP失败，疑似UP池已结束， e：{e}')
+            logger.error(f'更新原神UP失败，疑似UP池已结束， e：{e}')
             if genshin_up_char.exists():
                 with open(genshin_up_char, 'r', encoding='utf8') as f:
                     data = json.load(f)
@@ -249,7 +251,7 @@ class PrettyAnnouncement:
                     time = str(big.text)
                     break
             else:
-                print('赛马娘UP无法找到活动日期....取消更新UP池子...')
+                logger.warning('赛马娘UP无法找到活动日期....取消更新UP池子...')
                 return
             time = time.replace('～', '-').replace('/', '月').split(' ')
             time = time[0] + '日 ' + time[1] + ' - ' + time[3] + '日 ' + time[4]
@@ -322,12 +324,12 @@ class PrettyAnnouncement:
                             data['card']['up_char'][star].pop(name)
                             data['card']['up_char'][star][all_data[x]['中文名']] = '70'
         except TimeoutError:
-            print(f'更新赛马娘UP池信息超时...')
+            logger.warning(f'更新赛马娘UP池信息超时...')
             if pretty_up_char.exists():
                 with open(pretty_up_char, 'r', encoding='utf8') as f:
                     data = json.load(f)
         except Exception as e:
-            print(f'赛马娘up更新未知错误 {type(e)}：{e}')
+            logger.error(f'赛马娘up更新未知错误 {type(e)}：{e}')
             if pretty_up_char.exists():
                 with open(pretty_up_char, 'r', encoding='utf8') as f:
                     data = json.load(f)
@@ -385,10 +387,10 @@ class GuardianAnnouncement:
                 name = x.find('p').find_all('a')[-1].text
                 data['arms']['up_char']['5'][name] = '0'
         except TimeoutError:
-            print(f'更新坎公骑冠剑UP池信息超时...')
+            logger.warning(f'更新坎公骑冠剑UP池信息超时...')
             if guardian_up_char.exists():
                 with open(guardian_up_char, 'r', encoding='utf8') as f:
                     data = json.load(f)
         except Exception as e:
-            print(f'坎公骑冠剑up更新未知错误 {type(e)}：{e}')
+            logger.error(f'坎公骑冠剑up更新未知错误 {type(e)}：{e}')
         return check_write(data, guardian_up_char)
