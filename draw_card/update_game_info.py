@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from .util import download_img
 from urllib.parse import unquote
 from .util import remove_prohibited_str
+from nonebot.log import logger
 import bs4
 import re
 try:
@@ -56,10 +57,10 @@ async def update_info(url: str, game_name: str, info_list: list = None) -> 'dict
                     member_dict, name = replace_update_name(member_dict, game_name)
                     await download_img(member_dict['头像'], game_name, name)
                     data[name] = member_dict
-                    print(f'{name} is update...')
+                    logger.info(f'{name} is update...')
             data = await _last_check(data, game_name, session)
     except TimeoutError:
-        print(f'更新 {game_name} 超时...')
+        logger.warning(f'更新 {game_name} 超时...')
         return {}, 999
     with open(DRAW_PATH + f'{game_name}.json', 'w', encoding='utf8') as wf:
         wf.write(json.dumps(data, ensure_ascii=False, indent=4))
@@ -150,11 +151,11 @@ async def _last_check(data: dict, game_name: str, session: aiohttp.ClientSession
                     data[key]['常驻/限定'] = '未知'
                     if str(tr).find('限定UP') != -1:
                         data[key]['常驻/限定'] = '限定UP'
-                        print(f'原神获取额外数据 {key}...{data[key]["常驻/限定"]}')
+                        logger.info(f'原神获取额外数据 {key}...{data[key]["常驻/限定"]}')
                         break
                     elif str(tr).find('常驻UP') != -1:
                         data[key]['常驻/限定'] = '常驻UP'
-                        print(f'原神获取额外数据 {key}...{data[key]["常驻/限定"]}')
+                        logger.info(f'原神获取额外数据 {key}...{data[key]["常驻/限定"]}')
                         break
     if game_name == 'pretty':
         for keys in data.keys():
@@ -162,14 +163,14 @@ async def _last_check(data: dict, game_name: str, session: aiohttp.ClientSession
                 r = re.search(r'.*?40px-(.*)图标.png', str(data[keys][key]))
                 if r:
                     data[keys][key] = r.group(1)
-                    print(f'赛马娘额外修改数据...{keys}[{key}]=> {r.group(1)}')
+                    logger.info(f'赛马娘额外修改数据...{keys}[{key}]=> {r.group(1)}')
     if game_name == 'guardian':
         for keys in data.keys():
             for key in data[keys].keys():
                 r = re.search(r'.*?-star_(.*).png', str(data[keys][key]))
                 if r:
                     data[keys][key] = r.group(1)
-                    print(f'坎公骑士剑额外修改数据...{keys}[{key}] => {r.group(1)}')
+                    logger.info(f'坎公骑士剑额外修改数据...{keys}[{key}] => {r.group(1)}')
     return data
 
 

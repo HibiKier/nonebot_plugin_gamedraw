@@ -4,6 +4,7 @@ from asyncio.exceptions import TimeoutError
 from .util import download_img
 from bs4 import BeautifulSoup
 from .util import remove_prohibited_str
+from nonebot.log import logger
 import asyncio
 try:
     import ujson as json
@@ -37,7 +38,7 @@ async def update_requests_info(game_name: str):
                             key = x['name']
                             data = add_to_data(data, x, game_name)
                             await download_img(data[key]['头像'], game_name, key)
-                            print(f'{key} is update...')
+                            logger.info(f'{key} is update...')
             if game_name == 'onmyoji':
                 url = 'https://yys.res.netease.com/pc/zt/20161108171335/js/app/all_shishen.json?v74='
                 async with session.get(f'{url}', timeout=7) as response:
@@ -46,10 +47,10 @@ async def update_requests_info(game_name: str):
                         x['name'] = remove_prohibited_str(x['name'])
                         key = x['name']
                         data = add_to_data(data, x, game_name)
-                        print(f'{key} is update...')
+                        logger.info(f'{key} is update...')
             data = await _last_check(data, game_name, session)
     except TimeoutError:
-        print(f'更新 {game_name} 超时...')
+        logger.warning(f'更新 {game_name} 超时...')
         return {}, 999
     with open(DRAW_PATH + f'{game_name}.json', 'w', encoding='utf8') as wf:
         json.dump(data, wf, ensure_ascii=False, indent=4)
@@ -135,12 +136,12 @@ async def _async_update_fgo_extra_info(url: str, key: str, _id: str, session: ai
                             obtain = obtain.strip().split('&')
                         else:
                             obtain = obtain.strip().split(' ')
-                    print(f'Fgo获取额外信息 {key}....{obtain}')
+                    logger.info(f'Fgo获取额外信息 {key}....{obtain}')
                     x = {key: {}}
                     x[key]['入手方式'] = obtain
                     return x
             except TimeoutError:
-                print(f'访问{url}{_id} 第 {i}次 超时...已再次访问')
+                logger.warning(f'访问{url}{_id} 第 {i}次 超时...已再次访问')
     return {}
 
 

@@ -1,5 +1,6 @@
 import asyncio
 import nonebot
+from nonebot.log import logger
 import os
 from .pcr_handle import update_pcr_info, init_pcr_data
 from .azur_handle import update_azur_info, init_azur_data
@@ -59,7 +60,7 @@ async def async_update_game():
         for func in init_lst:
             await func()
     except asyncio.exceptions.CancelledError:
-        print('更新异常：CancelledError，再次更新...')
+        logger.warning('更新异常：CancelledError，再次更新...')
         await async_update_game()
 
 

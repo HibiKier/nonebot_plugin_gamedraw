@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from .util import download_img
 from .util import remove_prohibited_str
 from urllib.parse import unquote
+from nonebot.log import logger
 import bs4
 import asyncio
 
@@ -37,7 +38,7 @@ async def update_simple_info(url: str, game_name: str) -> 'dict, int':
                         index += 1
             data = await _last_check(data, game_name, session)
     except TimeoutError:
-        print(f'更新 {game_name} 超时...')
+        logger.warning(f'更新 {game_name} 超时...')
         return {}, 999
     with open(DRAW_PATH + f'{game_name}.json', 'w', encoding='utf8') as wf:
         wf.write(json.dumps(data, ensure_ascii=False, indent=4))
@@ -134,7 +135,7 @@ async def retrieve_char_data(char: bs4.element.Tag, game_name: str, data: dict, 
             member_dict['头像'] = unquote(str(avatar_img['src']).split(' ')[-2])
         except TypeError:
             member_dict['头像'] = "img link not find..."
-            print(f'{member_dict["名称"]} 图片缺失....')
+            logger.warning(f'{member_dict["名称"]} 图片缺失....')
         star = char.find('div').find('img')['alt']
         if star == '舰娘头像外框普通.png':
             star = 1
@@ -152,7 +153,7 @@ async def retrieve_char_data(char: bs4.element.Tag, game_name: str, data: dict, 
         member_dict['类型'] = azur_type[str(index)]
     await download_img(member_dict['头像'], game_name, member_dict['名称'])
     data[member_dict['名称']] = member_dict
-    print(f'{member_dict["名称"]} is update...')
+    logger.info(f'{member_dict["名称"]} is update...')
     return data
 
 
@@ -173,12 +174,12 @@ async def _async_update_azur_extra_info(key: str, session: aiohttp.ClientSession
                             x[key]['获取途径'].append('活动限定')
                         else:
                             x[key]['获取途径'].append('可以建造')
-                        print(f'碧蓝航线获取额外信息 {key}...{x[key]["获取途径"]}')
+                        logger.info(f'碧蓝航线获取额外信息 {key}...{x[key]["获取途径"]}')
                     except AttributeError:
                         x = {key: {'获取途径': []}}
-                        print(f'碧蓝航线获取额外信息错误 {key}...{[]}')
+                        logger.warning(f'碧蓝航线获取额外信息错误 {key}...{[]}')
                     return x
             except TimeoutError:
-                print(f'访问 https://wiki.biligame.com/blhx/{key} 第 {i}次 超时...已再次访问')
+                logger.warning(f'访问 https://wiki.biligame.com/blhx/{key} 第 {i}次 超时...已再次访问')
     return {}
 

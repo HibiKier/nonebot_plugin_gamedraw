@@ -8,6 +8,7 @@ from .util import generate_img, init_star_rst, max_card, BaseData, UpEvent, set_
 from .init_card_pool import init_game_pool
 from .announcement import PrtsAnnouncement
 from dataclasses import dataclass
+from nonebot.log import logger
 try:
     import ujson as json
 except ModuleNotFoundError:
@@ -93,7 +94,6 @@ def _get_operator_card(add: float):
         if random.random() < zoom:
             up_operators = [x.operators for x in UP_OPERATOR if x.star == star and x.zoom < 1][0]
             up_operator_name = random.choice(up_operators)
-            # print(up_operator_name)
             acquire_operator = [x for x in ALL_OPERATOR if x.name == up_operator_name][0]
         else:
             all_star_operators = [x for x in ALL_OPERATOR if x.star == star
@@ -147,7 +147,7 @@ async def _init_up_char():
     if _CURRENT_POOL_TITLE:
         POOL_IMG = MessageSegment.image(up_char_dict['char']['pool_img'])
     up_char_dict = up_char_dict['char']['up_char']
-    print(f'成功获取明日方舟当前up信息...当前up池: {_CURRENT_POOL_TITLE}')
+    logger.info(f'成功获取明日方舟当前up信息...当前up池: {_CURRENT_POOL_TITLE}')
     average_dict = {'6': {}, '5': {}, '4': {}}
     for star in up_char_dict.keys():
         for key in up_char_dict[star].keys():

@@ -15,6 +15,7 @@ from .util import is_number, check_num
 from .rule import is_switch
 from .config import PRTS_FLAG, PRETTY_FLAG, GUARDIAN_FLAG, GENSHIN_FLAG, PCR_FLAG, AZUR_FLAG, FGO_FLAG, ONMYOJI_FLAG
 from .async_update_game_info import async_update_game
+from nonebot.log import logger
 import re
 import asyncio
 

@@ -1,5 +1,6 @@
 import nonebot
 from pathlib import Path
+from nonebot.log import logger
 try:
     import ujson as json
 except ModuleNotFoundError:
@@ -211,7 +212,7 @@ def check_config():
     except (FileNotFoundError, ValueError):
         _draw_config.parent.mkdir(parents=True, exist_ok=True)
         json.dump(config_default_data, open(_draw_config, 'w', encoding='utf8'), indent=4, ensure_ascii=False)
-        print('draw_card：配置文件不存在或格式错误，已重新生成配置文件.....')
+        logger.warning('draw_card：配置文件不存在或格式错误，已重新生成配置文件.....')
     else:
 
         try:

@@ -11,6 +11,7 @@ import pypinyin
 from PIL import UnidentifiedImageError
 from .create_img import CreateImg
 from nonebot.adapters.cqhttp import MessageSegment
+from nonebot.log import logger
 import random
 from dataclasses import dataclass
 import os
@@ -53,13 +54,13 @@ async def download_img(url: str, path: str, name: str) -> bool:
                 async with session.get(url, timeout=7) as response:
                     async with aiofiles.open(DRAW_PATH + f'/draw_card/{path}/{codename}.png', 'wb') as f:
                         await f.write(await response.read())
-                        print(f'下载 {path_dict[path]} 图片成功，名称：{name}，url：{url}')
+                        logger.info(f'下载 {path_dict[path]} 图片成功，名称：{name}，url：{url}')
                         return True
         except TimeoutError:
-            print(f'下载 {path_dict[path]} 图片超时，名称：{name}，url：{url}')
+            logger.warning(f'下载 {path_dict[path]} 图片超时，名称：{name}，url：{url}')
             return False
         except InvalidURL:
-            print(f'下载 {path_dict[path]} 链接错误，名称：{name}，url：{url}')
+            logger.warning(f'下载 {path_dict[path]} 链接错误，名称：{name}，url：{url}')
             return False
     else:
         # logger.info(f'{path_dict[path]} 图片 {name} 已存在')
@@ -130,12 +131,12 @@ def _pst(h: int, img_list: list, game_name: str, background_list: list):
                 try:
                     b = CreateImg(100, 100, background=img)
                 except UnidentifiedImageError as e:
-                    print(f'无法识别图片 已删除图片，下次更新重新下载... e：{e}')
+                    logger.warning(f'无法识别图片 已删除图片，下次更新重新下载... e：{e}')
                     if os.path.exists(img):
                         os.remove(img)
                     b = CreateImg(100, 100, color='black')
         except FileNotFoundError:
-            print(f'{img} not exists')
+            logger.warning(f'{img} not exists')
             b = CreateImg(100, 100, color='black')
         card_img.paste(b)
         idx += 1
@@ -193,7 +194,7 @@ async def init_up_char(announcement):
             POOL_IMG += MessageSegment.image(up_char_dict[x[1]]['pool_img'])
     except (IndexError, KeyError):
         pass
-    print(f'成功获取{announcement.game_name}当前up信息...当前up池: {_CURRENT_CHAR_POOL_TITLE} & {_CURRENT_ARMS_POOL_TITLE}')
+    logger.info(f'成功获取{announcement.game_name}当前up信息...当前up池: {_CURRENT_CHAR_POOL_TITLE} & {_CURRENT_ARMS_POOL_TITLE}')
     for key in up_char_dict.keys():
         for star in up_char_dict[key]['up_char'].keys():
             up_char_lst = []

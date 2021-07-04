@@ -38,23 +38,26 @@ def is_expired(data: dict):
 
 # 检查写入
 def check_write(data: dict, up_char_file):
-    if not is_expired(data['char']):
-        for x in list(data.keys()):
-            data[x]['title'] = ''
-    else:
-        with open(up_char_file, 'w', encoding='utf8') as f:
-            json.dump(data, f, indent=4, ensure_ascii=False)
-    if not up_char_file.exists():
-        with open(up_char_file, 'w', encoding='utf8') as f:
-            json.dump(data, f, indent=4, ensure_ascii=False)
-    else:
-        with open(up_char_file, 'r', encoding='utf8') as f:
-            old_data = json.load(f)
-        if is_expired(old_data['char']):
-            return old_data
+    try:
+        if not is_expired(data['char']):
+            for x in list(data.keys()):
+                data[x]['title'] = ''
         else:
             with open(up_char_file, 'w', encoding='utf8') as f:
                 json.dump(data, f, indent=4, ensure_ascii=False)
+        if not up_char_file.exists():
+            with open(up_char_file, 'w', encoding='utf8') as f:
+                json.dump(data, f, indent=4, ensure_ascii=False)
+        else:
+            with open(up_char_file, 'r', encoding='utf8') as f:
+                old_data = json.load(f)
+            if is_expired(old_data['char']):
+                return old_data
+            else:
+                with open(up_char_file, 'w', encoding='utf8') as f:
+                    json.dump(data, f, indent=4, ensure_ascii=False)
+    except ValueError:
+        pass
     return data
 
 

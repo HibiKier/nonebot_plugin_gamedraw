@@ -130,7 +130,6 @@ def _get_pretty_card(pool_name: str, mode: int = 1):
             acquire_operator = random.choice(all_up_star)
             if pool_name == 'char':
                 acquire_operator = acquire_operator.split(']')[1]
-            print(acquire_operator)
             acquire_operator = [x for x in data if x.name == acquire_operator][0]
         else:
             acquire_operator = random.choice([x for x in data if x.star == star and not x.limited])
