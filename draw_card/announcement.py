@@ -27,12 +27,15 @@ guardian_url = "https://wiki.biligame.com/gt/%E9%A6%96%E9%A1%B5"
 
 # 是否过时
 def is_expired(data: dict):
-    times = data['time'].split('-')
-    for i in range(len(times)):
-        times[i] = str(datetime.now().year) + '-' + times[i].split('日')[0].strip().replace('月', '-')
-    start_date = datetime.strptime(times[0], '%Y-%m-%d').date()
-    end_date = datetime.strptime(times[1], '%Y-%m-%d').date()
-    now = datetime.now().date()
+    try:
+        times = data['time'].split('-')
+        for i in range(len(times)):
+            times[i] = str(datetime.now().year) + '-' + times[i].split('日')[0].strip().replace('月', '-')
+        start_date = datetime.strptime(times[0], '%Y-%m-%d').date()
+        end_date = datetime.strptime(times[1], '%Y-%m-%d').date()
+        now = datetime.now().date()
+    except ValueError:
+        return False
     return start_date <= now <= end_date
 
 
@@ -236,6 +239,7 @@ class PrettyAnnouncement:
                 return await res.text(), title[:-2]
 
     async def update_up_char(self):
+        pretty_up_char.parent.mkdir(exist_ok=True, parents=True)
         data = {
             'char': {'up_char': {'3': {}, '2': {}, '1': {}}, 'title': '', 'time': '', 'pool_img': ''},
             'card': {'up_char': {'3': {}, '2': {}, '1': {}}, 'title': '', 'time': '', 'pool_img': ''}
