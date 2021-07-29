@@ -147,6 +147,7 @@ class PrtsAnnouncement:
             if prts_up_char.exists():
                 with open(prts_up_char, 'r', encoding='utf8') as f:
                     data = json.load(f)
+        print(prts_up_char)
         return check_write(data, prts_up_char)
 
 
@@ -252,14 +253,12 @@ class PrettyAnnouncement:
                 context = soup.find('div', {'class': 'mw-parser-output'})
             data['char']['title'] = title
             data['card']['title'] = title
-            for big in context.find_all('big'):
-                r = re.search(r'\d{1,2}/\d{1,2} \d{1,2}:\d{1,2}', str(big.text))
-                if r:
-                    time = str(big.text)
-                    break
+            r = re.search(r'(\d{1,2}/\d{1,2} \d{1,2}:\d{1,2} ～ \d{1,2}/\d{1,2} \d{1,2}:\d{1,2})', str(context.text))
+            if r:
+                time = str(r.group(1))
             else:
                 logger.warning('赛马娘UP无法找到活动日期....取消更新UP池子...')
-                return
+                return check_write(data, pretty_up_char)
             time = time.replace('～', '-').replace('/', '月').split(' ')
             time = time[0] + '日 ' + time[1] + ' - ' + time[3] + '日 ' + time[4]
             data['char']['time'] = time
