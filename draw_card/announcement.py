@@ -1,7 +1,7 @@
 import aiohttp
 from bs4 import BeautifulSoup
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from .config import DRAW_PATH
 from pathlib import Path
 from asyncio.exceptions import TimeoutError
@@ -27,15 +27,12 @@ guardian_url = "https://wiki.biligame.com/gt/%E9%A6%96%E9%A1%B5"
 
 # 是否过时
 def is_expired(data: dict):
-    try:
-        times = data['time'].split('-')
-        for i in range(len(times)):
-            times[i] = str(datetime.now().year) + '-' + times[i].split('日')[0].strip().replace('月', '-')
-        start_date = datetime.strptime(times[0], '%Y-%m-%d').date()
-        end_date = datetime.strptime(times[1], '%Y-%m-%d').date()
-        now = datetime.now().date()
-    except ValueError:
-        return False
+    times = data['time'].split('-')
+    for i in range(len(times)):
+        times[i] = str(datetime.now().year) + '-' + times[i].split('日')[0].strip().replace('月', '-')
+    start_date = datetime.strptime(times[0], '%Y-%m-%d').date()
+    end_date = datetime.strptime(times[1], '%Y-%m-%d').date()
+    now = datetime.now().date()
     return start_date <= now <= end_date
 
 
@@ -147,7 +144,6 @@ class PrtsAnnouncement:
             if prts_up_char.exists():
                 with open(prts_up_char, 'r', encoding='utf8') as f:
                     data = json.load(f)
-        print(prts_up_char)
         return check_write(data, prts_up_char)
 
 
@@ -187,6 +183,11 @@ class GenshinAnnouncement:
                 data[itype]['time'] = trs[1].find('td').text
                 if data[itype]['time'][-1] == '\n':
                     data[itype]['time'] = data[itype]['time'][:-1]
+                if '版本更新后' in data[itype]['time']:
+                    sp = data[itype]['time'].split('~')
+                    end_time = datetime.strptime(sp[1].strip(), "%Y/%m/%d %H:%M:%S")
+                    start_time = end_time - timedelta(days=20)
+                    data[itype]['time'] = start_time.strftime('%Y/%m/%d') + ' ~ ' + end_time.strftime('%Y/%m/%d')
                 tmp = ''
                 for tm in data[itype]['time'].split('~'):
                     date_time_sp = tm.split('/')
@@ -240,7 +241,6 @@ class PrettyAnnouncement:
                 return await res.text(), title[:-2]
 
     async def update_up_char(self):
-        pretty_up_char.parent.mkdir(exist_ok=True, parents=True)
         data = {
             'char': {'up_char': {'3': {}, '2': {}, '1': {}}, 'title': '', 'time': '', 'pool_img': ''},
             'card': {'up_char': {'3': {}, '2': {}, '1': {}}, 'title': '', 'time': '', 'pool_img': ''}
@@ -253,12 +253,14 @@ class PrettyAnnouncement:
                 context = soup.find('div', {'class': 'mw-parser-output'})
             data['char']['title'] = title
             data['card']['title'] = title
-            r = re.search(r'(\d{1,2}/\d{1,2} \d{1,2}:\d{1,2} ～ \d{1,2}/\d{1,2} \d{1,2}:\d{1,2})', str(context.text))
-            if r:
-                time = str(r.group(1))
+            for big in context.find_all('big'):
+                r = re.search(r'\d{1,2}/\d{1,2} \d{1,2}:\d{1,2}', str(big.text))
+                if r:
+                    time = str(big.text)
+                    break
             else:
                 logger.warning('赛马娘UP无法找到活动日期....取消更新UP池子...')
-                return check_write(data, pretty_up_char)
+                return
             time = time.replace('～', '-').replace('/', '月').split(' ')
             time = time[0] + '日 ' + time[1] + ' - ' + time[3] + '日 ' + time[4]
             data['char']['time'] = time
