@@ -147,7 +147,7 @@ async def retrieve_char_data(char: bs4.element.Tag, game_name: str, data: dict, 
             star = 4
         elif star == '舰娘头像外框海上传奇.png':
             star = 5
-        elif star in ['舰娘头像外框最高方案.png', '舰娘头像外框决战方案.png', '舰娘头像外框超稀有META.png']:
+        elif star in ['舰娘头像外框最高方案.png', '舰娘头像外框决战方案.png', '舰娘头像外框超稀有META.png', '舰娘头像外框精锐META.png']:
             star = 6
         member_dict['星级'] = star
         member_dict['类型'] = azur_type[str(index)]
