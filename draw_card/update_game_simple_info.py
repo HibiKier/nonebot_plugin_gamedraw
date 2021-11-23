@@ -32,7 +32,10 @@ async def update_simple_info(url: str, game_name: str) -> 'dict, int':
                     type_lst = get_type_lst(div, game_name)
                     index = 0
                     for char_lst in type_lst:
-                        contents = get_char_lst_contents(char_lst, game_name)
+                        try:
+                            contents = get_char_lst_contents(char_lst, game_name)
+                        except AttributeError:
+                            continue
                         for char in contents:
                             data = await retrieve_char_data(char, game_name, data, session, index)
                         index += 1
@@ -123,10 +126,10 @@ async def retrieve_char_data(char: bs4.element.Tag, game_name: str, data: dict, 
             '名称': remove_prohibited_str(char.find('a')['title']),
             '星级': 3 - index}
     if game_name == 'azur':
-        char = char.find('td').find('div')
+        char = char.find('div').find('div').find('div').find('div')
         avatar_img = char.find('a').find('img')
         try:
-            member_dict['名称'] = remove_prohibited_str(str(avatar_img['alt'])[: str(avatar_img['alt']).find('头像')])
+            member_dict['名称'] = remove_prohibited_str(char.find('a')['title'])
         except TypeError:
             member_dict['名称'] = char.find('a')['title'][:-4]
         try:
