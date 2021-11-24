@@ -1,6 +1,6 @@
 from typing import Any
-from .config import DATA_PATH
-from utils.utils import is_number
+from .config import DRAW_PATH
+from .util import is_number
 from pathlib import Path
 from nonebot import logger
 try:
@@ -118,7 +118,7 @@ def init_game_pool(game: str, data: dict, Operator: Any):
                 logger.warning(f"阴阳师导入角色 {key} 数据错误：{type(e)}：{e}")
     # print(tmp_lst)
     char_name_lst = [x.name for x in tmp_lst]
-    up_char_file = Path(f'{DATA_PATH}/draw_card/draw_card_up/{game.split("_")[0]}_up_char.json')
+    up_char_file = Path(f'{DRAW_PATH}/draw_card/draw_card_up/{game.split("_")[0]}_up_char.json')
     if up_char_file.exists():
         data = json.load(open(up_char_file, 'r', encoding='utf8'))
         if len(game.split('_')) == 1:
