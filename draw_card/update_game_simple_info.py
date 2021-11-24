@@ -36,8 +36,11 @@ async def update_simple_info(url: str, game_name: str) -> 'dict, int':
                             contents = get_char_lst_contents(char_lst, game_name)
                         except AttributeError:
                             continue
-                        for char in contents:
-                            data = await retrieve_char_data(char, game_name, data, session, index)
+                        for char in contents[1:]:
+                            try:
+                                data = await retrieve_char_data(char, game_name, data, session, index)
+                            except AttributeError:
+                                continue
                         index += 1
             data = await _last_check(data, game_name, session)
     except TimeoutError:
