@@ -332,7 +332,7 @@ async def _():
 async def _():
     if PRTS_FLAG:
         await reload_genshin_pool()
-        
+
 
 # 重载坎公骑冠剑卡池
 @scheduler.scheduled_job(
