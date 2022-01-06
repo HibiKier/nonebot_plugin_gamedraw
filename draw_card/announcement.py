@@ -33,7 +33,7 @@ def is_expired(data: dict):
     start_date = datetime.strptime(times[0], '%Y-%m-%d').date()
     end_date = datetime.strptime(times[1], '%Y-%m-%d').date()
     now = datetime.now().date()
-    return start_date <= now <= end_date
+    return not start_date <= now <= end_date
 
 
 # 检查写入
@@ -185,7 +185,7 @@ class GenshinAnnouncement:
                     data[itype]['time'] = data[itype]['time'][:-1]
                 if '版本更新后' in data[itype]['time']:
                     sp = data[itype]['time'].split('~')
-                    end_time = datetime.strptime(sp[1].strip(), "%Y/%m/%d %H:%M:%S")
+                    end_time = datetime.strptime(sp[1].strip(), "%Y/%m/%d %H:%M")
                     start_time = end_time - timedelta(days=20)
                     data[itype]['time'] = start_time.strftime('%Y/%m/%d') + ' ~ ' + end_time.strftime('%Y/%m/%d')
                 tmp = ''

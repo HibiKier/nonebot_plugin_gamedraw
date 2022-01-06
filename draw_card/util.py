@@ -92,8 +92,8 @@ async def generate_img(card_set: Union[Set[BaseData], List[BaseData]], game_name
         if game_name == 'azur':
             if os.path.exists(DRAW_PATH + f'/draw_card/{game_name}/{x.star}_star.png'):
                 background_list.append(DRAW_PATH + f'/draw_card/{game_name}/{x.star}_star.png')
-        pyname = cn2py(x.name)
-        img_list.append(DRAW_PATH + f'/draw_card/{game_name}/{pyname}.png')
+        py_name = cn2py(x.name)
+        img_list.append(DRAW_PATH + f'/draw_card/{game_name}/{py_name}.png')
     img_len = len(img_list)
     w = 100 * 10
     if img_len <= 10:
@@ -158,6 +158,31 @@ def init_star_rst(star_list: list, cnlist: list, max_star_list: list, max_star_i
         else:
             rst += f'第 {max_star_index_list[i]+1} 抽获取 {max_star_list[i]}\n'
     return rst
+
+
+# 更好的初始化
+def init_rst(max_star_char_dict: dict, star_num_list: List[int], star: List[str], up_list: list = None):
+    # print(max_star_char_dict)
+    # print(star_num_list)
+    # print(up_list)
+    up_list = up_list if up_list else []
+    rst = ""
+    for i in range(len(star_num_list)):
+        if star_num_list[i]:
+            rst += f'[{star[i]}×{star_num_list[i]}] '
+    rst += '\n'
+    _tmp = []
+    for name in max_star_char_dict.keys():
+        _tmp += max_star_char_dict[name]
+    for index in sorted(_tmp):
+        for name in max_star_char_dict.keys():
+            if index in max_star_char_dict[name]:
+                if name in up_list:
+                    rst += f'第 {index} 抽获取UP {name}\n'
+                else:
+                    rst += f'第 {index} 抽获取 {name}\n'
+    print(rst)
+    return rst[:-1] if rst else ""
 
 
 def max_card(_dict: dict):
@@ -311,7 +336,7 @@ def check_num(num: str, max_num: int) -> 'str, bool':
 
 
 # 移除windows和linux下特殊字符
-def remove_prohibited_str(name: str):
+def remove_prohibited_str(name: str) -> str:
     if platform.system().lower() == 'windows':
         tmp = ''
         for i in name:
@@ -321,6 +346,7 @@ def remove_prohibited_str(name: str):
     else:
         name = name.replace('/', '\\')
     return name
+
 
 
 
