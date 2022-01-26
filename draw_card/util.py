@@ -10,7 +10,7 @@ import nonebot
 import pypinyin
 from PIL import UnidentifiedImageError
 from .create_img import CreateImg
-from nonebot.adapters.cqhttp import MessageSegment
+from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot.log import logger
 import random
 from dataclasses import dataclass

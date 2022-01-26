@@ -1,7 +1,8 @@
 from nonebot import on_regex, require, on_keyword
-from nonebot.adapters.cqhttp import Bot, MessageEvent, Message
+from nonebot.adapters.onebot.v11 import Bot, MessageEvent, Message
 from nonebot.permission import SUPERUSER
 from nonebot.typing import T_State
+from nonebot.params import State
 from .genshin_handle import genshin_draw, update_genshin_info, reset_count, reload_genshin_pool
 from .prts_handle import update_prts_info, prts_draw, reload_prts_pool
 from .pretty_handle import update_pretty_info, pretty_draw, reload_pretty_pool
@@ -21,43 +22,43 @@ import asyncio
 
 scheduler = require('nonebot_plugin_apscheduler').scheduler
 
-prts = on_regex(r'.*?方舟[1-9|一][0-9]{0,2}[抽|井]', rule=is_switch('prts'), priority=5, block=True)
+prts = on_regex(r'.*?方舟[1-9|一][0-9]{0,2}[抽|井|连]', rule=is_switch('prts'), priority=5, block=True)
 prts_update = on_keyword({'更新方舟信息', '更新明日方舟信息'}, permission=SUPERUSER, priority=1, block=True)
 prts_up_reload = on_keyword({'重载方舟卡池'}, priority=1, block=True)
 
-genshin = on_regex('.*?原神(武器|角色)?池?[1-9|一][0-9]{0,2}[抽|井]', rule=is_switch('genshin'), priority=5, block=True)
+genshin = on_regex(r'.*?原神(武器|角色)?池?[1-9|一][0-9]{0,2}[抽|井|连]', rule=is_switch('genshin'), priority=5, block=True)
 genshin_update = on_keyword({'更新原神信息'}, permission=SUPERUSER, priority=1, block=True)
 genshin_reset = on_keyword({'重置原神抽卡'}, priority=1, block=True)
 genshin_up_reload = on_keyword({'重载原神卡池'}, priority=1, block=True)
 
-pretty = on_regex('.*?马娘卡?[1-9|一][0-9]{0,2}[抽|井]', rule=is_switch('pretty'), priority=5, block=True)
+pretty = on_regex(r'.*?马娘卡?[1-9|一][0-9]{0,2}[抽|井|连]', rule=is_switch('pretty'), priority=5, block=True)
 pretty_update = on_keyword({'更新马娘信息', '更新赛马娘信息'}, permission=SUPERUSER, priority=1, block=True)
 pretty_up_reload = on_keyword({'重载赛马娘卡池'}, priority=1, block=True)
 
-guardian = on_regex('.*?坎公骑冠剑武?器?[1-9|一][0-9]{0,2}[抽|井]', rule=is_switch('guardian'), priority=5, block=True)
+guardian = on_regex(r'.*?坎公骑冠剑武?器?[1-9|一][0-9]{0,2}[抽|井|连]', rule=is_switch('guardian'), priority=5, block=True)
 guardian_update = on_keyword({'更新坎公骑冠剑信息'}, permission=SUPERUSER, priority=1, block=True)
 guardian_up_reload = on_keyword({'重载坎公骑冠剑卡池'}, priority=1, block=True)
 
-pcr = on_regex('.*?(pcr|公主连结|公主连接|公主链接|公主焊接)[1-9|一][0-9]{0,2}[抽|井]', rule=is_switch('pcr'), priority=5, block=True)
+pcr = on_regex(r'.*?(pcr|公主连结|公主连接|公主链接|公主焊接)[1-9|一][0-9]{0,2}[抽|井|连]', rule=is_switch('pcr'), priority=5, block=True)
 pcr_update = on_keyword({'更新pcr信息', '更新公主连结信息'}, permission=SUPERUSER, priority=1, block=True)
 
-azur = on_regex('.*?碧蓝航?线?(轻型|重型|特型)池?[1-9|一][0-9]{0,2}[抽]', rule=is_switch('azur'), priority=5, block=True)
+azur = on_regex(r'.*?碧蓝航?线?(轻型|重型|特型)池?[1-9|一][0-9]{0,2}[抽|连]', rule=is_switch('azur'), priority=5, block=True)
 azur_update = on_keyword({'更新碧蓝信息', '更新碧蓝航线信息'}, permission=SUPERUSER, priority=1, block=True)
 
-fgo = on_regex('.*?fgo[1-9|一][0-9]{0,2}[抽]', rule=is_switch('fgo'), priority=5, block=True)
+fgo = on_regex(r'.*?fgo[1-9|一][0-9]{0,2}[抽|连]', rule=is_switch('fgo'), priority=5, block=True)
 fgo_update = on_keyword({'更新fgo信息'}, permission=SUPERUSER, priority=1, block=True)
 
-onmyoji = on_regex('.*?阴阳师[1-9|一][0-9]{0,2}[抽]', rule=is_switch('onmyoji'), priority=5, block=True)
+onmyoji = on_regex(r'.*?阴阳师[1-9|一][0-9]{0,2}[抽|连]', rule=is_switch('onmyoji'), priority=5, block=True)
 onmyoji_update = on_keyword({'更新阴阳师信息'}, permission=SUPERUSER, priority=1, block=True)
 
 
 @prts.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     msg = str(event.get_message()).strip()
     if msg in ['方舟一井', '方舟1井']:
         num = 300
     else:
-        rmsg = re.search(r'.*?方舟(.*)抽', msg)
+        rmsg = re.search(r'.*?方舟(.*)[抽|连]', msg)
         if rmsg:
             num, flag = check_num(rmsg.group(1), 300)
             if not flag:
@@ -68,15 +69,15 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
 
 
 @prts_up_reload.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     text = await reload_prts_pool()
     await prts_up_reload.finish(Message(f'重载完成！\n{text}'))
 
 
 @genshin.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     msg = str(event.get_message()).strip()
-    rmsg = re.search(r'.*?原神(武器|角色)?池?(.*)[抽|井]', msg)
+    rmsg = re.search(r'.*?原神(武器|角色)?池?(.*)[抽|井|连]', msg)
     if rmsg:
         pool_name = rmsg.group(1)
         if pool_name == '武器':
@@ -98,19 +99,19 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
 
 
 @genshin_up_reload.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     text = await reload_genshin_pool()
     await genshin_reset.finish(Message(f'重载成功！\n{text}'))
 
 
 @genshin_reset.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     reset_count(event.user_id)
     await genshin_reset.send('重置了原神抽卡次数', at_sender=True)
 
 
 @pretty.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     msg = str(event.get_message()).strip()
     if msg.find('1井') != -1 or msg.find('一井') != -1:
         num = 200
@@ -119,7 +120,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
         else:
             pool_name = 'card'
     else:
-        rmsg = re.search(r'.*?马娘(.*)抽', msg)
+        rmsg = re.search(r'.*?马娘(.*)[抽|连]', msg)
         if rmsg:
             num = rmsg.group(1)
             if num[0] == '卡':
@@ -136,13 +137,13 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
 
 
 @pretty_up_reload.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     text = await reload_pretty_pool()
     await genshin_reset.finish(Message(f'重载成功！\n{text}'))
 
 
 @guardian.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     msg = str(event.get_message()).strip()
     pool_name = 'char'
     if msg.find('1井') != -1 or msg.find('一井') != -1:
@@ -150,7 +151,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
         if msg.find('武器') != -1:
             pool_name = 'arms'
     else:
-        rmsg = re.search(r'.*?坎公骑冠剑(.*)抽', msg)
+        rmsg = re.search(r'.*?坎公骑冠剑(.*)[抽|连]', msg)
         if rmsg:
             num = rmsg.group(1)
             if num.find('武器') != -1:
@@ -165,18 +166,18 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
 
 
 @guardian_up_reload.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     text = await reload_guardian_pool()
     await genshin_reset.finish(Message(f'重载成功！\n{text}'))
 
 
 @pcr.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     msg = str(event.get_message()).strip()
     if msg.find('1井') != -1 or msg.find('一井') != -1:
         num = 300
     else:
-        rmsg = re.search(r'.*?(pcr|公主连结)(.*)[抽|井]', msg)
+        rmsg = re.search(r'.*?(pcr|公主连结)(.*)[抽|井|连]', msg)
         if rmsg:
             num, flag = check_num(rmsg.group(2), 300)
             if not flag:
@@ -187,9 +188,9 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
 
 
 @azur.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     msg = str(event.get_message()).strip()
-    rmsg = re.search('.*?碧蓝航?线?(轻型|重型|特型)池?(.*)[抽]', msg)
+    rmsg = re.search(r'.*?碧蓝航?线?(轻型|重型|特型)池?(.*)[抽|连]', msg)
     if rmsg:
         pool_name = rmsg.group(1)
         num, flag = check_num(rmsg.group(2), 300)
@@ -201,9 +202,9 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
 
 
 @fgo.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     msg = str(event.get_message()).strip()
-    rmsg = re.search('.*?fgo(.*)抽', msg)
+    rmsg = re.search(r'.*?fgo(.*)[抽|连]', msg)
     if rmsg:
         num, flag = check_num(rmsg.group(1), 300)
         if not flag:
@@ -214,9 +215,9 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
 
 
 @onmyoji.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     msg = str(event.get_message()).strip()
-    rmsg = re.search('.*?阴阳师(.*)抽', msg)
+    rmsg = re.search(r'.*?阴阳师(.*)[抽|连]', msg)
     if rmsg:
         num, flag = check_num(rmsg.group(1), 300)
         if not flag:
@@ -227,49 +228,49 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
 
 
 @prts_update.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     await update_prts_info()
     await prts_update.finish('更新完成！')
 
 
 @genshin_update.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     await update_genshin_info()
     await genshin_update.finish('更新完成！')
 
 
 @pretty_update.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     await update_pretty_info()
     await genshin_update.finish('更新完成！')
 
 
 @guardian_update.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     await update_guardian_info()
     await genshin_update.finish('更新完成！')
 
 
 @pcr_update.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     await update_pcr_info()
     await genshin_update.finish('更新完成！')
 
 
 @azur_update.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     await update_azur_info()
     await genshin_update.finish('更新完成！')
 
 
 @fgo_update.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     await update_fgo_info()
     await genshin_update.finish('更新完成！')
 
 
 @onmyoji_update.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State):
+async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
     await update_onmyoji_info()
     await genshin_update.finish('更新完成！')
 

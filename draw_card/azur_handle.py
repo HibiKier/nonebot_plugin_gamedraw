@@ -1,5 +1,5 @@
 
-from nonebot.adapters.cqhttp import MessageSegment
+from nonebot.adapters.onebot.v11 import MessageSegment
 import random
 from .update_game_simple_info import update_simple_info
 from .util import generate_img, init_star_rst, BaseData, set_list, get_star, max_card, format_card_information

@@ -1,5 +1,5 @@
 import ujson as json
-from nonebot.adapters.cqhttp import MessageSegment
+from nonebot.adapters.onebot.v11 import MessageSegment
 import nonebot
 import random
 from .update_game_info import update_info
