@@ -115,6 +115,10 @@
     
 ## 更新：
 
+### 2021/1/27
+
+ * 适配nb beat1 [@pull 27](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/27)
+
 ### 2021/1/6
 
  * 修复UP卡池无法正常初始化
