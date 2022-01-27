@@ -1,6 +1,6 @@
 
 import nonebot
-from nonebot.adapters.cqhttp import MessageSegment, Message
+from nonebot.adapters.onebot.v11 import MessageSegment, Message
 from .announcement import PrettyAnnouncement
 from .update_game_info import update_info
 from .util import init_star_rst, generate_img, max_card, BaseData, \

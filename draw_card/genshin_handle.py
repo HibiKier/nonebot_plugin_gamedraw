@@ -1,5 +1,5 @@
 import os
-from nonebot.adapters.cqhttp import MessageSegment, Message
+from nonebot.adapters.onebot.v11 import MessageSegment, Message
 import nonebot
 import random
 from .update_game_info import update_info
