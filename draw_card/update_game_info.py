@@ -48,10 +48,11 @@ async def update_info(url: str, game_name: str, info_list: list = None) -> 'dict
                         info_list = att_dict.keys()
                     for key in info_list:
                         key, attr = parse_key(key, game_name)
-                        td = tds[att_dict[key]]
-                        last_tag = unquote(_find_last_tag(td, attr, game_name), 'utf-8')
-                        member_dict[key] = last_tag
-                        member_dict = intermediate_check(member_dict, key, game_name, td)
+                        if key!='初始基础属性1' and key!='初始基础属性2'and key!='攻击力（MAX）'and key!='副属性（MAX）':
+                            td = tds[att_dict[key]]
+                            last_tag = unquote(_find_last_tag(td, attr, game_name), 'utf-8')
+                            member_dict[key] = last_tag
+                            member_dict = intermediate_check(member_dict, key, game_name, td)
                     avatar_img = await _modify_avatar_url(session, game_name, member_dict["名称"])
                     member_dict['头像'] = avatar_img if avatar_img else member_dict['头像']
                     member_dict, name = replace_update_name(member_dict, game_name)
