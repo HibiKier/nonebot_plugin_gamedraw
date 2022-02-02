@@ -110,18 +110,6 @@ async def update_genshin_info():
     data, code = await update_info(
         url,
         "genshin_arms",
-        [
-            "头像",
-            "名称",
-            "类型",
-            "稀有度.alt",
-            "获取途径",
-            "初始基础属性1",
-            "初始基础属性2",
-            "攻击力（MAX）",
-            "副属性（MAX）",
-            "技能",
-        ],
     )
     if code == 200:
         ALL_ARMS = init_game_pool("genshin_arms", data, GenshinChar)
