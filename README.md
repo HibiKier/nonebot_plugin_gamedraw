@@ -115,6 +115,10 @@
     
 ## 更新：
 
+### 2021/2/7
+
+ * 修复原神bwiki页面修改导致爬取错误引起导入错误
+
 ### 2021/1/27
 
  * 适配nb beat1 [@pull 27](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/27)
