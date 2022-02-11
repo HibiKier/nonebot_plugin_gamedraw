@@ -320,7 +320,7 @@ class PrettyAnnouncement:
                             if star == 'R':
                                 data['card']['up_char']['1'][char_name] = '70'
             # 日文->中文
-            with open(DRAW_PATH + 'pretty_card.json', 'r', encoding='utf8') as f:
+            with open(DRAW_PATH / 'pretty_card.json', 'r', encoding='utf8') as f:
                 all_data = json.load(f)
             for star in data['card']['up_char'].keys():
                 for name in list(data['card']['up_char'][star].keys()):

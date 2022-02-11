@@ -43,7 +43,7 @@ class UpEvent:
 async def download_img(url: str, path: str, name: str) -> bool:
     path = path.split('_')[0]
     codename = cn2py(name)
-    img_path = DRAW_PATH / f'/draw_card/{path}/{codename}.png'
+    img_path = DRAW_PATH / f'draw_card/{path}/{codename}.png'
     if not img_path.exists():
         try:
             async with aiohttp.ClientSession(headers=headers) as session:
