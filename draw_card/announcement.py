@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup
 import re
 from datetime import datetime, timedelta
 from .config import DRAW_PATH
-from pathlib import Path
 from asyncio.exceptions import TimeoutError
 from nonebot.log import logger
 
@@ -14,10 +13,10 @@ except ModuleNotFoundError:
 
 headers = {'User-Agent': '"Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)"'}
 
-prts_up_char = Path(DRAW_PATH + "/draw_card_up/prts_up_char.json")
-genshin_up_char = Path(DRAW_PATH + "/draw_card_up/genshin_up_char.json")
-pretty_up_char = Path(DRAW_PATH + "/draw_card_up/pretty_up_char.json")
-guardian_up_char = Path(DRAW_PATH + "/draw_card_up/guardian_up_char.json")
+prts_up_char = DRAW_PATH / "draw_card_up/prts_up_char.json"
+genshin_up_char = DRAW_PATH / "draw_card_up/genshin_up_char.json"
+pretty_up_char = DRAW_PATH / "draw_card_up/pretty_up_char.json"
+guardian_up_char = DRAW_PATH / "draw_card_up/guardian_up_char.json"
 
 prts_url = "https://ak.hypergryph.com/news.html"
 genshin_url = "https://wiki.biligame.com/ys/%E7%A5%88%E6%84%BF"

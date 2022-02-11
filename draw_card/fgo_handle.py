@@ -1,10 +1,8 @@
-
 from nonebot.adapters.onebot.v11 import MessageSegment
 import random
 from .update_game_requests_info import update_requests_info
 from .util import generate_img, init_star_rst, BaseData, set_list, get_star, max_card
-from .config import FGO_CARD_FOUR_P, FGO_CARD_FIVE_P, FGO_CARD_THREE_P, FGO_SERVANT_THREE_P, \
-    FGO_SERVANT_FIVE_P, FGO_SERVANT_FOUR_P, FGO_FLAG, DRAW_PATH
+from .config import DRAW_PATH, draw_config
 from dataclasses import dataclass
 from .init_card_pool import init_game_pool
 
@@ -45,11 +43,11 @@ async def update_fgo_info():
 
 async def init_fgo_data():
     global ALL_CHAR, ALL_CARD
-    if FGO_FLAG:
-        with open(DRAW_PATH + 'fgo.json', 'r', encoding='utf8') as f:
+    if draw_config.FGO_FLAG:
+        with (DRAW_PATH / 'fgo.json').open('r', encoding='utf8') as f:
             fgo_dict = json.load(f)
         ALL_CHAR = init_game_pool('fgo', fgo_dict, FgoChar)
-        with open(DRAW_PATH + 'fgo_card.json', 'r', encoding='utf8') as f:
+        with (DRAW_PATH / 'fgo_card.json').open('r', encoding='utf8') as f:
             fgo_dict = json.load(f)
         ALL_CARD = init_game_pool('fgo', fgo_dict, FgoChar)
 
@@ -57,13 +55,14 @@ async def init_fgo_data():
 # 抽取卡池
 def _get_fgo_card(mode: int = 1):
     global ALL_CHAR, ALL_CARD
+    fgo_config = draw_config.fgo
     if mode == 1:
-        star = get_star([8, 7, 6, 5, 4, 3], [FGO_SERVANT_FIVE_P, FGO_SERVANT_FOUR_P, FGO_SERVANT_THREE_P,
-                                             FGO_CARD_FIVE_P, FGO_CARD_FOUR_P, FGO_CARD_THREE_P])
+        star = get_star([8, 7, 6, 5, 4, 3], [fgo_config.FGO_SERVANT_FIVE_P, fgo_config.FGO_SERVANT_FOUR_P, fgo_config.FGO_SERVANT_THREE_P,
+                                             fgo_config.FGO_CARD_FIVE_P, fgo_config.FGO_CARD_FOUR_P, fgo_config.FGO_CARD_THREE_P])
     elif mode == 2:
-        star = get_star([5, 4], [FGO_CARD_FIVE_P, FGO_CARD_FOUR_P])
+        star = get_star([5, 4], [fgo_config.FGO_CARD_FIVE_P, fgo_config.FGO_CARD_FOUR_P])
     else:
-        star = get_star([8, 7, 6], [FGO_SERVANT_FIVE_P, FGO_SERVANT_FOUR_P, FGO_SERVANT_THREE_P])
+        star = get_star([8, 7, 6], [fgo_config.FGO_SERVANT_FIVE_P, fgo_config.FGO_SERVANT_FOUR_P, fgo_config.FGO_SERVANT_THREE_P])
     if star > 5:
         itype = 'servant'
         star -= 3

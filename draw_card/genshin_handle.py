@@ -1,6 +1,4 @@
-import os
 from nonebot.adapters.onebot.v11 import MessageSegment, Message
-import nonebot
 import random
 from .update_game_info import update_info
 from .util import (
@@ -11,16 +9,7 @@ from .util import (
     get_star,
     init_up_char,
 )
-from .config import (
-    GENSHIN_FIVE_P,
-    GENSHIN_FOUR_P,
-    GENSHIN_G_FIVE_P,
-    GENSHIN_G_FOUR_P,
-    GENSHIN_THREE_P,
-    I72_ADD,
-    DRAW_PATH,
-    GENSHIN_FLAG,
-)
+from .config import DRAW_PATH, draw_config
 from .count_manager import GenshinCountManager
 from dataclasses import dataclass
 from .init_card_pool import init_game_pool
@@ -31,7 +20,6 @@ try:
 except ModuleNotFoundError:
     import json
 
-driver: nonebot.Driver = nonebot.get_driver()
 
 announcement = GenshinAnnouncement()
 
@@ -118,15 +106,13 @@ async def update_genshin_info():
 
 async def init_genshin_data():
     global ALL_CHAR, ALL_ARMS
-    if GENSHIN_FLAG:
-        if not os.path.exists(DRAW_PATH + "genshin.json") or not os.path.exists(
-            DRAW_PATH + "genshin_arms.json"
-        ):
+    if draw_config.GENSHIN_FLAG:
+        if not (DRAW_PATH / "genshin.json").exists() or not (DRAW_PATH / "genshin_arms.json").exists():
             await update_genshin_info()
         else:
-            with open(DRAW_PATH + "genshin.json", "r", encoding="utf8") as f:
+            with (DRAW_PATH / "genshin.json").open("r", encoding="utf8") as f:
                 genshin_dict = json.load(f)
-            with open(DRAW_PATH + "genshin_arms.json", "r", encoding="utf8") as f:
+            with (DRAW_PATH / "genshin_arms.json").open("r", encoding="utf8") as f:
                 genshin_ARMS_dict = json.load(f)
             ALL_CHAR = init_game_pool("genshin", genshin_dict, GenshinChar)
             ALL_ARMS = init_game_pool("genshin_arms", genshin_ARMS_dict, GenshinChar)
@@ -139,12 +125,13 @@ def _get_genshin_card(mode: int = 1, pool_name: str = "", add: float = 0.0, is_u
     mode 1：普通抽 2：四星保底 3：五星保底
     """
     global ALL_ARMS, ALL_CHAR, UP_ARMS, UP_CHAR, _CURRENT_ARMS_POOL_TITLE, _CURRENT_CHAR_POOL_TITLE
+    genshin_config = draw_config.genshin
     if mode == 1:
         star = get_star(
-            [5, 4, 3], [GENSHIN_FIVE_P + add, GENSHIN_FOUR_P, GENSHIN_THREE_P]
+            [5, 4, 3], [genshin_config.GENSHIN_FIVE_P + add, genshin_config.GENSHIN_FOUR_P, genshin_config.GENSHIN_THREE_P]
         )
     elif mode == 2:
-        star = get_star([5, 4], [GENSHIN_G_FIVE_P + add, GENSHIN_G_FOUR_P])
+        star = get_star([5, 4], [genshin_config.GENSHIN_G_FIVE_P + add, genshin_config.GENSHIN_G_FOUR_P])
     else:
         star = 5
     if pool_name == "char":
@@ -201,7 +188,7 @@ def _format_card_information(_count: int, user_id, pool_name):
         draw_count_manager.increase(user_id)
         star = draw_count_manager.check(user_id)
         if (draw_count_manager.get_user_count(user_id) - draw_count_manager.get_user_count(user_id, 1)) % 90 >= 72:
-            add += I72_ADD
+            add += draw_config.genshin.I72_ADD
         if star:
             star = int(star)
             if star == 4:

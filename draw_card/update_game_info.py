@@ -1,5 +1,6 @@
 #coding:utf-8
 import aiohttp
+from typing import Tuple
 from .config import DRAW_PATH
 from asyncio.exceptions import TimeoutError
 from bs4 import BeautifulSoup
@@ -18,9 +19,10 @@ except ModuleNotFoundError:
 headers = {'User-Agent': '"Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)"'}
 
 
-async def update_info(url: str, game_name: str, info_list: list = None) -> 'dict, int':
+async def update_info(url: str, game_name: str, info_list: list = None) -> Tuple[dict, int]:
+    info_path = DRAW_PATH / f"{game_name}.json"
     try:
-        with open(DRAW_PATH + f'{game_name}.json', 'r', encoding='utf8') as f:
+        with info_path.open('r', encoding='utf8') as f:
             data = json.load(f)
     except (ValueError, FileNotFoundError):
         data = {}
@@ -62,7 +64,7 @@ async def update_info(url: str, game_name: str, info_list: list = None) -> 'dict
     except TimeoutError:
         logger.warning(f'更新 {game_name} 超时...')
         return {}, 999
-    with open(DRAW_PATH + f'{game_name}.json', 'w', encoding='utf8') as wf:
+    with info_path.open('w', encoding='utf8') as wf:
         wf.write(json.dumps(data, ensure_ascii=False, indent=4))
     return data, 200
 

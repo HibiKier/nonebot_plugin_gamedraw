@@ -1,8 +1,6 @@
-
 from nonebot.adapters.onebot.v11 import MessageSegment, Message
-import nonebot
 import random
-from .config import PRTS_FIVE_P, PRTS_FOUR_P, PRTS_SIX_P, PRTS_THREE_P, DRAW_PATH, PRTS_FLAG
+from .config import DRAW_PATH, draw_config
 from .update_game_info import update_info
 from .util import generate_img, init_star_rst, max_card, BaseData, UpEvent, set_list, get_star
 from .init_card_pool import init_game_pool
@@ -14,7 +12,6 @@ try:
 except ModuleNotFoundError:
     import json
 
-driver: nonebot.Driver = nonebot.get_driver()
 
 announcement = PrtsAnnouncement()
 
@@ -70,8 +67,8 @@ async def update_prts_info():
 
 async def init_prts_data():
     global prts_dict, ALL_OPERATOR
-    if PRTS_FLAG:
-        with open(DRAW_PATH + 'prts.json', 'r', encoding='utf8') as f:
+    if draw_config.PRTS_FLAG:
+        with (DRAW_PATH / 'prts.json').open('r', encoding='utf8') as f:
             prts_dict = json.load(f)
         ALL_OPERATOR = init_game_pool('prts', prts_dict, Operator)
         await _init_up_char()
@@ -79,7 +76,8 @@ async def init_prts_data():
 
 # 抽取干员
 def _get_operator_card(add: float):
-    star = get_star([6, 5, 4, 3], [PRTS_SIX_P + add, PRTS_FIVE_P, PRTS_FOUR_P, PRTS_THREE_P])
+    prts_config = draw_config.prts
+    star = get_star([6, 5, 4, 3], [prts_config.PRTS_SIX_P + add, prts_config.PRTS_FIVE_P, prts_config.PRTS_FOUR_P, prts_config.PRTS_THREE_P])
     if _CURRENT_POOL_TITLE:
         zooms = [x.zoom for x in UP_OPERATOR if x.star == star]
         zoom = 0

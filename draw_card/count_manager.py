@@ -111,4 +111,3 @@ class GenshinCountManager(DrawCountManager):
                     self._data[key][f"count_{i}"] = self._data[key]['count']
                     return self._star2name[i]
         return None
-

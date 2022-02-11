@@ -1,5 +1,6 @@
 import aiohttp
-from .config import DRAW_PATH, SEMAPHORE
+from typing import Tuple
+from .config import DRAW_PATH, draw_config
 from asyncio.exceptions import TimeoutError
 from bs4 import BeautifulSoup
 from .util import download_img
@@ -19,9 +20,10 @@ headers = {
 }
 
 
-async def update_simple_info(url: str, game_name: str) -> "dict, int":
+async def update_simple_info(url: str, game_name: str) -> Tuple[dict, int]:
+    info_path = DRAW_PATH / f"{game_name}.json"
     try:
-        with open(DRAW_PATH + f"{game_name}.json", "r", encoding="utf8") as f:
+        with info_path.open("r", encoding="utf8") as f:
             data = json.load(f)
     except (ValueError, FileNotFoundError):
         data = {}
@@ -50,7 +52,7 @@ async def update_simple_info(url: str, game_name: str) -> "dict, int":
     except TimeoutError:
         logger.warning(f"更新 {game_name} 超时...")
         return {}, 999
-    with open(DRAW_PATH + f"{game_name}.json", "w", encoding="utf8") as wf:
+    with info_path.open("w", encoding="utf8") as wf:
         wf.write(json.dumps(data, ensure_ascii=False, indent=4))
     return data, 200
 
@@ -101,7 +103,7 @@ async def _last_check(
             await download_img(url, "azur", f"{idx}_star")
             idx += 1
         tasks = []
-        semaphore = asyncio.Semaphore(SEMAPHORE)
+        semaphore = asyncio.Semaphore(draw_config.SEMAPHORE)
         for key in data.keys():
             tasks.append(
                 asyncio.ensure_future(

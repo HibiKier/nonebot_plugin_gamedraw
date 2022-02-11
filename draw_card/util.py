@@ -3,9 +3,8 @@ import aiohttp
 import aiofiles
 from asyncio.exceptions import TimeoutError
 from aiohttp.client_exceptions import InvalidURL
-from typing import List, Union, Set
-from pathlib import Path
-from .config import path_dict, DRAW_PATH
+from typing import List, Tuple, Union, Set
+from .config import draw_config, DRAW_PATH
 import nonebot
 import pypinyin
 from PIL import UnidentifiedImageError
@@ -16,13 +15,9 @@ import random
 from dataclasses import dataclass
 import os
 import asyncio
-try:
-    import ujson as json
-except ModuleNotFoundError:
-    import json
 
 
-driver: nonebot.Driver = nonebot.get_driver()
+driver = nonebot.get_driver()
 
 
 loop = asyncio.get_event_loop()
@@ -48,19 +43,20 @@ class UpEvent:
 async def download_img(url: str, path: str, name: str) -> bool:
     path = path.split('_')[0]
     codename = cn2py(name)
-    if not os.path.exists(DRAW_PATH + f'/draw_card/{path}/{codename}.png'):
+    img_path = DRAW_PATH / f'/draw_card/{path}/{codename}.png'
+    if not img_path.exists():
         try:
             async with aiohttp.ClientSession(headers=headers) as session:
                 async with session.get(url, timeout=7) as response:
-                    async with aiofiles.open(DRAW_PATH + f'/draw_card/{path}/{codename}.png', 'wb') as f:
+                    async with aiofiles.open(str(img_path), 'wb') as f:
                         await f.write(await response.read())
-                        logger.info(f'下载 {path_dict[path]} 图片成功，名称：{name}，url：{url}')
+                        logger.info(f'下载 {draw_config.path_dict[path]} 图片成功，名称：{name}，url：{url}')
                         return True
         except TimeoutError:
-            logger.warning(f'下载 {path_dict[path]} 图片超时，名称：{name}，url：{url}')
+            logger.warning(f'下载 {draw_config.path_dict[path]} 图片超时，名称：{name}，url：{url}')
             return False
         except InvalidURL:
-            logger.warning(f'下载 {path_dict[path]} 链接错误，名称：{name}，url：{url}')
+            logger.warning(f'下载 {draw_config.path_dict[path]} 链接错误，名称：{name}，url：{url}')
             return False
     else:
         # logger.info(f'{path_dict[path]} 图片 {name} 已存在')
@@ -69,10 +65,10 @@ async def download_img(url: str, path: str, name: str) -> bool:
 
 @driver.on_startup
 def _check_dir():
-    for dir_name in path_dict.keys():
-        _p = Path(DRAW_PATH + f'/draw_card/' + dir_name)
-        if not _p.exists():
-            _p.mkdir(parents=True, exist_ok=True)
+    for dir_name in draw_config.path_dict.keys():
+        dir_path = DRAW_PATH / f'draw_card/{dir_name}'
+        if not dir_path.exists():
+            dir_path.mkdir(parents=True, exist_ok=True)
 
 
 async def generate_img(card_set: Union[Set[BaseData], List[BaseData]], game_name: str, star_list: list) -> str:
@@ -89,11 +85,12 @@ async def generate_img(card_set: Union[Set[BaseData], List[BaseData]], game_name
                 background_list.append('#9370D8')
             else:
                 background_list.append('white')
+        img_path = DRAW_PATH / f'draw_card/{game_name}/{x.star}_star.png'
         if game_name == 'azur':
-            if os.path.exists(DRAW_PATH + f'/draw_card/{game_name}/{x.star}_star.png'):
-                background_list.append(DRAW_PATH + f'/draw_card/{game_name}/{x.star}_star.png')
+            if img_path.exists():
+                background_list.append(str(img_path))
         py_name = cn2py(x.name)
-        img_list.append(DRAW_PATH + f'/draw_card/{game_name}/{py_name}.png')
+        img_list.append(str(DRAW_PATH / f'draw_card/{game_name}/{py_name}.png'))
     img_len = len(img_list)
     w = 100 * 10
     if img_len <= 10:
@@ -321,7 +318,7 @@ def format_card_information(count: int, star_list: List[int], func, pool_name: s
 
 
 # 检测次数是否合法
-def check_num(num: str, max_num: int) -> 'str, bool':
+def check_num(num: str, max_num: int) -> Tuple[str, bool]:
     if is_number(num):
         try:
             num = int(num)
