@@ -115,6 +115,10 @@
     
 ## 更新：
 
+### 2021/2/11
+
+ * 优化代码，使用pydantic解析配置等 [@pull 31](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/31)
+
 ### 2021/2/7
 
  * 修复原神bwiki页面修改导致爬取错误引起导入错误
