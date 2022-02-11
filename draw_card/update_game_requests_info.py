@@ -1,5 +1,5 @@
 import aiohttp
-from .config import DRAW_PATH, SEMAPHORE
+from .config import DRAW_PATH, draw_config
 from asyncio.exceptions import TimeoutError
 from .util import download_img
 from bs4 import BeautifulSoup
@@ -16,8 +16,9 @@ headers = {'User-Agent': '"Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Te
 
 
 async def update_requests_info(game_name: str):
+    info_path = DRAW_PATH / f"{game_name}.json"
     try:
-        with open(DRAW_PATH + f'{game_name}.json', 'r', encoding='utf8') as f:
+        with info_path.open('r', encoding='utf8') as f:
             data = json.load(f)
     except (ValueError, FileNotFoundError):
         data = {}
@@ -52,7 +53,7 @@ async def update_requests_info(game_name: str):
     except TimeoutError:
         logger.warning(f'更新 {game_name} 超时...')
         return {}, 999
-    with open(DRAW_PATH + f'{game_name}.json', 'w', encoding='utf8') as wf:
+    with info_path.open('w', encoding='utf8') as wf:
         json.dump(data, wf, ensure_ascii=False, indent=4)
     return data, 200
 
@@ -101,7 +102,7 @@ async def _last_check(data: dict, game_name: str, session: aiohttp.ClientSession
     if game_name == 'fgo':
         url = 'http://fgo.vgtime.com/servant/'
         tasks = []
-        semaphore = asyncio.Semaphore(SEMAPHORE)
+        semaphore = asyncio.Semaphore(draw_config.SEMAPHORE)
         for key in data.keys():
             tasks.append(asyncio.ensure_future(
                 _async_update_fgo_extra_info(url, key, data[key]['id'], session, semaphore)))

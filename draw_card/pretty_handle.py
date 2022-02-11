@@ -1,12 +1,10 @@
-
-import nonebot
-from nonebot.adapters.onebot.v11 import MessageSegment, Message
+from nonebot.adapters.onebot.v11 import MessageSegment
 from .announcement import PrettyAnnouncement
 from .update_game_info import update_info
 from .util import init_star_rst, generate_img, max_card, BaseData, \
     set_list, get_star, format_card_information, init_up_char
 import random
-from .config import PRETTY_THREE_P, PRETTY_TWO_P, DRAW_PATH, PRETTY_ONE_P, PRETTY_FLAG
+from .config import DRAW_PATH, draw_config
 from dataclasses import dataclass
 from .init_card_pool import init_game_pool
 
@@ -15,7 +13,6 @@ try:
 except ModuleNotFoundError:
     import json
 
-driver: nonebot.Driver = nonebot.get_driver()
 
 announcement = PrettyAnnouncement()
 
@@ -96,10 +93,10 @@ async def update_pretty_info():
 
 async def init_pretty_data():
     global ALL_CHAR, ALL_CARD
-    if PRETTY_FLAG:
-        with open(DRAW_PATH + 'pretty.json', 'r', encoding='utf8') as f:
+    if draw_config.PRETTY_FLAG:
+        with (DRAW_PATH / 'pretty.json').open('r', encoding='utf8') as f:
             pretty_char_dict = json.load(f)
-        with open(DRAW_PATH + 'pretty_card.json', 'r', encoding='utf8') as f:
+        with (DRAW_PATH / 'pretty_card.json').open('r', encoding='utf8') as f:
             pretty_card_dict = json.load(f)
         ALL_CHAR = init_game_pool('pretty', pretty_char_dict, PrettyChar)
         ALL_CARD = init_game_pool('pretty_card', pretty_card_dict, PrettyChar)
@@ -109,10 +106,11 @@ async def init_pretty_data():
 # 抽取卡池
 def _get_pretty_card(pool_name: str, mode: int = 1):
     global ALL_CHAR, ALL_CARD, _CURRENT_CHAR_POOL_TITLE, _CURRENT_CARD_POOL_TITLE
+    pretty_config = draw_config.pretty
     if mode == 1:
-        star = get_star([3, 2, 1], [PRETTY_THREE_P, PRETTY_TWO_P, PRETTY_ONE_P])
+        star = get_star([3, 2, 1], [pretty_config.PRETTY_THREE_P, pretty_config.PRETTY_TWO_P, pretty_config.PRETTY_ONE_P])
     else:
-        star = get_star([3, 2], [PRETTY_THREE_P, PRETTY_TWO_P])
+        star = get_star([3, 2], [pretty_config.PRETTY_THREE_P, pretty_config.PRETTY_TWO_P])
     if pool_name == 'card':
         title = _CURRENT_CARD_POOL_TITLE
         up_data = UP_CARD

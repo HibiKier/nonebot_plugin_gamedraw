@@ -14,7 +14,7 @@ from .onmyoji_handle import update_onmyoji_info, onmyoji_draw
 from .update_game_info import update_info
 from .util import is_number, check_num
 from .rule import is_switch
-from .config import PRTS_FLAG, PRETTY_FLAG, GUARDIAN_FLAG, GENSHIN_FLAG, PCR_FLAG, AZUR_FLAG, FGO_FLAG, ONMYOJI_FLAG
+from .config import draw_config
 from .async_update_game_info import async_update_game
 from nonebot.log import logger
 import re
@@ -283,21 +283,21 @@ async def _(bot: Bot, event: MessageEvent, state: T_State=State()):
 )
 async def _():
     tasks = []
-    if PRTS_FLAG:
+    if draw_config.PRTS_FLAG:
         tasks.append(asyncio.ensure_future(update_prts_info()))
-    if GENSHIN_FLAG:
+    if draw_config.GENSHIN_FLAG:
         tasks.append(asyncio.ensure_future(update_genshin_info()))
-    if PRETTY_FLAG:
+    if draw_config.PRETTY_FLAG:
         tasks.append(asyncio.ensure_future(update_pretty_info()))
-    if GUARDIAN_FLAG:
+    if draw_config.GUARDIAN_FLAG:
         tasks.append(asyncio.ensure_future(update_guardian_info()))
-    if PCR_FLAG:
+    if draw_config.PCR_FLAG:
         tasks.append(asyncio.ensure_future(update_pcr_info()))
-    if AZUR_FLAG:
+    if draw_config.AZUR_FLAG:
         tasks.append(asyncio.ensure_future(update_azur_info()))
-    if FGO_FLAG:
+    if draw_config.FGO_FLAG:
         tasks.append(asyncio.ensure_future(update_fgo_info()))
-    if ONMYOJI_FLAG:
+    if draw_config.ONMYOJI_FLAG:
         tasks.append(asyncio.ensure_future(update_onmyoji_info()))
     await asyncio.gather(*tasks)
 
@@ -309,7 +309,7 @@ async def _():
     minute=1,
 )
 async def _():
-    if PRTS_FLAG:
+    if draw_config.PRTS_FLAG:
         await reload_prts_pool()
 
 
@@ -320,7 +320,7 @@ async def _():
     minute=1,
 )
 async def _():
-    if PRETTY_FLAG:
+    if draw_config.PRETTY_FLAG:
         await reload_pretty_pool()
 
 
@@ -331,7 +331,7 @@ async def _():
     minute=1,
 )
 async def _():
-    if PRTS_FLAG:
+    if draw_config.PRTS_FLAG:
         await reload_genshin_pool()
 
 
@@ -342,8 +342,5 @@ async def _():
     minute=1,
 )
 async def _():
-    if GUARDIAN_FLAG:
+    if draw_config.GUARDIAN_FLAG:
         await reload_guardian_pool()
-
-
-

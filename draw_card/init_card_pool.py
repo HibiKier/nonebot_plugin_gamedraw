@@ -2,7 +2,7 @@ from typing import Any
 from .config import DRAW_PATH
 from .util import is_number
 from pathlib import Path
-from nonebot import logger
+from nonebot.log import logger
 try:
     import ujson as json
 except ModuleNotFoundError:

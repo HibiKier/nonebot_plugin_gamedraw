@@ -1,9 +1,8 @@
-
 from nonebot.adapters.onebot.v11 import MessageSegment
 import random
 from .update_game_simple_info import update_simple_info
 from .util import generate_img, init_star_rst, BaseData, set_list, get_star, max_card, format_card_information
-from .config import AZUR_ONE_P, AZUR_TWO_P, AZUR_THREE_P, AZUR_FOUR_P, AZUR_FLAG, DRAW_PATH
+from .config import DRAW_PATH, draw_config
 from dataclasses import dataclass
 from .init_card_pool import init_game_pool
 try:
@@ -42,8 +41,8 @@ async def update_azur_info():
 
 async def init_azur_data():
     global ALL_CHAR
-    if AZUR_FLAG:
-        with open(DRAW_PATH + 'azur.json', 'r', encoding='utf8') as f:
+    if draw_config.AZUR_FLAG:
+        with (DRAW_PATH / 'azur.json').open('r', encoding='utf8') as f:
             azur_dict = json.load(f)
         ALL_CHAR = init_game_pool('azur', azur_dict, AzurChar)
 
@@ -51,13 +50,13 @@ async def init_azur_data():
 # 抽取卡池
 def _get_azur_card(pool_name: str, mode: int = 1):
     global ALL_CHAR
+    azur_config = draw_config.azur
     if pool_name == '轻型':
         itype = ['驱逐', '轻巡', '维修']
     elif pool_name == '重型':
         itype = ['重巡', '战列', '战巡', '重炮']
     else:
         itype = ['维修', '潜艇', '重巡', '轻航', '航母']
-    star = get_star([4, 3, 2, 1], [AZUR_FOUR_P, AZUR_THREE_P, AZUR_TWO_P, AZUR_ONE_P])
+    star = get_star([4, 3, 2, 1], [azur_config.AZUR_FOUR_P, azur_config.AZUR_THREE_P, azur_config.AZUR_TWO_P, azur_config.AZUR_ONE_P])
     chars = [x for x in ALL_CHAR if x.star == star and x.itype in itype and not x.limited]
     return random.choice(chars), 4 - star
-
