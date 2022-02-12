@@ -155,7 +155,7 @@ def check_config():
     else:
         data = json.load(config_path.open("r", encoding="utf8"))
         try:
-            draw_config = Config.parse_obj(global_config.dict().update(data))
+            draw_config = Config.parse_obj({**global_config.dict(), **data})
         except ValidationError:
             draw_config = Config()
             logger.warning("draw_card：配置文件格式错误，已重新生成配置文件.....")
