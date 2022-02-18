@@ -59,9 +59,7 @@ async def update_simple_info(url: str, game_name: str) -> Tuple[dict, int]:
 
 # 获取所有包含需要图片的divs
 def get_char_divs(soup: bs4.BeautifulSoup, game_name: str) -> bs4.element.ResultSet:
-    if game_name == "pcr":
-        return soup.find_all("div", {"class": "tabbertab"})
-    if game_name == "azur":
+    if game_name in ["azur", "pcr"]:
         return soup.find_all("div", {"class": "resp-tabs"})
 
 
@@ -145,7 +143,7 @@ async def retrieve_char_data(
     member_dict = {}
     if game_name == "pcr":
         member_dict = {
-            "头像": unquote(char.find("img", {"class": "img-kk"})["src"]),
+            "头像": unquote(char.find("a").find("img")["src"]),
             "名称": remove_prohibited_str(char.find("a")["title"]),
             "星级": 3 - index,
         }
