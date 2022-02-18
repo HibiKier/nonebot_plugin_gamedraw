@@ -115,6 +115,10 @@
     
 ## 更新：
 
+### 2021/2/18
+
+ * 修复bwiki页面变动导致pcr数据无法获取
+
 ### 2021/2/11
 
  * 优化代码，使用pydantic解析配置等 [@pull 31](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/31)
