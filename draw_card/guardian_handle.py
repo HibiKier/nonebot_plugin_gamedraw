@@ -92,7 +92,7 @@ async def update_guardian_info():
 async def init_guardian_data():
     global ALL_CHAR, ALL_ARMS
     if draw_config.GUARDIAN_FLAG:
-        if (DRAW_PATH / 'guardian.json').exists() or not (DRAW_PATH / 'guardian_arms.json').exists():
+        if not (DRAW_PATH / 'guardian.json').exists() or not (DRAW_PATH / 'guardian_arms.json').exists():
             await update_guardian_info()
         else:
             with (DRAW_PATH / 'guardian.json').open('r', encoding='utf8') as f:
