@@ -125,6 +125,7 @@ class PrettyHandle(BaseHandle[PrettyData]):
         return info.strip()
 
     def draw(self, count: int, pool_name: str, **kwargs) -> Message:
+        pool_name = "char" if not pool_name else pool_name
         cards = self.get_cards(count, pool_name)
         up_event = self.UP_CHAR if pool_name == "char" else self.UP_CARD
         up_list = [x.name for x in up_event.up_char] if up_event else []
@@ -150,6 +151,9 @@ class PrettyHandle(BaseHandle[PrettyData]):
             for value in self.load_data("pretty_card.json").values()
         ]
         self.load_up_char()
+
+    def data_exists(self) -> bool:
+        return super().data_exists() and super().data_exists("pretty_card.json")
 
     def load_up_char(self):
         try:
@@ -323,7 +327,7 @@ class PrettyHandle(BaseHandle[PrettyData]):
         except Exception as e:
             logger.warning(f"{self.game_name_cn}UP更新出错 {type(e)}：{e}")
 
-    async def reload_pool(self) -> Optional[Message]:
+    async def _reload_pool(self) -> Optional[Message]:
         await self.update_up_char()
         self.load_up_char()
         if self.UP_CHAR and self.UP_CARD:

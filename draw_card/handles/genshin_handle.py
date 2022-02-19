@@ -126,7 +126,7 @@ class GenshinHandle(BaseHandle[GenshinData]):
                 )
                 count_manager.record_count(user_id, 0)
                 count_manager.record_count(user_id, 1)
-                if pool and card.name in [x for x in pool.up_char if x.star == 5]:
+                if pool and card.name in [x.name for x in pool.up_char if x.star == 5]:
                     count_manager.set_is_up(user_id, True)
                 else:
                     count_manager.set_is_up(user_id, False)
@@ -144,9 +144,9 @@ class GenshinHandle(BaseHandle[GenshinData]):
             star5_list = [x.name for x in up_event.up_char if x.star == 5]
             star4_list = [x.name for x in up_event.up_char if x.star == 4]
             if star5_list:
-                info += f"五星UP：{''.join(star5_list)}\n"
+                info += f"五星UP：{' '.join(star5_list)}\n"
             if star4_list:
-                info += f"四星UP：{''.join(star4_list)}\n"
+                info += f"四星UP：{' '.join(star4_list)}\n"
             info = f"当前up池：{up_event.title}\n{info}"
         return info.strip()
 
@@ -184,6 +184,9 @@ class GenshinHandle(BaseHandle[GenshinData]):
             for value in self.load_data("genshin_arms.json").values()
         ]
         self.load_up_char()
+
+    def data_exists(self) -> bool:
+        return super().data_exists() and super().data_exists("genshin_arms.json")
 
     def load_up_char(self):
         try:
@@ -272,7 +275,7 @@ class GenshinHandle(BaseHandle[GenshinData]):
         for value in char_info.values():
             await self.download_img(value["头像"], value["名称"])
         for value in arms_info.values():
-            await self.download_img(value["头像"], value["中文名"])
+            await self.download_img(value["头像"], value["名称"])
         await self.update_up_char()
 
     async def update_up_char(self):
@@ -332,7 +335,7 @@ class GenshinHandle(BaseHandle[GenshinData]):
         self.count_manager.reset(user_id)
         return True
 
-    async def reload_pool(self) -> Optional[Message]:
+    async def _reload_pool(self) -> Optional[Message]:
         await self.update_up_char()
         self.load_up_char()
         if self.UP_CHAR and self.UP_ARMS:

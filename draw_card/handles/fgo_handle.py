@@ -61,9 +61,9 @@ class FgoHandle(BaseHandle[FgoData]):
             )
         if star > 5:
             star -= 3
-            chars = [x for x in self.ALL_CHAR if x.star == star if not x.limited]
+            chars = [x for x in self.ALL_CHAR if x.star == star and not x.limited]
         else:
-            chars = [x for x in self.ALL_CARD if x.star == star if not x.limited]
+            chars = [x for x in self.ALL_CARD if x.star == star and not x.limited]
         return random.choice(chars)
 
     def get_cards(self, count: int, **kwargs) -> List[FgoData]:
@@ -101,6 +101,9 @@ class FgoHandle(BaseHandle[FgoData]):
             for value in self.load_data("fgo_card.json").values()
         ]
 
+    def data_exists(self) -> bool:
+        return super().data_exists() and super().data_exists("fgo_card.json")
+
     async def _update_info(self):
         # fgo.json
         fgo_info = {}
@@ -133,14 +136,14 @@ class FgoHandle(BaseHandle[FgoData]):
                 url = f'http://fgo.vgtime.com/servant/{fgo_info[key]["id"]}'
                 result = await self.get_url(url)
                 if not result:
-                    fgo_info[key]["入手方式"] = []
+                    fgo_info[key]["入手方式"] = ["圣晶石召唤"]
                     logger.warning(f"{self.game_name_cn} 获取额外信息错误 {key}")
                     continue
                 try:
                     dom = etree.HTML(result, etree.HTMLParser())
                     obtain = dom.xpath(
                         "//div[@class='uk-grid uk-margin-remove']/div/table[contains(string(.),'入手方式')]/tbody/tr[8]/td[3]/text()"
-                    )
+                    )[0]
                     obtain = str(obtain).strip()
                     if "限时活动免费获取 活动结束后无法获得" in obtain:
                         obtain = ["活动获取"]
@@ -154,7 +157,7 @@ class FgoHandle(BaseHandle[FgoData]):
                     obtain = [s.strip() for s in obtain if s.strip()]
                     fgo_info[key]["入手方式"] = obtain
                 except IndexError:
-                    fgo_info[key]["入手方式"] = []
+                    fgo_info[key]["入手方式"] = ["圣晶石召唤"]
                     logger.warning(f"{self.game_name_cn} 获取额外信息错误 {key}")
             self.dump_data(fgo_info)
             logger.info(f"{self.game_name_cn} 更新成功")

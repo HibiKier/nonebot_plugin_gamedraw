@@ -3,6 +3,7 @@ import random
 import aiohttp
 import asyncio
 import aiofiles
+import traceback
 from datetime import datetime
 from pydantic import BaseModel, Extra
 from asyncio.exceptions import TimeoutError
@@ -29,7 +30,7 @@ class BaseData(BaseModel, extra=Extra.ignore):
         return self.name == other.name
 
     def __hash__(self):
-        return self.name
+        return hash(self.name)
 
     @property
     def star_str(self) -> str:
@@ -163,6 +164,12 @@ class BaseHandle(Generic[TC]):
         with filepath.open("w", encoding="utf8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
+    def data_exists(self, filename: str = "") -> bool:
+        if not filename:
+            filename = f"{self.game_name}.json"
+        filepath = DRAW_PATH / filename
+        return filepath.exists()
+
     def _init_data(self):
         raise NotImplementedError
 
@@ -181,13 +188,12 @@ class BaseHandle(Generic[TC]):
                 "User-Agent": '"Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)"'
             }
             async with asyncio.Semaphore(draw_config.SEMAPHORE):
-                async with aiohttp.ClientSession(
-                    headers=headers, timeout=10
-                ) as session:
+                async with aiohttp.ClientSession(headers=headers) as session:
                     self.session = session
                     await self._update_info()
         except Exception as e:
-            logger.warning(f"{self.game_name_cn} 更新数据错误：{type(e)}：{e}")
+            logger.warning(traceback.format_exc())
+            # logger.warning(f"{self.game_name_cn} 更新数据错误：{type(e)}：{e}")
         self.init_data()
 
     async def get_url(self, url: str) -> str:
@@ -195,7 +201,7 @@ class BaseHandle(Generic[TC]):
         retry = 5
         for i in range(retry):
             try:
-                async with self.session.get(url) as response:
+                async with self.session.get(url, timeout=10) as response:
                     result = await response.text()
                 break
             except TimeoutError:
@@ -210,7 +216,7 @@ class BaseHandle(Generic[TC]):
             return True
         img_path.parent.mkdir(parents=True, exist_ok=True)
         try:
-            async with self.session.get(url) as response:
+            async with self.session.get(url, timeout=10) as response:
                 async with aiofiles.open(str(img_path), "wb") as f:
                     await f.write(await response.read())
             return True
@@ -221,8 +227,19 @@ class BaseHandle(Generic[TC]):
             logger.warning(f"下载 {self.game_name_cn} 链接错误，名称：{name}，url：{url}")
             return False
 
-    async def reload_pool(self) -> Optional[Message]:
+    async def _reload_pool(self) -> Optional[Message]:
         return None
+
+    async def reload_pool(self) -> Optional[Message]:
+        try:
+            headers = {
+                "User-Agent": '"Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)"'
+            }
+            async with aiohttp.ClientSession(headers=headers) as session:
+                self.session = session
+                return await self._reload_pool()
+        except Exception as e:
+            logger.warning(f"{self.game_name_cn} 重载UP池错误：{type(e)}：{e}")
 
     def reset_count(self, user_id: int) -> bool:
         return False

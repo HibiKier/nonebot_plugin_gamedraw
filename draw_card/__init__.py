@@ -13,15 +13,15 @@ from nonebot.permission import SUPERUSER
 from nonebot.typing import T_Handler
 from nonebot_plugin_apscheduler import scheduler
 
-from handles.base_handle import BaseHandle
-from handles.azur_handle import AzurHandle
-from handles.fgo_handle import FgoHandle
-from handles.genshin_handle import GenshinHandle
-from handles.guardian_handle import GuardianHandle
-from handles.onmyoji_handle import OnmyojiHandle
-from handles.pcr_handle import PcrHandle
-from handles.pretty_handle import PrettyHandle
-from handles.prts_handle import PrtsHandle
+from .handles.base_handle import BaseHandle
+from .handles.azur_handle import AzurHandle
+from .handles.fgo_handle import FgoHandle
+from .handles.genshin_handle import GenshinHandle
+from .handles.guardian_handle import GuardianHandle
+from .handles.onmyoji_handle import OnmyojiHandle
+from .handles.pcr_handle import PcrHandle
+from .handles.pretty_handle import PrettyHandle
+from .handles.prts_handle import PrtsHandle
 
 from .config import draw_config
 
@@ -78,7 +78,7 @@ def create_matchers():
             pool_name = (
                 pool_name.replace("池", "")
                 .replace("武器", "arms")
-                .replace("角色", "card")
+                .replace("角色", "char")
                 .replace("卡牌", "card")
                 .replace("卡", "card")
             )
@@ -147,7 +147,6 @@ def create_matchers():
 
 create_matchers()
 
-driver = nonebot.get_driver()
 
 # 更新资源
 @scheduler.scheduled_job(
@@ -155,10 +154,23 @@ driver = nonebot.get_driver()
     hour=4,
     minute=1,
 )
-@driver.on_startup
 async def _():
     tasks = []
     for game in games:
         if game.flag:
             tasks.append(asyncio.ensure_future(game.handle.update_info()))
+    await asyncio.gather(*tasks)
+
+
+driver = nonebot.get_driver()
+
+
+@driver.on_startup
+async def _():
+    tasks = []
+    for game in games:
+        if game.flag:
+            game.handle.init_data()
+            if not game.handle.data_exists():
+                tasks.append(asyncio.ensure_future(game.handle.update_info()))
     await asyncio.gather(*tasks)

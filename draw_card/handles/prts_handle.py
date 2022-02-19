@@ -60,7 +60,7 @@ class PrtsHandle(BaseHandle[Operator]):
                 zooms = [x.zoom for x in up_operators]
                 zoom_sum = sum(zooms)
                 if random.random() < zoom_sum:
-                    up_name = random.choices(up_operators, weights=zooms, k=1)[0]
+                    up_name = random.choices(up_operators, weights=zooms, k=1)[0].name
                     acquire_operator = [
                         x for x in self.ALL_OPERATOR if x.name == up_name
                     ][0]
@@ -92,11 +92,11 @@ class PrtsHandle(BaseHandle[Operator]):
             star5_list = [x.name for x in self.UP_EVENT.up_char if x.star == 5]
             star4_list = [x.name for x in self.UP_EVENT.up_char if x.star == 4]
             if star6_list:
-                info += f"六星UP：{''.join(star6_list)}\n"
+                info += f"六星UP：{' '.join(star6_list)}\n"
             if star5_list:
-                info += f"五星UP：{''.join(star5_list)}\n"
+                info += f"五星UP：{' '.join(star5_list)}\n"
             if star4_list:
-                info += f"四星UP：{''.join(star4_list)}\n"
+                info += f"四星UP：{' '.join(star4_list)}\n"
             info = f"当前up池: {self.UP_EVENT.title}\n{info}"
         return info.strip()
 
@@ -248,7 +248,7 @@ class PrtsHandle(BaseHandle[Operator]):
                     logger.info(f"成功获取{self.game_name_cn}当前up信息...当前up池: {title}")
                 break
 
-    async def reload_pool(self) -> Optional[Message]:
+    async def _reload_pool(self) -> Optional[Message]:
         await self.update_up_char()
         self.load_up_char()
         if self.UP_EVENT:

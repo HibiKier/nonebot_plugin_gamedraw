@@ -94,7 +94,7 @@ class OnmyojiHandle(BaseHandle[OnmyojiChar]):
         # 更新头像
         for key in info.keys():
             url = f'https://yys.163.com/shishen/{info[key]["id"]}.html'
-            result = self.get_url(url)
+            result = await self.get_url(url)
             if not result:
                 info[key]["头像"] = ""
                 continue

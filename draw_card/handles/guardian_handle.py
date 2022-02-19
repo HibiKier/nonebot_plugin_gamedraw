@@ -123,15 +123,12 @@ class GuardianHandle(BaseHandle[GuardianData]):
         info = ""
         up_event = self.UP_CHAR if pool_name == "char" else self.UP_ARMS
         if up_event:
-            for x in up_event.up_char:
-                if pool_name == "char":
-                    if x.star == 3:
-                        up_list = [x.name for x in up_event.up_char if x.star == 3]
-                        info += f'三星UP：{" ".join(up_list)} \n'
-                else:
-                    if x.star == 5:
-                        up_list = [x.name for x in up_event.up_char if x.star == 5]
-                        info += f'五星UP：{" ".join(up_list)}'
+            if pool_name == "char":
+                up_list = [x.name for x in up_event.up_char if x.star == 3]
+                info += f'三星UP：{" ".join(up_list)}\n'
+            else:
+                up_list = [x.name for x in up_event.up_char if x.star == 5]
+                info += f'五星UP：{" ".join(up_list)}\n'
             info = f"当前up池：{up_event.title}\n{info}"
         return info.strip()
 
@@ -153,6 +150,9 @@ class GuardianHandle(BaseHandle[GuardianData]):
             for value in self.load_data("guardian_arms.json").values()
         ]
         self.load_up_char()
+
+    def data_exists(self) -> bool:
+        return super().data_exists() and super().data_exists("guardian_arms.json")
 
     def load_up_char(self):
         try:
@@ -312,7 +312,7 @@ class GuardianHandle(BaseHandle[GuardianData]):
         except Exception as e:
             logger.warning(f"{self.game_name_cn}UP更新出错 {type(e)}：{e}")
 
-    async def reload_pool(self) -> Optional[Message]:
+    async def _reload_pool(self) -> Optional[Message]:
         await self.update_up_char()
         self.load_up_char()
         if self.UP_CHAR and self.UP_ARMS:
