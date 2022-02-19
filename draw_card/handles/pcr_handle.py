@@ -1,0 +1,112 @@
+import random
+from lxml import etree
+from typing import List
+from urllib.parse import unquote
+from nonebot.log import logger
+
+from .base_handle import BaseHandle, BaseData
+from ..config import draw_config
+from ..util import remove_prohibited_str
+
+
+class PcrChar(BaseData):
+    pass
+
+
+class PcrHandle(BaseHandle[PcrChar]):
+    def __init__(self):
+        super().__init__("pcr", "公主连结")
+        self.max_star = 3
+        self.config = draw_config.pcr
+        self.ALL_CHAR: List[PcrChar] = []
+
+    def get_card(self, mode: int = 1) -> PcrChar:
+        if mode == 2:
+            star = self.get_star(
+                [3, 2], [self.config.PCR_G_THREE_P, self.config.PCR_G_TWO_P]
+            )
+        else:
+            star = self.get_star(
+                [3, 2, 1],
+                [self.config.PCR_THREE_P, self.config.PCR_TWO_P, self.config.PCR_ONE_P],
+            )
+        chars = [x for x in self.ALL_CHAR if x.star == star and not x.limited]
+        return random.choice(chars)
+
+    def get_cards(self, count: int, **kwargs) -> List[PcrChar]:
+        card_list = []
+        card_count = 0  # 保底计算
+        for _ in range(count):
+            card_count += 1
+            # 十连保底
+            if card_count == 10:
+                card = self.get_card(2)
+                card_count = 0
+            else:
+                card = self.get_card(1)
+                if card.star > self.max_star - 2:
+                    card_count = 0
+            card_list.append(card)
+        return card_list
+
+    def _init_data(self):
+        self.ALL_CHAR = [
+            PcrChar(
+                name=value["名称"],
+                star=int(value["星级"]),
+                limited=True if "（" in key else False,
+            )
+            for key, value in self.load_data().items()
+        ]
+
+    async def _update_info(self):
+        info = {}
+        if draw_config.PCR_TAI:
+            url = "https://wiki.biligame.com/pcr/角色图鉴"
+            result = await self.get_url(url)
+            if not result:
+                logger.warning(f"更新 {self.game_name_cn} 出错")
+                return
+            dom = etree.HTML(result, etree.HTMLParser())
+            char_list = dom.xpath(
+                "//div[@class='resp-tab-content']/div[@class='unit-icon']"
+            )
+            for char in char_list:
+                try:
+                    name = char.xpath("./a/@title")[0]
+                    avatar = char.xpath("./a/img/@srcset")[0]
+                    star = len(char.xpath("./div[1]/img"))
+                except IndexError:
+                    continue
+                member_dict = {
+                    "头像": unquote(str(avatar).split(" ")[-2]),
+                    "名称": remove_prohibited_str(name),
+                    "星级": star,
+                }
+                info[member_dict["名称"]] = member_dict
+        else:
+            url = "https://wiki.biligame.com/pcr/角色筛选表"
+            result = await self.get_url(url)
+            if not result:
+                logger.warning(f"更新 {self.game_name_cn} 出错")
+                return
+            dom = etree.HTML(result, etree.HTMLParser())
+            char_list = dom.xpath("//table[@id='CardSelectTr']/tbody/tr")
+            for char in char_list:
+                try:
+                    name = char.xpath("./td[1]/a/@title")[0]
+                    avatar = char.xpath("./td[1]/a/img/@srcset")[0]
+                    star = char.xpath("./td[4]/text()")[0]
+                except IndexError:
+                    continue
+                member_dict = {
+                    "头像": unquote(str(avatar).split(" ")[-2]),
+                    "名称": remove_prohibited_str(name),
+                    "星级": int(str(star).strip()),
+                }
+                info[member_dict["名称"]] = member_dict
+        self.dump_data(info)
+        logger.info(f"{self.game_name_cn} 更新成功")
+        # 下载头像
+        for value in info.values():
+            await self.download_img(value["头像"], value["名称"])
