@@ -92,7 +92,9 @@ class FgoHandle(BaseHandle[FgoData]):
             FgoChar(
                 name=value["名称"],
                 star=int(value["星级"]),
-                limited=True if "圣晶石召唤" not in value["入手方式"] else False,
+                limited=True
+                if not ("圣晶石召唤" in value["入手方式"] or "圣晶石召唤（Story卡池）" in value["入手方式"])
+                else False,
             )
             for value in self.load_data().values()
         ]
@@ -107,85 +109,88 @@ class FgoHandle(BaseHandle[FgoData]):
     async def _update_info(self):
         # fgo.json
         fgo_info = {}
-        url = "http://fgo.vgtime.com/servant/ajax?card=&wd=&ids=&sort=12777&o=desc&pn="
-        result = await self.get_url(url)
-        if not result:
-            logger.warning(f"更新 {self.game_name_cn} 出错")
-        else:
+        for i in range(500):
+            url = f"http://fgo.vgtime.com/servant/ajax?card=&wd=&ids=&sort=12777&o=desc&pn={i}"
+            result = await self.get_url(url)
+            if not result:
+                logger.warning(f"更新 {self.game_name_cn} page {i} 出错")
+                continue
             fgo_data = json.loads(result)
-            if int(fgo_data["nums"]) > 0:
-                for x in fgo_data["data"]:
-                    name = remove_prohibited_str(x["name"])
-                    member_dict = {
-                        "id": x["id"],
-                        "card_id": x["charid"],
-                        "头像": x["icon"],
-                        "名称": name,
-                        "职阶": x["classes"],
-                        "星级": x["star"],
-                        "hp": x["lvmax4hp"],
-                        "atk": x["lvmax4atk"],
-                        "card_quick": x["cardquick"],
-                        "card_arts": x["cardarts"],
-                        "card_buster": x["cardbuster"],
-                        "宝具": x["tprop"],
-                    }
-                    fgo_info[name] = member_dict
-            # 更新额外信息
-            for key in fgo_info.keys():
-                url = f'http://fgo.vgtime.com/servant/{fgo_info[key]["id"]}'
-                result = await self.get_url(url)
-                if not result:
-                    fgo_info[key]["入手方式"] = ["圣晶石召唤"]
-                    logger.warning(f"{self.game_name_cn} 获取额外信息错误 {key}")
-                    continue
-                try:
-                    dom = etree.HTML(result, etree.HTMLParser())
-                    obtain = dom.xpath(
-                        "//div[@class='uk-grid uk-margin-remove']/div/table[contains(string(.),'入手方式')]/tbody/tr[8]/td[3]/text()"
-                    )[0]
-                    obtain = str(obtain).strip()
-                    if "限时活动免费获取 活动结束后无法获得" in obtain:
-                        obtain = ["活动获取"]
-                    elif "非限时UP无法获得" in obtain:
-                        obtain = ["限时召唤"]
+            if int(fgo_data["nums"]) <= 0:
+                break
+            for x in fgo_data["data"]:
+                name = remove_prohibited_str(x["name"])
+                member_dict = {
+                    "id": x["id"],
+                    "card_id": x["charid"],
+                    "头像": x["icon"],
+                    "名称": remove_prohibited_str(x["name"]),
+                    "职阶": x["classes"],
+                    "星级": int(x["star"]),
+                    "hp": x["lvmax4hp"],
+                    "atk": x["lvmax4atk"],
+                    "card_quick": x["cardquick"],
+                    "card_arts": x["cardarts"],
+                    "card_buster": x["cardbuster"],
+                    "宝具": x["tprop"],
+                }
+                fgo_info[name] = member_dict
+        # 更新额外信息
+        for key in fgo_info.keys():
+            url = f'http://fgo.vgtime.com/servant/{fgo_info[key]["id"]}'
+            result = await self.get_url(url)
+            if not result:
+                fgo_info[key]["入手方式"] = ["圣晶石召唤"]
+                logger.warning(f"{self.game_name_cn} 获取额外信息错误 {key}")
+                continue
+            try:
+                dom = etree.HTML(result, etree.HTMLParser())
+                obtain = dom.xpath(
+                    "//table[contains(string(.),'入手方式')]/tr[8]/td[3]/text()"
+                )[0]
+                obtain = str(obtain).strip()
+                if "限时活动免费获取 活动结束后无法获得" in obtain:
+                    obtain = ["活动获取"]
+                elif "非限时UP无法获得" in obtain:
+                    obtain = ["限时召唤"]
+                else:
+                    if "&" in obtain:
+                        obtain = obtain.split("&")
                     else:
-                        if "&" in obtain:
-                            obtain = obtain.split("&")
-                        else:
-                            obtain = obtain.split(" ")
-                    obtain = [s.strip() for s in obtain if s.strip()]
-                    fgo_info[key]["入手方式"] = obtain
-                except IndexError:
-                    fgo_info[key]["入手方式"] = ["圣晶石召唤"]
-                    logger.warning(f"{self.game_name_cn} 获取额外信息错误 {key}")
-            self.dump_data(fgo_info)
-            logger.info(f"{self.game_name_cn} 更新成功")
+                        obtain = obtain.split(" ")
+                obtain = [s.strip() for s in obtain if s.strip()]
+                fgo_info[key]["入手方式"] = obtain
+            except IndexError:
+                fgo_info[key]["入手方式"] = ["圣晶石召唤"]
+                logger.warning(f"{self.game_name_cn} 获取额外信息错误 {key}")
+        self.dump_data(fgo_info)
+        logger.info(f"{self.game_name_cn} 更新成功")
         # fgo_card.json
         fgo_card_info = {}
-        url = "http://fgo.vgtime.com/equipment/ajax?wd=&ids=&sort=12958&o=desc&pn="
-        result = await self.get_url(url)
-        if not result:
-            logger.warning(f"更新 {self.game_name_cn} 卡牌出错")
-        else:
+        for i in range(500):
+            url = f"http://fgo.vgtime.com/equipment/ajax?wd=&ids=&sort=12958&o=desc&pn={i}"
+            result = await self.get_url(url)
+            if not result:
+                logger.warning(f"更新 {self.game_name_cn}卡牌 page {i} 出错")
+                continue
             fgo_data = json.loads(result)
-            if int(fgo_data["nums"]) > 0:
-                for x in fgo_data["data"]:
-                    name = remove_prohibited_str(x["name"])
-                    member_dict = {
-                        "id": x["id"],
-                        "card_id": x["equipid"],
-                        "头像": x["icon"],
-                        "名称": name,
-                        "星级": x["star"],
-                        "hp": x["lvmax_hp"],
-                        "atk": x["lvmax_atk"],
-                        "skill_e": str(x["skill_e"]).split("<br />")[:-1],
-                    }
-                    fgo_card_info[name] = member_dict
-                    # logger.info(f"{name} is update...")
-            self.dump_data(fgo_card_info, "fgo_card.json")
-            logger.info(f"{self.game_name_cn} 卡牌更新成功")
+            if int(fgo_data["nums"]) <= 0:
+                break
+            for x in fgo_data["data"]:
+                name = remove_prohibited_str(x["name"])
+                member_dict = {
+                    "id": x["id"],
+                    "card_id": x["equipid"],
+                    "头像": x["icon"],
+                    "名称": name,
+                    "星级": int(x["star"]),
+                    "hp": x["lvmax_hp"],
+                    "atk": x["lvmax_atk"],
+                    "skill_e": str(x["skill_e"]).split("<br />")[:-1],
+                }
+                fgo_card_info[name] = member_dict
+        self.dump_data(fgo_card_info, "fgo_card.json")
+        logger.info(f"{self.game_name_cn} 卡牌更新成功")
         # 下载头像
         for value in fgo_info.values():
             await self.download_img(value["头像"], value["名称"])

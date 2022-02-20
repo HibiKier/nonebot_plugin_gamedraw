@@ -3,7 +3,6 @@ import random
 import aiohttp
 import asyncio
 import aiofiles
-import traceback
 from datetime import datetime
 from pydantic import BaseModel, Extra
 from asyncio.exceptions import TimeoutError
@@ -160,7 +159,6 @@ class BaseHandle(Generic[TC]):
         if not filename:
             filename = f"{self.game_name}.json"
         filepath = DRAW_PATH / filename
-        filepath.parent.mkdir(parents=True, exist_ok=True)
         with filepath.open("w", encoding="utf8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
@@ -170,10 +168,15 @@ class BaseHandle(Generic[TC]):
         filepath = DRAW_PATH / filename
         return filepath.exists()
 
+    def mkdirs(self):
+        (DRAW_PATH / f"draw_card/{self.game_name}").mkdir(parents=True, exist_ok=True)
+        (DRAW_PATH / "draw_card_up").mkdir(parents=True, exist_ok=True)
+
     def _init_data(self):
         raise NotImplementedError
 
     def init_data(self):
+        self.mkdirs()
         try:
             self._init_data()
         except Exception as e:
@@ -192,8 +195,7 @@ class BaseHandle(Generic[TC]):
                     self.session = session
                     await self._update_info()
         except Exception as e:
-            logger.warning(traceback.format_exc())
-            # logger.warning(f"{self.game_name_cn} 更新数据错误：{type(e)}：{e}")
+            logger.warning(f"{self.game_name_cn} 更新数据错误：{type(e)}：{e}")
         self.init_data()
 
     async def get_url(self, url: str) -> str:
@@ -214,7 +216,6 @@ class BaseHandle(Generic[TC]):
         img_path = DRAW_PATH / f"draw_card/{self.game_name}/{codename}.png"
         if img_path.exists():
             return True
-        img_path.parent.mkdir(parents=True, exist_ok=True)
         try:
             async with self.session.get(url, timeout=10) as response:
                 async with aiofiles.open(str(img_path), "wb") as f:
