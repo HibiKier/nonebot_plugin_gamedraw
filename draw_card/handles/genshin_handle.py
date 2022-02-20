@@ -34,6 +34,7 @@ class GenshinArms(GenshinData):
 class GenshinHandle(BaseHandle[GenshinData]):
     def __init__(self):
         super().__init__("genshin", "原神")
+        self.data_files.append("genshin_arms.json")
         self.max_star = 5
         self.config = draw_config.genshin
 
@@ -184,9 +185,6 @@ class GenshinHandle(BaseHandle[GenshinData]):
             for value in self.load_data("genshin_arms.json").values()
         ]
         self.load_up_char()
-
-    def data_exists(self) -> bool:
-        return super().data_exists() and super().data_exists("genshin_arms.json")
 
     def load_up_char(self):
         try:

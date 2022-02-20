@@ -29,6 +29,7 @@ class FgoCard(FgoData):
 class FgoHandle(BaseHandle[FgoData]):
     def __init__(self):
         super().__init__("fgo", "命运-冠位指定")
+        self.data_files.append("fgo_card.json")
         self.max_star = 5
         self.config = draw_config.fgo
         self.ALL_CHAR: List[FgoChar] = []
@@ -107,9 +108,6 @@ class FgoHandle(BaseHandle[FgoData]):
             FgoCard(name=value["名称"], star=int(value["星级"]), limited=False)
             for value in self.load_data("fgo_card.json").values()
         ]
-
-    def data_exists(self) -> bool:
-        return super().data_exists() and super().data_exists("fgo_card.json")
 
     async def _update_info(self):
         # fgo.json

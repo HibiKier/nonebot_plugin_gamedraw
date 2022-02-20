@@ -61,6 +61,7 @@ class BaseHandle(Generic[TC]):
         self.up_path = DRAW_PATH / "draw_card_up"
         self.img_path.mkdir(parents=True, exist_ok=True)
         self.up_path.mkdir(parents=True, exist_ok=True)
+        self.data_files: List[str] = [f"{self.game_name}.json"]
 
     def draw(self, count: int, **kwargs) -> Message:
         cards = self.get_cards(count, **kwargs)
@@ -166,11 +167,11 @@ class BaseHandle(Generic[TC]):
         with filepath.open("w", encoding="utf8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
-    def data_exists(self, filename: str = "") -> bool:
-        if not filename:
-            filename = f"{self.game_name}.json"
-        filepath = self.data_path / filename
-        return filepath.exists()
+    def data_exists(self) -> bool:
+        for file in self.data_files:
+            if not (self.data_path / file).exists():
+                return False
+        return True
 
     def _init_data(self):
         raise NotImplementedError

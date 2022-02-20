@@ -38,6 +38,7 @@ class PrettyCard(PrettyData):
 class PrettyHandle(BaseHandle[PrettyData]):
     def __init__(self):
         super().__init__("pretty", "赛马娘")
+        self.data_files.append("pretty_card.json")
         self.max_star = 3
         self.config = draw_config.pretty
 
@@ -158,9 +159,6 @@ class PrettyHandle(BaseHandle[PrettyData]):
             for value in self.load_data("pretty_card.json").values()
         ]
         self.load_up_char()
-
-    def data_exists(self) -> bool:
-        return super().data_exists() and super().data_exists("pretty_card.json")
 
     def load_up_char(self):
         try:
@@ -339,9 +337,8 @@ class PrettyHandle(BaseHandle[PrettyData]):
         self.load_up_char()
         if self.UP_CHAR and self.UP_CARD:
             return Message(
-                Message.template("重载成功！\n当前UP池子：{} & {}{:image}{:image}").format(
+                Message.template("重载成功！\n当前UP池子：{}{:image}{:image}").format(
                     self.UP_CHAR.title,
-                    self.UP_CARD.title,
                     self.UP_CHAR.pool_img,
                     self.UP_CARD.pool_img,
                 )

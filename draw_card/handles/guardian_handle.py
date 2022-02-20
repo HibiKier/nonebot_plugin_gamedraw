@@ -34,6 +34,7 @@ class GuardianArms(GuardianData):
 class GuardianHandle(BaseHandle[GuardianData]):
     def __init__(self):
         super().__init__("guardian", "坎公骑冠剑")
+        self.data_files.append("guardian_arms.json")
         self.config = draw_config.guardian
 
         self.ALL_CHAR: List[GuardianChar] = []
@@ -150,9 +151,6 @@ class GuardianHandle(BaseHandle[GuardianData]):
             for value in self.load_data("guardian_arms.json").values()
         ]
         self.load_up_char()
-
-    def data_exists(self) -> bool:
-        return super().data_exists() and super().data_exists("guardian_arms.json")
 
     def load_up_char(self):
         try:
@@ -316,4 +314,4 @@ class GuardianHandle(BaseHandle[GuardianData]):
         await self.update_up_char()
         self.load_up_char()
         if self.UP_CHAR and self.UP_ARMS:
-            return Message(f"当前UP池子：{self.UP_CHAR.title}")
+            return Message(f"重载成功！\n当前UP池子：{self.UP_CHAR.title}")
