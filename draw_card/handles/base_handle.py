@@ -56,6 +56,11 @@ class BaseHandle(Generic[TC]):
         self.game_name = game_name
         self.game_name_cn = game_name_cn
         self.max_star = 1  # 最大星级
+        self.data_path = DRAW_PATH
+        self.img_path = DRAW_PATH / f"draw_card/{self.game_name}"
+        self.up_path = DRAW_PATH / "draw_card_up"
+        self.img_path.mkdir(parents=True, exist_ok=True)
+        self.up_path.mkdir(parents=True, exist_ok=True)
 
     def draw(self, count: int, **kwargs) -> Message:
         cards = self.get_cards(count, **kwargs)
@@ -142,14 +147,13 @@ class BaseHandle(Generic[TC]):
         return img.pic2bs4()
 
     def generate_card_img(self, card: TC) -> CreateImg:
-        py_name = cn2py(card.name)
-        img = str(DRAW_PATH / f"draw_card/{self.game_name}/{py_name}.png")
+        img = str(self.img_path / f"{cn2py(card.name)}.png")
         return CreateImg(100, 100, background=img)
 
     def load_data(self, filename: str = "") -> dict:
         if not filename:
             filename = f"{self.game_name}.json"
-        filepath = DRAW_PATH / filename
+        filepath = self.data_path / filename
         if not filepath.exists():
             return {}
         with filepath.open("r", encoding="utf8") as f:
@@ -158,25 +162,20 @@ class BaseHandle(Generic[TC]):
     def dump_data(self, data: dict, filename: str = ""):
         if not filename:
             filename = f"{self.game_name}.json"
-        filepath = DRAW_PATH / filename
+        filepath = self.data_path / filename
         with filepath.open("w", encoding="utf8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
     def data_exists(self, filename: str = "") -> bool:
         if not filename:
             filename = f"{self.game_name}.json"
-        filepath = DRAW_PATH / filename
+        filepath = self.data_path / filename
         return filepath.exists()
-
-    def mkdirs(self):
-        (DRAW_PATH / f"draw_card/{self.game_name}").mkdir(parents=True, exist_ok=True)
-        (DRAW_PATH / "draw_card_up").mkdir(parents=True, exist_ok=True)
 
     def _init_data(self):
         raise NotImplementedError
 
     def init_data(self):
-        self.mkdirs()
         try:
             self._init_data()
         except Exception as e:
@@ -185,13 +184,16 @@ class BaseHandle(Generic[TC]):
     async def _update_info(self):
         raise NotImplementedError
 
+    def client(self) -> aiohttp.ClientSession:
+        headers = {
+            "User-Agent": '"Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)"'
+        }
+        return aiohttp.ClientSession(headers=headers)
+
     async def update_info(self):
         try:
-            headers = {
-                "User-Agent": '"Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)"'
-            }
             async with asyncio.Semaphore(draw_config.SEMAPHORE):
-                async with aiohttp.ClientSession(headers=headers) as session:
+                async with self.client() as session:
                     self.session = session
                     await self._update_info()
         except Exception as e:
@@ -212,8 +214,7 @@ class BaseHandle(Generic[TC]):
         return result
 
     async def download_img(self, url: str, name: str) -> bool:
-        codename = cn2py(name)
-        img_path = DRAW_PATH / f"draw_card/{self.game_name}/{codename}.png"
+        img_path = self.img_path / f"{cn2py(name)}.png"
         if img_path.exists():
             return True
         try:
@@ -233,10 +234,7 @@ class BaseHandle(Generic[TC]):
 
     async def reload_pool(self) -> Optional[Message]:
         try:
-            headers = {
-                "User-Agent": '"Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)"'
-            }
-            async with aiohttp.ClientSession(headers=headers) as session:
+            async with self.client() as session:
                 self.session = session
                 return await self._reload_pool()
         except Exception as e:

@@ -6,7 +6,8 @@ from nonebot.log import logger
 
 from .base_handle import BaseHandle, BaseData
 from ..config import draw_config
-from ..util import remove_prohibited_str
+from ..util import remove_prohibited_str, cn2py
+from ..create_img import CreateImg
 
 
 class AzurChar(BaseData):
@@ -46,6 +47,14 @@ class AzurHandle(BaseHandle[AzurChar]):
             if x.star == star and x.itype in itype and not x.limited
         ]
         return random.choice(chars)
+
+    def generate_card_img(self, card: AzurChar) -> CreateImg:
+        bg_path = str(self.img_path / f"{card.star}_star.png")
+        bg = CreateImg(100, 100, background=bg_path)
+        img_path = str(self.img_path / f"{cn2py(card.name)}.png")
+        img = CreateImg(98, 90, background=img_path)
+        bg.paste(img, (1, 5))
+        return bg
 
     def _init_data(self):
         self.ALL_CHAR = [

@@ -17,7 +17,8 @@ except ModuleNotFoundError:
 
 from .base_handle import BaseHandle, BaseData, UpChar, UpEvent
 from ..config import draw_config
-from ..util import remove_prohibited_str
+from ..util import remove_prohibited_str, cn2py
+from ..create_img import CreateImg
 
 
 class PrettyData(BaseData):
@@ -132,6 +133,12 @@ class PrettyHandle(BaseHandle[PrettyData]):
         result = self.format_result(cards, up_list=up_list)
         pool_info = self.format_pool_info(pool_name)
         return pool_info + MessageSegment.image(self.generate_img(cards)) + result
+
+    def generate_card_img(self, card: PrettyData) -> CreateImg:
+        w = 200
+        h = 267 if isinstance(card, PrettyCard) else 219
+        img = str(self.img_path / f"{cn2py(card.name)}.png")
+        return CreateImg(w, h, background=img)
 
     def _init_data(self):
         self.ALL_CHAR = [

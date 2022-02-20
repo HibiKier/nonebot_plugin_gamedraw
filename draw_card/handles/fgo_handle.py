@@ -10,7 +10,8 @@ except ModuleNotFoundError:
 
 from .base_handle import BaseHandle, BaseData
 from ..config import draw_config
-from ..util import remove_prohibited_str
+from ..util import remove_prohibited_str, cn2py
+from ..create_img import CreateImg
 
 
 class FgoData(BaseData):
@@ -86,6 +87,10 @@ class FgoHandle(BaseHandle[FgoData]):
                 servant_count = 0
             card_list.append(card)
         return card_list
+
+    def generate_card_img(self, card: FgoData) -> CreateImg:
+        img = str(self.img_path / f"{cn2py(card.name)}.png")
+        return CreateImg(128, 140, background=img)
 
     def _init_data(self):
         self.ALL_CHAR = [
