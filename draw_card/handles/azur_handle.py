@@ -1,12 +1,13 @@
 import random
 from lxml import etree
 from typing import List
+from PIL import ImageDraw
 from urllib.parse import unquote
 from nonebot.log import logger
 
 from .base_handle import BaseHandle, BaseData
 from ..config import draw_config
-from ..util import remove_prohibited_str, cn2py
+from ..util import remove_prohibited_str, cn2py, load_font
 from ..create_img import CreateImg
 
 
@@ -48,12 +49,36 @@ class AzurHandle(BaseHandle[AzurChar]):
         ]
         return random.choice(chars)
 
+    def generate_img(self, card_list: List[AzurChar]) -> str:
+        return super().generate_img(card_list, num_per_line=6)
+
     def generate_card_img(self, card: AzurChar) -> CreateImg:
-        bg_path = str(self.img_path / f"{card.star}_star.png")
-        bg = CreateImg(100, 100, background=bg_path)
+        sep_w = 5
+        sep_t = 5
+        sep_b = 20
+        w = 100
+        h = 100
+        bg = CreateImg(w + sep_w * 2, h + sep_t + sep_b)
+        frame_path = str(self.img_path / f"{card.star}_star.png")
+        frame = CreateImg(w, h, background=frame_path)
         img_path = str(self.img_path / f"{cn2py(card.name)}.png")
-        img = CreateImg(98, 90, background=img_path)
-        bg.paste(img, (1, 5))
+        img = CreateImg(w, h, background=img_path)
+        # 加圆角
+        frame.circle_corner(6)
+        img.circle_corner(6)
+        bg.paste(img, (sep_w, sep_t), alpha=True)
+        bg.paste(frame, (sep_w, sep_t), alpha=True)
+        # 加名字
+        text = card.name[:6] + "..." if len(card.name) > 7 else card.name
+        font = load_font(fontsize=14)
+        text_w, text_h = font.getsize(text)
+        draw = ImageDraw.Draw(bg.markImg)
+        draw.text(
+            (sep_w + (w - text_w) / 2, h + sep_t + (sep_b - text_h) / 2),
+            text,
+            font=font,
+            fill=["#808080", "#3b8bff", "#8000ff", "#c90", "#ee494c"][card.star - 1],
+        )
         return bg
 
     def _init_data(self):

@@ -75,6 +75,21 @@ class CreateImg:
         self.current_w += self.img_w
         return self.markImg
 
+    def circle_corner(self, r: int):
+        img = self.markImg.convert("RGBA")
+        w, h = img.size
+        alpha = img.split()[-1]
+        circle = Image.new("L", (r * 2, r * 2), 0)  # 创建黑色方形
+        draw = ImageDraw.Draw(circle)
+        draw.ellipse((0, 0, r * 2, r * 2), fill=255)  # 黑色方形内切白色圆形
+        draw = ImageDraw.Draw(alpha)
+        alpha.paste(circle.crop((0, 0, r, r)), (0, 0))  # 左上角
+        alpha.paste(circle.crop((r, 0, r * 2, r)), (w - r, 0))  # 右上角
+        alpha.paste(circle.crop((r, r, r * 2, r * 2)), (w - r, h - r))  # 右下角
+        alpha.paste(circle.crop((0, r, r, r * 2)), (0, h - r))  # 左下角
+        img.putalpha(alpha)
+        self.markImg = img
+
     # 转bs4:
     def pic2bs4(self):
         buf = BytesIO()
