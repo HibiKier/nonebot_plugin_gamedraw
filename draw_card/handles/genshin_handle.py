@@ -1,6 +1,7 @@
 import random
 import dateparser
 from lxml import etree
+from PIL import Image, ImageDraw
 from urllib.parse import unquote
 from typing import List, Optional
 from pydantic import ValidationError
@@ -16,7 +17,8 @@ except ModuleNotFoundError:
 from .base_handle import BaseHandle, BaseData, UpChar, UpEvent
 from ..config import draw_config
 from ..count_manager import GenshinCountManager
-from ..util import remove_prohibited_str
+from ..util import remove_prohibited_str, cn2py, load_font
+from ..create_img import CreateImg
 
 
 class GenshinData(BaseData):
@@ -133,6 +135,49 @@ class GenshinHandle(BaseHandle[GenshinData]):
                     count_manager.set_is_up(user_id, False)
             card_list.append(card)
         return card_list
+
+    def generate_img(self, card_list: List[GenshinData]) -> str:
+        return super().generate_img(
+            card_list, num_per_line=5, paste_alpha=True, color="#EBEBEB"
+        )
+
+    def generate_card_img(self, card: GenshinData) -> CreateImg:
+        sep_w = 10
+        sep_h = 5
+        frame_w = 112
+        frame_h = 132
+        img_w = 106
+        img_h = 106
+        bg = CreateImg(frame_w + sep_w * 2, frame_h + sep_h * 2, color=None)
+        frame_path = str(self.img_path / "avatar_frame.png")
+        frame = Image.open(frame_path)
+        # 加名字
+        text = card.name
+        font = load_font(fontsize=14)
+        text_w, text_h = font.getsize(text)
+        draw = ImageDraw.Draw(frame)
+        draw.text(
+            ((frame_w - text_w) / 2, frame_h - 15 - text_h / 2),
+            text,
+            font=font,
+            fill="#000000",
+        )
+        img_path = str(self.img_path / f"{cn2py(card.name)}.png")
+        img = CreateImg(img_w, img_h, background=img_path)
+        if isinstance(card, GenshinArms):
+            # 武器卡背景不是透明的，切去上方两个圆弧
+            r = 12
+            circle = Image.new("L", (r * 2, r * 2), 0)
+            alpha = Image.new("L", img.size, 255)
+            alpha.paste(circle, (-r - 3, -r - 3))  # 左上角
+            alpha.paste(circle, (img_h - r + 3, -r - 3))  # 右上角
+            img.markImg.putalpha(alpha)
+        star_path = str(self.img_path / f"{card.star}_star.png")
+        star = Image.open(star_path)
+        bg.paste(frame, (sep_w, sep_h), alpha=True)
+        bg.paste(img, (sep_w + 3, sep_h + 3), alpha=True)
+        bg.paste(star, (sep_w + int((frame_w - star.width) / 2), sep_h - 6), alpha=True)
+        return bg
 
     def format_pool_info(self, pool_name: str) -> str:
         info = ""
@@ -274,6 +319,22 @@ class GenshinHandle(BaseHandle[GenshinData]):
             await self.download_img(value["头像"], value["名称"])
         for value in arms_info.values():
             await self.download_img(value["头像"], value["名称"])
+        # 下载星星
+        idx = 1
+        YS_URL = "https://patchwiki.biligame.com/images/ys"
+        for url in [
+            "/1/13/7xzg7tgf8dsr2hjpmdbm5gn9wvzt2on.png",
+            "/b/bc/sd2ige6d7lvj7ugfumue3yjg8gyi0d1.png",
+            "/e/ec/l3mnhy56pyailhn3v7r873htf2nofau.png",
+            "/9/9c/sklp02ffk3aqszzvh8k1c3139s0awpd.png",
+            "/c/c7/qu6xcndgj6t14oxvv7yz2warcukqv1m.png",
+        ]:
+            await self.download_img(YS_URL + url, f"{idx}_star")
+            idx += 1
+        # 下载头像框
+        await self.download_img(
+            YS_URL + "/2/2e/opbcst4xbtcq0i4lwerucmosawn29ti.png", f"avatar_frame"
+        )
         await self.update_up_char()
 
     async def update_up_char(self):

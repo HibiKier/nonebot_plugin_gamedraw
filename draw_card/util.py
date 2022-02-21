@@ -1,5 +1,10 @@
 import platform
 import pypinyin
+from pathlib import Path
+from PIL import ImageFont
+from PIL.ImageFont import FreeTypeFont
+
+dir_path = Path(__file__).parent.absolute()
 
 
 def cn2py(word) -> str:
@@ -20,3 +25,9 @@ def remove_prohibited_str(name: str) -> str:
     else:
         name = name.replace("/", "\\")
     return name
+
+
+def load_font(fontname: str = "msyh.ttf", fontsize: int = 16) -> FreeTypeFont:
+    return ImageFont.truetype(
+        str(dir_path / f"resources/fonts/{fontname}"), fontsize, encoding="utf-8"
+    )
