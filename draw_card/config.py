@@ -86,17 +86,6 @@ class OnmyojiConfig(BaseModel, extra=Extra.ignore):
     ONMYOJI_R: float = 0.7875
 
 
-class PathDict(BaseModel, extra=Extra.ignore):
-    genshin: str = "原神"
-    prts: str = "明日方舟"
-    pretty: str = "赛马娘"
-    guardian: str = "坎公骑冠剑"
-    pcr: str = "公主连结"
-    azur: str = "碧蓝航线"
-    fgo: str = "命运-冠位指定"
-    onmyoji: str = "阴阳师"
-
-
 class Config(BaseModel, extra=Extra.ignore):
     # 开关
     PRTS_FLAG: bool = True
@@ -112,18 +101,6 @@ class Config(BaseModel, extra=Extra.ignore):
     PCR_TAI: bool = True
     SEMAPHORE: int = 5
 
-    # 路径
-    path_dict: dict = {
-        "genshin": "原神",
-        "prts": "明日方舟",
-        "pretty": "赛马娘",
-        "guardian": "坎公骑冠剑",
-        "pcr": "公主连结",
-        "azur": "碧蓝航线",
-        "fgo": "命运-冠位指定",
-        "onmyoji": "阴阳师",
-    }
-
     # 抽卡概率
     prts: PrtsConfig = PrtsConfig()
     genshin: GenshinConfig = GenshinConfig()
@@ -137,8 +114,11 @@ class Config(BaseModel, extra=Extra.ignore):
 
 driver = nonebot.get_driver()
 global_config = driver.config
-draw_path = global_config.draw_path
-DRAW_PATH = Path(draw_path) if draw_path else Path("data/draw_card").absolute()
+DRAW_PATH = Path("data/draw_card").absolute()
+try:
+    DRAW_PATH = Path(global_config.draw_path).absolute()
+except:
+    pass
 config_path = DRAW_PATH / "draw_card_config" / "draw_card_config.json"
 
 draw_config: Config = Config()
@@ -153,16 +133,18 @@ def check_config():
         draw_config = Config()
         logger.warning("draw_card：配置文件不存在，已重新生成配置文件.....")
     else:
-        data = json.load(config_path.open("r", encoding="utf8"))
+        with config_path.open("r", encoding="utf8") as fp:
+            data = json.load(fp)
         try:
             draw_config = Config.parse_obj({**global_config.dict(), **data})
         except ValidationError:
             draw_config = Config()
             logger.warning("draw_card：配置文件格式错误，已重新生成配置文件.....")
 
-    json.dump(
-        draw_config.dict(),
-        config_path.open("w", encoding="utf8"),
-        indent=4,
-        ensure_ascii=False,
-    )
+    with config_path.open("w", encoding="utf8") as fp:
+        json.dump(
+            draw_config.dict(),
+            fp,
+            indent=4,
+            ensure_ascii=False,
+        )

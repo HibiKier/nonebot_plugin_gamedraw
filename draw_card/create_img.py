@@ -1,18 +1,22 @@
-from PIL import Image, ImageDraw
 import base64
 from io import BytesIO
+from pathlib import Path
+from PIL import Image, ImageDraw, UnidentifiedImageError
+from nonebot.log import logger
 
 
 class CreateImg:
-    def __init__(self,
-                 w,
-                 h,
-                 img_w=0,
-                 img_h=0,
-                 color='white',
-                 image_type='RGBA',
-                 background='',
-                 divisor=1):
+    def __init__(
+        self,
+        w: int,
+        h: int,
+        img_w: int = 0,
+        img_h: int = 0,
+        background: str = "",
+        color="white",
+        image_type="RGBA",
+        divisor: float = 1,
+    ):
         self.w = int(w)
         self.h = int(h)
         self.img_w = int(img_w)
@@ -22,18 +26,32 @@ class CreateImg:
         if not background:
             self.markImg = Image.new(image_type, (self.w, self.h), color)
         else:
-            if w == 0 and h == 0:
-                self.markImg = Image.open(background)
-                w, h = self.markImg.size
-                if divisor:
-                    self.w = int(divisor * w)
-                    self.h = int(divisor * h)
-                    self.markImg = self.markImg.resize((self.w, self.h), Image.ANTIALIAS)
+            try:
+                if w == 0 and h == 0:
+                    self.markImg = Image.open(background)
+                    w, h = self.markImg.size
+                    if divisor:
+                        self.w = int(divisor * w)
+                        self.h = int(divisor * h)
+                        self.markImg = self.markImg.resize(
+                            (self.w, self.h), Image.ANTIALIAS
+                        )
+                    else:
+                        self.w = w
+                        self.h = h
                 else:
-                    self.w = w
-                    self.h = h
-            else:
-                self.markImg = Image.open(background).resize((self.w, self.h), Image.ANTIALIAS)
+                    self.markImg = Image.open(background).resize(
+                        (self.w, self.h), Image.ANTIALIAS
+                    )
+
+            except UnidentifiedImageError as e:
+                logger.warning(f"无法识别图片 已删除图片，下次更新重新下载... e：{e}")
+                Path(background).unlink(missing_ok=True)
+                self.markImg = Image.new(image_type, (self.w, self.h), color)
+            except FileNotFoundError:
+                logger.warning(f"{background} not exists")
+                self.markImg = Image.new(image_type, (self.w, self.h), color)
+
         self.draw = ImageDraw.Draw(self.markImg)
         self.size = self.w, self.h
 
@@ -60,6 +78,5 @@ class CreateImg:
     # 转bs4:
     def pic2bs4(self):
         buf = BytesIO()
-        self.markImg.save(buf, format='PNG')
-        base64_str = base64.b64encode(buf.getvalue()).decode()
-        return base64_str
+        self.markImg.save(buf, format="PNG")
+        return f"base64://{base64.b64encode(buf.getvalue()).decode()}"

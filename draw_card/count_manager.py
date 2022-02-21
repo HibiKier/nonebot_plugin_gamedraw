@@ -33,7 +33,9 @@ class DrawCountManager:
         else:
             self._data[key][f"count"] += value
             if self._data[key][f"count"] > self._guarantee_tuple[-1]:
-                self._data[key][f"count"] = self._data[key][f"count"] % self._guarantee_tuple[-1]
+                self._data[key][f"count"] = (
+                    self._data[key][f"count"] % self._guarantee_tuple[-1]
+                )
 
     def reset(self, key: int):
         """
@@ -70,7 +72,6 @@ class DrawCountManager:
 
 
 class GenshinCountManager(DrawCountManager):
-
     def increase(self, key: int, value: int = 1):
         """
         用户抽卡次数加1
@@ -107,7 +108,7 @@ class GenshinCountManager(DrawCountManager):
                 if count - self._data[key][f"count_{i}"] == self._guarantee_tuple[i]:
                     if i in [2, 1]:
                         # print("clean four count")
-                        self._data[key][f"count_0"] = self._data[key]['count']
-                    self._data[key][f"count_{i}"] = self._data[key]['count']
+                        self._data[key][f"count_0"] = self._data[key]["count"]
+                    self._data[key][f"count_{i}"] = self._data[key]["count"]
                     return self._star2name[i]
         return None
