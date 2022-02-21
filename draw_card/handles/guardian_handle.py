@@ -2,6 +2,7 @@ import re
 import random
 import dateparser
 from lxml import etree
+from PIL import ImageDraw
 from datetime import datetime
 from urllib.parse import unquote
 from typing import List, Optional
@@ -16,7 +17,8 @@ except ModuleNotFoundError:
 
 from .base_handle import BaseHandle, BaseData, UpChar, UpEvent
 from ..config import draw_config
-from ..util import remove_prohibited_str
+from ..util import remove_prohibited_str, cn2py, load_font
+from ..create_img import CreateImg
 
 
 class GuardianData(BaseData):
@@ -141,6 +143,56 @@ class GuardianHandle(BaseHandle[GuardianData]):
         pool_info = self.format_pool_info(pool_name)
         return pool_info + MessageSegment.image(self.generate_img(cards)) + result
 
+    def generate_card_img(self, card: GuardianData) -> CreateImg:
+        sep_w = 1
+        sep_h = 1
+        block_w = 170
+        block_h = 90
+        img_w = 90
+        img_h = 90
+        if isinstance(card, GuardianChar):
+            block_color = "#2e2923"
+            font_color = "#e2ccad"
+            star_w = 90
+            star_h = 30
+            star_name = f"{card.star}_star.png"
+            frame_path = ""
+        else:
+            block_color = "#EEE4D5"
+            font_color = "#A65400"
+            star_w = 45
+            star_h = 45
+            star_name = f"{card.star}_star_rank.png"
+            frame_path = str(self.img_path / "avatar_frame.png")
+        bg = CreateImg(block_w + sep_w * 2, block_h + sep_h * 2, color="#F6F4ED")
+        block = CreateImg(block_w, block_h, color=block_color)
+        star_path = str(self.img_path / star_name)
+        star = CreateImg(star_w, star_h, background=star_path)
+        img_path = str(self.img_path / f"{cn2py(card.name)}.png")
+        img = CreateImg(img_w, img_h, background=img_path)
+        block.paste(img, (0, 0), alpha=True)
+        if frame_path:
+            frame = CreateImg(img_w, img_h, background=frame_path)
+            block.paste(frame, (0, 0), alpha=True)
+        block.paste(
+            star,
+            (int((block_w + img_w - star_w) / 2), block_h - star_h - 30),
+            alpha=True,
+        )
+        # 加名字
+        text = card.name[:4] + "..." if len(card.name) > 5 else card.name
+        font = load_font(fontsize=14)
+        text_w, _ = font.getsize(text)
+        draw = ImageDraw.Draw(block.markImg)
+        draw.text(
+            ((block_w + img_w - text_w) / 2, 55),
+            text,
+            font=font,
+            fill=font_color,
+        )
+        bg.paste(block, (sep_w, sep_h))
+        return bg
+
     def _init_data(self):
         self.ALL_CHAR = [
             GuardianChar(name=value["名称"], star=int(value["星级"]), limited=False)
@@ -248,6 +300,31 @@ class GuardianHandle(BaseHandle[GuardianData]):
             await self.download_img(value["头像"], value["名称"])
         for value in guardian_arms_info.values():
             await self.download_img(value["头像"], value["名称"])
+        # 下载星星
+        idx = 1
+        GT_URL = "https://patchwiki.biligame.com/images/gt"
+        for url in [
+            "/4/4b/ardr3bi2yf95u4zomm263tc1vke6i3i.png",
+            "/5/55/6vow7lh76gzus6b2g9cfn325d1sugca.png",
+            "/b/b9/du8egrd2vyewg0cuyra9t8jh0srl0ds.png",
+        ]:
+            await self.download_img(GT_URL + url, f"{idx}_star")
+            idx += 1
+        # 另一种星星
+        idx = 1
+        for url in [
+            "/6/66/4e2tfa9kvhfcbikzlyei76i9crva145.png",
+            "/1/10/r9ihsuvycgvsseyneqz4xs22t53026m.png",
+            "/7/7a/o0k86ru9k915y04azc26hilxead7xp1.png",
+            "/c/c9/rxz99asysz0rg391j3b02ta09mnpa7v.png",
+            "/2/2a/sfxz0ucv1s6ewxveycz9mnmrqs2rw60.png",
+        ]:
+            await self.download_img(GT_URL + url, f"{idx}_star_rank")
+            idx += 1
+        # 头像框
+        await self.download_img(
+            GT_URL + "/8/8e/ogbqslbhuykjhnc8trtoa0p0nhfzohs.png", f"avatar_frame"
+        )
         await self.update_up_char()
 
     async def update_up_char(self):

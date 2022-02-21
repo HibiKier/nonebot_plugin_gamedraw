@@ -129,9 +129,7 @@ class BaseHandle(Generic[TC]):
         max_card = list(card_dict.keys())[list(card_dict.values()).index(max_count)]
         return f"抽取到最多的是{max_card.name}，共抽取了{max_count}次"
 
-    def generate_img(
-        self, card_list: List[TC], num_per_line: int = 10, paste_alpha=False, **kwargs
-    ) -> str:
+    def generate_img(self, card_list: List[TC], num_per_line: int = 5) -> str:
         if len(card_list) > 90:
             card_list = list(set(card_list))
 
@@ -144,9 +142,9 @@ class BaseHandle(Generic[TC]):
         img_h = card_imgs[0].h
         w = img_w * num_per_line
         h = img_h * math.ceil(len(card_imgs) / num_per_line)
-        img = CreateImg(w, h, img_w, img_h, **kwargs)
+        img = CreateImg(w, h, img_w, img_h)
         for card_img in card_imgs:
-            img.paste(card_img, alpha=paste_alpha)
+            img.paste(card_img)
         return img.pic2bs4()
 
     def generate_card_img(self, card: TC) -> CreateImg:

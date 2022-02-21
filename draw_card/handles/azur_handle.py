@@ -49,9 +49,6 @@ class AzurHandle(BaseHandle[AzurChar]):
         ]
         return random.choice(chars)
 
-    def generate_img(self, card_list: List[AzurChar]) -> str:
-        return super().generate_img(card_list, num_per_line=6)
-
     def generate_card_img(self, card: AzurChar) -> CreateImg:
         sep_w = 5
         sep_t = 5

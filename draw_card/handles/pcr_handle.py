@@ -1,12 +1,14 @@
 import random
 from lxml import etree
 from typing import List
+from PIL import ImageDraw
 from urllib.parse import unquote
 from nonebot.log import logger
 
 from .base_handle import BaseHandle, BaseData
 from ..config import draw_config
-from ..util import remove_prohibited_str
+from ..util import remove_prohibited_str, cn2py, load_font
+from ..create_img import CreateImg
 
 
 class PcrChar(BaseData):
@@ -48,6 +50,34 @@ class PcrHandle(BaseHandle[PcrChar]):
                     card_count = 0
             card_list.append(card)
         return card_list
+
+    def generate_card_img(self, card: PcrChar) -> CreateImg:
+        sep_w = 5
+        sep_h = 5
+        star_h = 15
+        img_w = 90
+        img_h = 90
+        font_h = 20
+        bg = CreateImg(img_w + sep_w * 2, img_h + font_h + sep_h * 2, color="#EFF2F5")
+        star_path = str(self.img_path / "star.png")
+        star = CreateImg(star_h, star_h, background=star_path)
+        img_path = str(self.img_path / f"{cn2py(card.name)}.png")
+        img = CreateImg(img_w, img_h, background=img_path)
+        bg.paste(img, (sep_w, sep_h), alpha=True)
+        for i in range(card.star):
+            bg.paste(star, (sep_w + img_w - star_h * (i + 1), sep_h), alpha=True)
+        # 加名字
+        text = card.name[:5] + "..." if len(card.name) > 6 else card.name
+        font = load_font(fontsize=14)
+        text_w, text_h = font.getsize(text)
+        draw = ImageDraw.Draw(bg.markImg)
+        draw.text(
+            (sep_w + (img_w - text_w) / 2, sep_h + img_h + (font_h - text_h) / 2),
+            text,
+            font=font,
+            fill="gray",
+        )
+        return bg
 
     def _init_data(self):
         self.ALL_CHAR = [
@@ -110,3 +140,8 @@ class PcrHandle(BaseHandle[PcrChar]):
         # 下载头像
         for value in info.values():
             await self.download_img(value["头像"], value["名称"])
+        # 下载星星
+        await self.download_img(
+            "https://patchwiki.biligame.com/images/pcr/0/02/s75ys2ecqhu2xbdw1wf1v9ccscnvi5g.png",
+            "star",
+        )

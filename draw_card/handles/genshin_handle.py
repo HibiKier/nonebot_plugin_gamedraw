@@ -136,11 +136,6 @@ class GenshinHandle(BaseHandle[GenshinData]):
             card_list.append(card)
         return card_list
 
-    def generate_img(self, card_list: List[GenshinData]) -> str:
-        return super().generate_img(
-            card_list, num_per_line=5, paste_alpha=True, color="#EBEBEB"
-        )
-
     def generate_card_img(self, card: GenshinData) -> CreateImg:
         sep_w = 10
         sep_h = 5
@@ -148,7 +143,7 @@ class GenshinHandle(BaseHandle[GenshinData]):
         frame_h = 132
         img_w = 106
         img_h = 106
-        bg = CreateImg(frame_w + sep_w * 2, frame_h + sep_h * 2, color=None)
+        bg = CreateImg(frame_w + sep_w * 2, frame_h + sep_h * 2, color="#EBEBEB")
         frame_path = str(self.img_path / "avatar_frame.png")
         frame = Image.open(frame_path)
         # 加名字
@@ -160,7 +155,7 @@ class GenshinHandle(BaseHandle[GenshinData]):
             ((frame_w - text_w) / 2, frame_h - 15 - text_h / 2),
             text,
             font=font,
-            fill="#000000",
+            fill="gray",
         )
         img_path = str(self.img_path / f"{cn2py(card.name)}.png")
         img = CreateImg(img_w, img_h, background=img_path)
