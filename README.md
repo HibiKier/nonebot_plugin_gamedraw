@@ -115,23 +115,27 @@
     
 ## 更新：
 
-### 2021/2/18
+### 2022/2/22
+
+ * 优化抽卡图片结果 [@pull 35](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/35)
+
+### 2022/2/18
 
  * 修复bwiki页面变动导致pcr数据无法获取
 
-### 2021/2/11
+### 2022/2/11
 
  * 优化代码，使用pydantic解析配置等 [@pull 31](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/31)
 
-### 2021/2/7
+### 2022/2/7
 
  * 修复原神bwiki页面修改导致爬取错误引起导入错误
 
-### 2021/1/27
+### 2022/1/27
 
  * 适配nb beat1 [@pull 27](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/27)
 
-### 2021/1/6
+### 2022/1/6
 
  * 修复UP卡池无法正常初始化
  * 原神提供大保底机制
@@ -273,19 +277,4 @@
   * 历史卡池切换
   * 抽卡统计
 
-## 效果
-![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/0.png)
-![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/prts_up_reload.png)
-![](https://raw.githubusercontent.com/HibiKier/nonebot_plugin_gamedraw/main/docs/CM85%40%5B6TG%25%25SEZ5%24T%7DH5A73.png)
-![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/genshin.png)
-![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/genshin_up_reload.png)
-![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/2.png)
-![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/3.png)
- ![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/reload_pretty_pool.png)
-![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/5.png)
-![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/6.png)
-![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/prc.png)
-![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/azur.png)
-![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/fgo.png)
-![](https://github.com/HibiKier/nonebot_plugin_gamedraw/blob/main/docs/yys.png)
 
