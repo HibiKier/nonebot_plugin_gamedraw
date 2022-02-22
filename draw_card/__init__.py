@@ -1,5 +1,6 @@
 import asyncio
 import traceback
+from cn2an import cn2an
 from dataclasses import dataclass
 from typing import Optional, Set, Tuple
 
@@ -70,10 +71,18 @@ def create_matchers():
             matcher: Matcher, event: MessageEvent, args: Tuple[str, ...] = RegexGroup()
         ):
             pool_name, num, unit = args
-            num = int(num.replace("一", "1"))
+            if num == "单":
+                num = 1
+            else:
+                try:
+                    num = int(cn2an(num, mode="smart"))
+                except ValueError:
+                    await matcher.finish("必！须！是！数！字！")
             if unit == "井":
                 num *= game.max_count
-            if num > game.max_count:
+            if num < 1:
+                await matcher.finish("虚空抽卡？？？")
+            elif num > game.max_count:
                 await matcher.finish("一井都满不足不了你嘛！快爬开！")
             pool_name = (
                 pool_name.replace("池", "")
@@ -120,8 +129,11 @@ def create_matchers():
         return handler
 
     for game in games:
-        draw_regex = r".*?(?:{})(\S{{0,3}})([1-9|一][0-9]{{0,2}})([抽|井|连])".format(
-            "|".join(game.keywords)
+        pool_pattern = r"([^\s单0-9零一二三四五六七八九百十]{0,3})"
+        num_pattern = r"(单|[0-9零一二三四五六七八九百十]{1,3})"
+        unit_pattern = r"([抽|井|连])"
+        draw_regex = r".*?(?:{})\s*{}\s*{}\s*{}".format(
+            "|".join(game.keywords), pool_pattern, num_pattern, unit_pattern
         )
         update_keywords = {f"更新{keyword}信息" for keyword in game.keywords}
         reload_keywords = {f"重载{keyword}卡池" for keyword in game.keywords}

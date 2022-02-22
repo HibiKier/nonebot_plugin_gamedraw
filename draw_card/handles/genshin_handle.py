@@ -73,10 +73,14 @@ class GenshinHandle(BaseHandle[GenshinData]):
 
         if pool_name == "char":
             up_event = self.UP_CHAR
-            all_list = self.ALL_CHAR
+            all_list = self.ALL_CHAR + [
+                x for x in self.ALL_ARMS if x.star == star and x.star < 5
+            ]
         elif pool_name == "arms":
             up_event = self.UP_ARMS
-            all_list = self.ALL_ARMS
+            all_list = self.ALL_ARMS + [
+                x for x in self.ALL_CHAR if x.star == star and x.star < 5
+            ]
         else:
             up_event = None
             all_list = self.ALL_ARMS + self.ALL_CHAR
