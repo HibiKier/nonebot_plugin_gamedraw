@@ -14,8 +14,8 @@ class GenshinConfig(BaseModel, extra=Extra.ignore):
     GENSHIN_FIVE_P: float = 0.006
     GENSHIN_FOUR_P: float = 0.051
     GENSHIN_THREE_P: float = 0.43
-    GENSHIN_G_FIVE_P: float = 0.13
-    GENSHIN_G_FOUR_P: float = 0.016
+    GENSHIN_G_FIVE_P: float = 0.016
+    GENSHIN_G_FOUR_P: float = 0.13
     I72_ADD: float = 0.0585
 
 
