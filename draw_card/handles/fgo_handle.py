@@ -1,6 +1,7 @@
 import random
 from lxml import etree
 from typing import List
+from PIL import ImageDraw
 from nonebot.log import logger
 
 try:
@@ -10,7 +11,7 @@ except ModuleNotFoundError:
 
 from .base_handle import BaseHandle, BaseData
 from ..config import draw_config
-from ..util import remove_prohibited_str, cn2py
+from ..util import remove_prohibited_str, cn2py, load_font
 from ..create_img import CreateImg
 
 
@@ -90,8 +91,27 @@ class FgoHandle(BaseHandle[FgoData]):
         return card_list
 
     def generate_card_img(self, card: FgoData) -> CreateImg:
-        img = str(self.img_path / f"{cn2py(card.name)}.png")
-        return CreateImg(128, 140, background=img)
+        sep_w = 5
+        sep_t = 5
+        sep_b = 20
+        w = 128
+        h = 140
+        bg = CreateImg(w + sep_w * 2, h + sep_t + sep_b)
+        img_path = str(self.img_path / f"{cn2py(card.name)}.png")
+        img = CreateImg(w, h, background=img_path)
+        bg.paste(img, (sep_w, sep_t), alpha=True)
+        # 加名字
+        text = card.name[:6] + "..." if len(card.name) > 7 else card.name
+        font = load_font(fontsize=16)
+        text_w, text_h = font.getsize(text)
+        draw = ImageDraw.Draw(bg.markImg)
+        draw.text(
+            (sep_w + (w - text_w) / 2, h + sep_t + (sep_b - text_h) / 2),
+            text,
+            font=font,
+            fill="gray",
+        )
+        return bg
 
     def _init_data(self):
         self.ALL_CHAR = [

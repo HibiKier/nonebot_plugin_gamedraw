@@ -2,6 +2,8 @@ import random
 from lxml import etree
 from typing import List
 from nonebot.log import logger
+from PIL import Image, ImageDraw
+from PIL.Image import Image as IMG
 
 try:
     import ujson as json
@@ -10,7 +12,8 @@ except ModuleNotFoundError:
 
 from .base_handle import BaseHandle, BaseData
 from ..config import draw_config
-from ..util import remove_prohibited_str
+from ..util import remove_prohibited_str, cn2py, load_font
+from ..create_img import CreateImg
 
 
 class OnmyojiChar(BaseData):
@@ -47,6 +50,66 @@ class OnmyojiHandle(BaseHandle[OnmyojiChar]):
             elif card.star == self.max_star - 1:
                 rst += f"第 {index} 抽获取SSR {card.name}\n"
         return rst.strip()
+
+    @staticmethod
+    def star_label(star: int) -> IMG:
+        text, color1, color2 = [
+            ("N", "#7E7E82", "#F5F6F7"),
+            ("R", "#014FA8", "#37C6FD"),
+            ("SR", "#6E0AA4", "#E94EFD"),
+            ("SSR", "#E5511D", "#FAF905"),
+            ("SP", "#FA1F2D", "#FFBBAF"),
+        ][star - 1]
+        w = 200
+        h = 110
+        # 制作渐变色图片
+        base = Image.new("RGBA", (w, h), color1)
+        top = Image.new("RGBA", (w, h), color2)
+        mask = Image.new("L", (w, h))
+        mask_data = []
+        for y in range(h):
+            mask_data.extend([int(255 * (y / h))] * w)
+        mask.putdata(mask_data)
+        base.paste(top, (0, 0), mask)
+        # 透明图层
+        font = load_font("gorga.otf", 100)
+        alpha = Image.new("L", (w, h))
+        draw = ImageDraw.Draw(alpha)
+        draw.text((20, -30), text, fill="white", font=font)
+        base.putalpha(alpha)
+        # stroke
+        bg = Image.new("RGBA", (w, h))
+        draw = ImageDraw.Draw(bg)
+        draw.text(
+            (20, -30),
+            text,
+            font=font,
+            fill="gray",
+            stroke_width=3,
+            stroke_fill="gray",
+        )
+        bg.paste(base, (0, 0), base)
+        return bg
+
+    def generate_img(self, card_list: List[OnmyojiChar]) -> str:
+        return super().generate_img(card_list, num_per_line=10)
+
+    def generate_card_img(self, card: OnmyojiChar) -> CreateImg:
+        bg = CreateImg(73, 240, color="#F1EFE9")
+        img_path = str(self.img_path / f"{cn2py(card.name)}_mark_btn.png")
+        img = CreateImg(0, 0, background=img_path)
+        img = Image.open(img_path).convert("RGBA")
+        label = self.star_label(card.star).resize((60, 33), Image.ANTIALIAS)
+        bg.paste(img, (0, 0), alpha=True)
+        bg.paste(label, (0, 135), alpha=True)
+        font = load_font("msyh.ttf", 16)
+        draw = ImageDraw.Draw(bg.markImg)
+        text = "\n".join([t for t in card.name[:4]])
+        _, text_h = font.getsize_multiline(text, spacing=0)
+        draw.text(
+            (40, 150 + (90 - text_h) / 2), text, font=font, fill="gray", spacing=0
+        )
+        return bg
 
     def _init_data(self):
         self.ALL_CHAR = [
@@ -111,3 +174,6 @@ class OnmyojiHandle(BaseHandle[OnmyojiChar]):
         # 下载头像
         for value in info.values():
             await self.download_img(value["头像"], value["名称"])
+            # 下载书签形式的头像
+            url = f"https://yys.res.netease.com/pc/zt/20161108171335/data/mark_btn/{value['id']}.png"
+            await self.download_img(url, value["名称"] + "_mark_btn")

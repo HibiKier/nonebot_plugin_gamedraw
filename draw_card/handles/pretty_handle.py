@@ -2,6 +2,7 @@ import re
 import random
 import dateparser
 from lxml import etree
+from PIL import ImageDraw
 from bs4 import BeautifulSoup
 from datetime import datetime
 from urllib.parse import unquote
@@ -17,7 +18,7 @@ except ModuleNotFoundError:
 
 from .base_handle import BaseHandle, BaseData, UpChar, UpEvent
 from ..config import draw_config
-from ..util import remove_prohibited_str, cn2py
+from ..util import remove_prohibited_str, cn2py, load_font
 from ..create_img import CreateImg
 
 
@@ -136,10 +137,70 @@ class PrettyHandle(BaseHandle[PrettyData]):
         return pool_info + MessageSegment.image(self.generate_img(cards)) + result
 
     def generate_card_img(self, card: PrettyData) -> CreateImg:
-        w = 200
-        h = 267 if isinstance(card, PrettyCard) else 219
-        img = str(self.img_path / f"{cn2py(card.name)}.png")
-        return CreateImg(w, h, background=img)
+        if isinstance(card, PrettyChar):
+            star_h = 30
+            img_w = 200
+            img_h = 219
+            font_h = 50
+            bg = CreateImg(img_w, img_h + font_h, color="#EFF2F5")
+            star_path = str(self.img_path / "star.png")
+            star = CreateImg(star_h, star_h, background=star_path)
+            img_path = str(self.img_path / f"{cn2py(card.name)}.png")
+            img = CreateImg(img_w, img_h, background=img_path)
+            star_w = star_h * card.star
+            for i in range(card.star):
+                bg.paste(star, (int((img_w - star_w) / 2) + star_h * i, 0), alpha=True)
+            bg.paste(img, (0, 0), alpha=True)
+            # 加名字
+            text = card.name[:5] + "..." if len(card.name) > 6 else card.name
+            font = load_font(fontsize=30)
+            text_w, _ = font.getsize(text)
+            draw = ImageDraw.Draw(bg.markImg)
+            draw.text(
+                ((img_w - text_w) / 2, img_h),
+                text,
+                font=font,
+                fill="gray",
+            )
+            return bg
+        else:
+            sep_w = 10
+            img_w = 200
+            img_h = 267
+            font_h = 75
+            bg = CreateImg(img_w + sep_w * 2, img_h + font_h, color="#EFF2F5")
+            label_path = str(self.img_path / f"{card.star}_label.png")
+            label = CreateImg(40, 40, background=label_path)
+            img_path = str(self.img_path / f"{cn2py(card.name)}.png")
+            img = CreateImg(img_w, img_h, background=img_path)
+            bg.paste(img, (sep_w, 0), alpha=True)
+            bg.paste(label, (30, 3), alpha=True)
+            # 加名字
+            text = ""
+            texts = []
+            font = load_font(fontsize=25)
+            for t in card.name:
+                if font.getsize(text + t)[0] > 190:
+                    texts.append(text)
+                    text = ""
+                    if len(texts) >= 2:
+                        texts[-1] += "..."
+                        break
+                else:
+                    text += t
+            if text:
+                texts.append(text)
+            text = "\n".join(texts)
+            text_w, _ = font.getsize_multiline(text)
+            draw = ImageDraw.Draw(bg.markImg)
+            draw.text(
+                ((img_w - text_w) / 2, img_h),
+                text,
+                font=font,
+                align="center",
+                fill="gray",
+            )
+            return bg
 
     def _init_data(self):
         self.ALL_CHAR = [
@@ -234,6 +295,20 @@ class PrettyHandle(BaseHandle[PrettyData]):
             await self.download_img(value["头像"], value["名称"])
         for value in pretty_card_info.values():
             await self.download_img(value["头像"], value["中文名"])
+        # 下载星星
+        PRETTY_URL = "https://patchwiki.biligame.com/images/umamusume"
+        await self.download_img(
+            PRETTY_URL + "/1/13/e1hwjz4vmhtvk8wlyb7c0x3ld1s2ata.png", "star"
+        )
+        # 下载稀有度标志
+        idx = 1
+        for url in [
+            "/f/f7/afqs7h4snmvovsrlifq5ib8vlpu2wvk.png",
+            "/3/3b/d1jmpwrsk4irkes1gdvoos4ic6rmuht.png",
+            "/0/06/q23szwkbtd7pfkqrk3wcjlxxt9z595o.png",
+        ]:
+            await self.download_img(PRETTY_URL + url, f"{idx}_label")
+            idx += 1
         await self.update_up_char()
 
     async def update_up_char(self):
