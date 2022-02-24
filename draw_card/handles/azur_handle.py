@@ -1,14 +1,22 @@
 import random
+import dateparser
 from lxml import etree
-from typing import List
+from typing import List, Optional
 from PIL import ImageDraw
 from urllib.parse import unquote
+from pydantic import ValidationError
 from nonebot.log import logger
+from nonebot.adapters.onebot.v11 import Message
 
-from .base_handle import BaseHandle, BaseData
+from .base_handle import BaseHandle, BaseData, UpChar, UpEvent
 from ..config import draw_config
 from ..util import remove_prohibited_str, cn2py, load_font
 from ..create_img import CreateImg
+
+try:
+    import ujson as json
+except ModuleNotFoundError:
+    import json
 
 
 class AzurChar(BaseData):
@@ -25,6 +33,7 @@ class AzurHandle(BaseHandle[AzurChar]):
         self.max_star = 4
         self.config = draw_config.azur
         self.ALL_CHAR: List[AzurChar] = []
+        self.UP_EVENT: Optional[UpEvent] = None
 
     def get_card(self, pool_name: str, **kwargs) -> AzurChar:
         if pool_name == "轻型":
@@ -88,6 +97,19 @@ class AzurHandle(BaseHandle[AzurChar]):
             )
             for value in self.load_data().values()
         ]
+        self.load_up_char()
+
+    def load_up_char(self):
+        try:
+            data = self.load_data(f"draw_card_up/{self.game_name}_up_char.json")
+            self.UP_EVENT = UpEvent.parse_obj(data.get("char", {}))
+        except ValidationError:
+            logger.warning(f"{self.game_name}_up_char 解析出错")
+
+    def dump_up_char(self):
+        if self.UP_EVENT:
+            data = {"char": json.loads(self.UP_EVENT.json())}
+            self.dump_data(data, f"draw_card_up/{self.game_name}_up_char.json")
 
     async def _update_info(self):
         info = {}
@@ -158,18 +180,19 @@ class AzurHandle(BaseHandle[AzurChar]):
         ]:
             await self.download_img(BLHX_URL + url, f"{idx}_star")
             idx += 1
+        await self.update_up_char()
 
     @staticmethod
     def parse_star(star: str) -> int:
-        if star == "舰娘头像外框普通.png":
+        if star in ["舰娘头像外框普通.png", "舰娘头像外框白色.png"]:
             return 1
-        elif star == "舰娘头像外框稀有.png":
+        elif star in ["舰娘头像外框稀有.png", "舰娘头像外框蓝色.png"]:
             return 2
-        elif star == "舰娘头像外框精锐.png":
+        elif star in ["舰娘头像外框精锐.png", "舰娘头像外框紫色.png"]:
             return 3
-        elif star == "舰娘头像外框超稀有.png":
+        elif star in ["舰娘头像外框超稀有.png", "舰娘头像外框金色.png"]:
             return 4
-        elif star == "舰娘头像外框海上传奇.png":
+        elif star in ["舰娘头像外框海上传奇.png", "舰娘头像外框彩色.png"]:
             return 5
         elif star in [
             "舰娘头像外框最高方案.png",
@@ -202,3 +225,51 @@ class AzurHandle(BaseHandle[AzurChar]):
             return azur_types[index]
         except IndexError:
             return azur_types[0]
+
+    async def update_up_char(self):
+        url = "https://wiki.biligame.com/blhx/游戏活动表"
+        result = await self.get_url(url)
+        if not result:
+            logger.warning(f"{self.game_name_cn}获取活动表出错")
+            return
+        try:
+            dom = etree.HTML(result, etree.HTMLParser())
+            dd = dom.xpath("//div[@class='timeline2']/dl/dd/a")[0]
+            url = "https://wiki.biligame.com" + dd.xpath("./@href")[0]
+            title = dd.xpath("string(.)")
+            result = await self.get_url(url)
+            if not result:
+                logger.warning(f"{self.game_name_cn}获取活动页面出错")
+                return
+            dom = etree.HTML(result, etree.HTMLParser())
+            timer = dom.xpath("//span[@class='eventTimer']")[0]
+            start_time = dateparser.parse(timer.xpath("./@data-start")[0])
+            end_time = dateparser.parse(timer.xpath("./@data-end")[0])
+            ships = dom.xpath("//table[@class='shipinfo']")
+            up_chars = []
+            for ship in ships:
+                name = ship.xpath("./tbody/tr/td[2]/p/a/@title")[0]
+                try:
+                    p = float(str(ship.xpath(".//sup/text()")[0]).strip("%"))
+                except IndexError:
+                    p = 0
+                star = self.parse_star(
+                    ship.xpath("./tbody/tr/td[1]/div/div/div/a/img/@alt")[0]
+                )
+                up_chars.append(UpChar(name=name, star=star, limited=False, zoom=p))
+            self.UP_EVENT = UpEvent(
+                title=title,
+                pool_img="",
+                start_time=start_time,
+                end_time=end_time,
+                up_char=up_chars,
+            )
+            self.dump_up_char()
+        except Exception as e:
+            logger.warning(f"{self.game_name_cn}UP更新出错 {type(e)}：{e}")
+
+    async def _reload_pool(self) -> Optional[Message]:
+        await self.update_up_char()
+        self.load_up_char()
+        if self.UP_EVENT:
+            return Message(f"重载成功！\n当前活动：{self.UP_EVENT.title}")
