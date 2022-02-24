@@ -3,6 +3,7 @@ import random
 import aiohttp
 import asyncio
 import aiofiles
+from PIL import Image
 from datetime import datetime
 from pydantic import BaseModel, Extra
 from asyncio.exceptions import TimeoutError
@@ -17,7 +18,7 @@ except ModuleNotFoundError:
 
 from ..create_img import CreateImg
 from ..config import DRAW_PATH, draw_config
-from ..util import cn2py
+from ..util import cn2py, circled_number
 
 
 class BaseData(BaseModel, extra=Extra.ignore):
@@ -131,13 +132,37 @@ class BaseHandle(Generic[TC]):
             return ""
         return f"抽取到最多的是{max_card.name}，共抽取了{max_count}次"
 
-    def generate_img(self, card_list: List[TC], num_per_line: int = 5) -> str:
-        if len(card_list) > 90:
-            card_list = list(set(card_list))
+    def generate_img(self, cards: List[TC], num_per_line: int = 5) -> str:
+        if len(cards) > 90:
+            card_dict: Dict[TC, int] = {}  # 记录卡牌抽取次数
+            for card in cards:
+                try:
+                    card_dict[card] += 1
+                except KeyError:
+                    card_dict[card] = 1
+            card_list = list(card_dict)
+            num_list = list(card_dict.values())
+        else:
+            card_list = cards
+            num_list = [1] * len(cards)
 
         card_imgs: List[CreateImg] = []
-        for card in card_list:
+        for card, num in zip(card_list, num_list):
             card_img = self.generate_card_img(card)
+
+            # 数量 > 1 时加数字上标
+            if num > 1:
+                label = circled_number(num)
+                label_w = int(min(card_img.w, card_img.h) / 7)
+                label = label.resize(
+                    (
+                        int(label_w * label.width / label.height),
+                        label_w,
+                    ),
+                    Image.ANTIALIAS,
+                )
+                card_img.paste(label, alpha=True)
+
             card_imgs.append(card_img)
 
         img_w = card_imgs[0].w

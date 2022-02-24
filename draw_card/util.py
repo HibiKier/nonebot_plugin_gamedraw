@@ -1,7 +1,8 @@
 import platform
 import pypinyin
 from pathlib import Path
-from PIL import ImageFont
+from PIL import Image, ImageDraw, ImageFont
+from PIL.Image import Image as IMG
 from PIL.ImageFont import FreeTypeFont
 
 dir_path = Path(__file__).parent.absolute()
@@ -31,3 +32,25 @@ def load_font(fontname: str = "msyh.ttf", fontsize: int = 16) -> FreeTypeFont:
     return ImageFont.truetype(
         str(dir_path / f"resources/fonts/{fontname}"), fontsize, encoding="utf-8"
     )
+
+
+def circled_number(num: int) -> IMG:
+    font = load_font(fontsize=450)
+    text = str(num)
+    text_w = font.getsize(text)[0]
+    w = 240 + text_w
+    w = w if w >= 500 else 500
+    img = Image.new("RGBA", (w, 500))
+    draw = ImageDraw.Draw(img)
+    draw.ellipse(((0, 0), (500, 500)), fill="red")
+    draw.ellipse(((w - 500, 0), (w, 500)), fill="red")
+    draw.rectangle(((250, 0), (w - 250, 500)), fill="red")
+    draw.text(
+        (120, -60),
+        text,
+        font=font,
+        fill="white",
+        stroke_width=10,
+        stroke_fill="white",
+    )
+    return img
