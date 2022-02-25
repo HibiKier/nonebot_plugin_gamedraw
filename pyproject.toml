@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot_plugin_gamedraw"
-version = "0.3.1"
+version = "0.3.2"
 description = "nonebot2 实现自动更新的 原神/明日方舟/赛马娘/坎公骑冠剑/公主连结/碧蓝航线/FGO/阴阳师 抽卡插件"
 authors = ["HibiKier <775757368@qq.com>"]
 license = "MIT"
