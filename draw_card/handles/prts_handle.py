@@ -30,8 +30,9 @@ class Operator(BaseData):
 
 class PrtsHandle(BaseHandle[Operator]):
     def __init__(self):
-        super().__init__("prts", "明日方舟", "#eff2f5")
+        super().__init__("prts", "明日方舟")
         self.max_star = 6
+        self.game_card_color = "#eff2f5"
         self.config = draw_config.prts
 
         self.ALL_OPERATOR: List[Operator] = []
@@ -108,7 +109,11 @@ class PrtsHandle(BaseHandle[Operator]):
         up_list = [x.name for x in self.UP_EVENT.up_char] if self.UP_EVENT else []
         result = self.format_result(index2card, up_list=up_list)
         pool_info = self.format_pool_info()
-        return pool_info + MessageSegment.image(self.generate_img(cards).pic2bs4()) + result
+        return (
+            pool_info
+            + MessageSegment.image(self.generate_img(cards).pic2bs4())
+            + result
+        )
 
     def generate_card_img(self, card: Operator) -> BuildImage:
         sep_w = 5

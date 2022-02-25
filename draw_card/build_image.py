@@ -3,7 +3,7 @@ from io import BytesIO
 from pathlib import Path
 from PIL import Image, ImageDraw, UnidentifiedImageError
 from nonebot.log import logger
-from typing import Tuple, Union
+from typing import Tuple, Union, Optional, Literal
 from .util import load_font
 import asyncio
 
@@ -16,8 +16,21 @@ class BuildImage:
         img_w: int = 0,
         img_h: int = 0,
         background: str = "",
-        color="white",
-        image_type="RGBA",
+        color: Union[float, Tuple[float, ...], str] = "white",
+        image_type: Literal[
+            "1",
+            "CMYK",
+            "F",
+            "HSV",
+            "I",
+            "L",
+            "LAB",
+            "P",
+            "RGB",
+            "RGBA",
+            "RGBX",
+            "YCbCr",
+        ] = "RGBA",
         divisor: float = 1,
         font_size: int = 10,
     ):
@@ -99,7 +112,7 @@ class BuildImage:
     async def apaste(
         self,
         img: "BuildImage" or Image,
-        pos: Tuple[int, int] = None,
+        pos: Optional[Tuple[int, int]] = None,
         alpha: bool = False,
     ):
         """
