@@ -111,7 +111,7 @@ class BaseHandle(Generic[TC]):
     def format_max_star(
         self, card_list: List[Tuple[TC, int]], up_list: List[str] = [], **kwargs
     ) -> str:
-        up_list = up_list or kwargs.get("up_list")
+        up_list = up_list or kwargs.get("up_list", [])
         rst = ""
         for card, index in card_list:
             if card.star == self.max_star:
