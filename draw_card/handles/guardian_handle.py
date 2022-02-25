@@ -5,7 +5,7 @@ from lxml import etree
 from PIL import ImageDraw
 from datetime import datetime
 from urllib.parse import unquote
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from pydantic import ValidationError
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.log import logger
@@ -18,7 +18,7 @@ except ModuleNotFoundError:
 from .base_handle import BaseHandle, BaseData, UpChar, UpEvent
 from ..config import draw_config
 from ..util import remove_prohibited_str, cn2py, load_font
-from ..create_img import CreateImg
+from ..build_image import BuildImage
 
 
 class GuardianData(BaseData):
@@ -106,10 +106,10 @@ class GuardianHandle(BaseHandle[GuardianData]):
             acquire_char = random.choice(chars)
         return acquire_char
 
-    def get_cards(self, count: int, pool_name: str) -> List[GuardianData]:
+    def get_cards(self, count: int, pool_name: str) -> List[Tuple[GuardianData, int]]:
         card_list = []
         card_count = 0  # 保底计算
-        for _ in range(count):
+        for i in range(count):
             card_count += 1
             # 十连保底
             if card_count == 10:
@@ -119,7 +119,7 @@ class GuardianHandle(BaseHandle[GuardianData]):
                 card = self.get_card(pool_name, 1)
                 if card.star > self.max_star - 2:
                     card_count = 0
-            card_list.append(card)
+            card_list.append((card, i + 1))
         return card_list
 
     def format_pool_info(self, pool_name: str) -> str:
@@ -136,14 +136,15 @@ class GuardianHandle(BaseHandle[GuardianData]):
         return info.strip()
 
     def draw(self, count: int, pool_name: str, **kwargs) -> Message:
-        cards = self.get_cards(count, pool_name)
+        index2card = self.get_cards(count, pool_name)
+        cards = [card[0] for card in index2card]
         up_event = self.UP_CHAR if pool_name == "char" else self.UP_ARMS
         up_list = [x.name for x in up_event.up_char] if up_event else []
-        result = self.format_result(cards, up_list=up_list)
+        result = self.format_result(index2card, up_list=up_list)
         pool_info = self.format_pool_info(pool_name)
-        return pool_info + MessageSegment.image(self.generate_img(cards)) + result
+        return pool_info + MessageSegment.image(self.generate_img(cards).pic2bs4()) + result
 
-    def generate_card_img(self, card: GuardianData) -> CreateImg:
+    def generate_card_img(self, card: GuardianData) -> BuildImage:
         sep_w = 1
         sep_h = 1
         block_w = 170
@@ -164,15 +165,15 @@ class GuardianHandle(BaseHandle[GuardianData]):
             star_h = 45
             star_name = f"{card.star}_star_rank.png"
             frame_path = str(self.img_path / "avatar_frame.png")
-        bg = CreateImg(block_w + sep_w * 2, block_h + sep_h * 2, color="#F6F4ED")
-        block = CreateImg(block_w, block_h, color=block_color)
+        bg = BuildImage(block_w + sep_w * 2, block_h + sep_h * 2, color="#F6F4ED")
+        block = BuildImage(block_w, block_h, color=block_color)
         star_path = str(self.img_path / star_name)
-        star = CreateImg(star_w, star_h, background=star_path)
+        star = BuildImage(star_w, star_h, background=star_path)
         img_path = str(self.img_path / f"{cn2py(card.name)}.png")
-        img = CreateImg(img_w, img_h, background=img_path)
+        img = BuildImage(img_w, img_h, background=img_path)
         block.paste(img, (0, 0), alpha=True)
         if frame_path:
-            frame = CreateImg(img_w, img_h, background=frame_path)
+            frame = BuildImage(img_w, img_h, background=frame_path)
             block.paste(frame, (0, 0), alpha=True)
         block.paste(
             star,

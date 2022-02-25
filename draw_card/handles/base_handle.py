@@ -7,7 +7,7 @@ from PIL import Image
 from datetime import datetime
 from pydantic import BaseModel, Extra
 from asyncio.exceptions import TimeoutError
-from typing import Dict, List, Optional, TypeVar, Generic
+from typing import Dict, List, Optional, TypeVar, Generic, Tuple
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.log import logger
 
@@ -16,7 +16,7 @@ try:
 except ModuleNotFoundError:
     import json
 
-from ..create_img import CreateImg
+from ..build_image import BuildImage
 from ..config import DRAW_PATH, draw_config
 from ..util import cn2py, circled_number
 
@@ -53,7 +53,7 @@ TC = TypeVar("TC", bound="BaseData")
 
 
 class BaseHandle(Generic[TC]):
-    def __init__(self, game_name: str, game_name_cn: str):
+    def __init__(self, game_name: str, game_name_cn: str, game_card_color: str = "#ffffff"):
         self.game_name = game_name
         self.game_name_cn = game_name_cn
         self.max_star = 1  # 最大星级
@@ -63,28 +63,31 @@ class BaseHandle(Generic[TC]):
         self.img_path.mkdir(parents=True, exist_ok=True)
         self.up_path.mkdir(parents=True, exist_ok=True)
         self.data_files: List[str] = [f"{self.game_name}.json"]
+        self.game_card_color: str = game_card_color
 
     def draw(self, count: int, **kwargs) -> Message:
-        cards = self.get_cards(count, **kwargs)
-        result = self.format_result(cards)
-        return MessageSegment.image(self.generate_img(cards)) + result
+        index2card = self.get_cards(count, **kwargs)
+        cards = [card[0] for card in index2card]
+        result = self.format_result(index2card)
+        return MessageSegment.image(self.generate_img(cards).pic2bs4()) + result
 
     # 抽取卡池
     def get_card(self, **kwargs) -> TC:
         raise NotImplementedError
 
-    def get_cards(self, count: int, **kwargs) -> List[TC]:
-        return [self.get_card(**kwargs) for _ in range(count)]
+    def get_cards(self, count: int, **kwargs) -> List[Tuple[TC, int]]:
+        return [(self.get_card(**kwargs), i) for i in range(count)]
 
     # 获取星级
     @staticmethod
     def get_star(star_list: List[int], probability_list: List[float]) -> int:
         return random.choices(star_list, weights=probability_list, k=1)[0]
 
-    def format_result(self, card_list: List[TC], **kwargs) -> str:
+    def format_result(self, index2card: List[Tuple[TC, int]], **kwargs) -> str:
+        card_list = [card[0] for card in index2card]
         results = [
             self.format_star_result(card_list, **kwargs),
-            self.format_max_star(card_list, **kwargs),
+            self.format_max_star(index2card, **kwargs),
             self.format_max_card(card_list, **kwargs),
         ]
         results = [rst for rst in results if rst]
@@ -106,10 +109,11 @@ class BaseHandle(Generic[TC]):
         return rst.strip()
 
     def format_max_star(
-        self, card_list: List[TC], up_list: List[str] = [], **kwargs
+        self, card_list: List[Tuple[TC, int]], up_list: List[str] = [], **kwargs
     ) -> str:
+        up_list = up_list or kwargs.get("up_list")
         rst = ""
-        for index, card in enumerate(card_list, start=1):
+        for card, index in card_list:
             if card.star == self.max_star:
                 if card.name in up_list:
                     rst += f"第 {index} 抽获取UP {card.name}\n"
@@ -132,7 +136,20 @@ class BaseHandle(Generic[TC]):
             return ""
         return f"抽取到最多的是{max_card.name}，共抽取了{max_count}次"
 
-    def generate_img(self, cards: List[TC], num_per_line: int = 5) -> str:
+    def generate_img(
+        self,
+        cards: List[TC],
+        num_per_line: int = 5,
+        max_per_line: Tuple[int, int] = (40, 10),
+    ) -> BuildImage:
+        """
+        生成统计图片
+        :param cards: 卡牌列表
+        :param num_per_line: 单行角色显示数量
+        :param max_per_line: 当card_list超过一定数值时，更改单行数量
+        """
+        if len(cards) > max_per_line[0]:
+            num_per_line = max_per_line[1]
         if len(cards) > 90:
             card_dict: Dict[TC, int] = {}  # 记录卡牌抽取次数
             for card in cards:
@@ -146,7 +163,7 @@ class BaseHandle(Generic[TC]):
             card_list = cards
             num_list = [1] * len(cards)
 
-        card_imgs: List[CreateImg] = []
+        card_imgs: List[BuildImage] = []
         for card, num in zip(card_list, num_list):
             card_img = self.generate_card_img(card)
 
@@ -172,14 +189,14 @@ class BaseHandle(Generic[TC]):
         else:
             w = img_w * num_per_line
         h = img_h * math.ceil(len(card_imgs) / num_per_line)
-        img = CreateImg(w, h, img_w, img_h)
+        img = BuildImage(w, h, img_w, img_h, color=self.game_card_color)
         for card_img in card_imgs:
             img.paste(card_img)
-        return img.pic2bs4()
+        return img
 
-    def generate_card_img(self, card: TC) -> CreateImg:
+    def generate_card_img(self, card: TC) -> BuildImage:
         img = str(self.img_path / f"{cn2py(card.name)}.png")
-        return CreateImg(100, 100, background=img)
+        return BuildImage(100, 100, background=img)
 
     def load_data(self, filename: str = "") -> dict:
         if not filename:

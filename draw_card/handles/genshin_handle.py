@@ -3,7 +3,7 @@ import dateparser
 from lxml import etree
 from PIL import Image, ImageDraw
 from urllib.parse import unquote
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from pydantic import ValidationError
 from datetime import datetime, timedelta
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
@@ -18,7 +18,7 @@ from .base_handle import BaseHandle, BaseData, UpChar, UpEvent
 from ..config import draw_config
 from ..count_manager import GenshinCountManager
 from ..util import remove_prohibited_str, cn2py, load_font
-from ..create_img import CreateImg
+from ..build_image import BuildImage
 
 
 class GenshinData(BaseData):
@@ -35,7 +35,7 @@ class GenshinArms(GenshinData):
 
 class GenshinHandle(BaseHandle[GenshinData]):
     def __init__(self):
-        super().__init__("genshin", "原神")
+        super().__init__("genshin", "原神", "#ebebeb")
         self.data_files.append("genshin_arms.json")
         self.max_star = 5
         self.config = draw_config.genshin
@@ -45,7 +45,7 @@ class GenshinHandle(BaseHandle[GenshinData]):
         self.UP_CHAR: Optional[UpEvent] = None
         self.UP_ARMS: Optional[UpEvent] = None
 
-        self.count_manager = GenshinCountManager((10, 90), ("4", "5"))
+        self.count_manager = GenshinCountManager((10, 90), ("4", "5"), 180)
 
     # 抽取卡池
     def get_card(
@@ -102,52 +102,60 @@ class GenshinHandle(BaseHandle[GenshinData]):
             acquire_char = random.choice(chars)
         return acquire_char
 
-    def get_cards(self, count: int, user_id: int, pool_name: str) -> List[GenshinData]:
+    def get_cards(
+        self, count: int, user_id: int, pool_name: str
+    ) -> List[Tuple[GenshinData, int]]:
         card_list = []  # 获取角色列表
         add = 0.0
         count_manager = self.count_manager
+        count_manager.check_timeout(user_id)  # 检查上次抽卡次数是否超时
+        count_manager.check_count(user_id, count)  # 检查次数累计
         pool = self.UP_CHAR if pool_name == "char" else self.UP_ARMS
-        for _ in range(count):
+        for i in range(count):
             count_manager.increase(user_id)
-            star = count_manager.check(user_id)
+            star = count_manager.check(user_id)  # 是否有四星或五星保底
             if (
                 count_manager.get_user_count(user_id)
-                - count_manager.get_user_count(user_id, 1)
-            ) % 90 >= 72:
+                - count_manager.get_user_five_index(user_id)
+            ) % count_manager.get_max_guarantee() >= 72:
                 add += draw_config.genshin.I72_ADD
             if star:
-                star = int(star)
                 if star == 4:
                     card = self.get_card(pool_name, 2, add=add)
-                    count_manager.record_count(user_id, 0)
                 else:
                     card = self.get_card(
                         pool_name, 3, add, count_manager.is_up(user_id)
                     )
             else:
                 card = self.get_card(pool_name, 1, add, count_manager.is_up(user_id))
-            if card.star == self.max_star:
+            # print(f"{count_manager.get_user_count(user_id)}：",
+            # count_manager.get_user_five_index(user_id), star, card.star, add)
+            # 四星角色
+            if card.star == 4:
+                count_manager.mark_four_index(user_id)
+            # 五星角色
+            elif card.star == self.max_star:
                 add = 0
-                count_manager.set_count(
-                    user_id, 2, count_manager.get_user_count(user_id, 1)
-                )
-                count_manager.record_count(user_id, 0)
-                count_manager.record_count(user_id, 1)
-                if pool and card.name in [x.name for x in pool.up_char if x.star == 5]:
-                    count_manager.set_is_up(user_id, True)
-                else:
-                    count_manager.set_is_up(user_id, False)
-            card_list.append(card)
+                count_manager.mark_five_index(user_id)  # 记录五星保底
+                count_manager.mark_four_index(user_id)  # 记录四星保底
+            if pool and card.name in [
+                x.name for x in pool.up_char if x.star == self.max_star
+            ]:
+                count_manager.set_is_up(user_id, True)
+            else:
+                count_manager.set_is_up(user_id, False)
+            card_list.append((card, count_manager.get_user_count(user_id)))
+        count_manager.update_time(user_id)
         return card_list
 
-    def generate_card_img(self, card: GenshinData) -> CreateImg:
+    def generate_card_img(self, card: GenshinData) -> BuildImage:
         sep_w = 10
         sep_h = 5
         frame_w = 112
         frame_h = 132
         img_w = 106
         img_h = 106
-        bg = CreateImg(frame_w + sep_w * 2, frame_h + sep_h * 2, color="#EBEBEB")
+        bg = BuildImage(frame_w + sep_w * 2, frame_h + sep_h * 2, color="#EBEBEB")
         frame_path = str(self.img_path / "avatar_frame.png")
         frame = Image.open(frame_path)
         # 加名字
@@ -162,7 +170,7 @@ class GenshinHandle(BaseHandle[GenshinData]):
             fill="gray",
         )
         img_path = str(self.img_path / f"{cn2py(card.name)}.png")
-        img = CreateImg(img_w, img_h, background=img_path)
+        img = BuildImage(img_w, img_h, background=img_path)
         if isinstance(card, GenshinArms):
             # 武器卡背景不是透明的，切去上方两个圆弧
             r = 12
@@ -196,7 +204,8 @@ class GenshinHandle(BaseHandle[GenshinData]):
         return info.strip()
 
     def draw(self, count: int, user_id: int, pool_name: str = "", **kwargs) -> Message:
-        cards = self.get_cards(count, user_id, pool_name)
+        index2cards = self.get_cards(count, user_id, pool_name)
+        cards = [card[0] for card in index2cards]
         up_event = None
         if pool_name == "char":
             up_event = self.UP_CHAR
@@ -204,18 +213,26 @@ class GenshinHandle(BaseHandle[GenshinData]):
             up_event = self.UP_ARMS
         up_list = [x.name for x in up_event.up_char] if up_event else []
         result = self.format_star_result(cards)
-        result += "\n" + self.format_max_star(cards, up_list=up_list)
-        result += f"\n距离保底发还剩 {self.count_manager.get_user_count(user_id, 1) % 90} 抽"
-        result += "\n【五星：0.6%，四星：5.1%\n第72抽开始五星概率每抽加0.585%】"
+        result += (
+            "\n" + max_star_str
+            if (max_star_str := self.format_max_star(index2cards, up_list=up_list))
+            else ""
+        )
+        result += f"\n距离保底发还剩 {self.count_manager.get_user_guarantee_count(user_id)} 抽"
+        # result += "\n【五星：0.6%，四星：5.1%，第72抽开始五星概率每抽加0.585%】"
         pool_info = self.format_pool_info(pool_name)
-        return pool_info + MessageSegment.image(self.generate_img(cards)) + result
+        img = self.generate_img(cards)
+        bk = BuildImage(img.w, img.h + 50, font_size=20, color="#ebebeb")
+        bk.paste(img)
+        bk.text((0, img.h + 10), "【五星：0.6%，四星：5.1%，第72抽开始五星概率每抽加0.585%】")
+        return pool_info + MessageSegment.image(bk.pic2bs4()) + result
 
     def _init_data(self):
         self.ALL_CHAR = [
             GenshinChar(
                 name=value["名称"],
                 star=int(value["星级"]),
-                limited=True if value["常驻/限定"] == "限定UP" else False,
+                limited=value["常驻/限定"] == "限定UP",
             )
             for key, value in self.load_data().items()
             if "旅行者" not in key
@@ -224,7 +241,7 @@ class GenshinHandle(BaseHandle[GenshinData]):
             GenshinArms(
                 name=value["名称"],
                 star=int(value["星级"]),
-                limited=True if "限定祈愿" in value["获取途径"] else False,
+                limited="祈愿" not in value["获取途径"],
             )
             for value in self.load_data("genshin_arms.json").values()
         ]

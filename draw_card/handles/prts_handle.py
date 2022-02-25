@@ -6,7 +6,7 @@ from PIL import ImageDraw
 from bs4 import BeautifulSoup
 from datetime import datetime
 from urllib.parse import unquote
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from pydantic import ValidationError
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.log import logger
@@ -19,7 +19,7 @@ except ModuleNotFoundError:
 from .base_handle import BaseHandle, BaseData, UpChar, UpEvent
 from ..config import draw_config
 from ..util import remove_prohibited_str, cn2py, load_font
-from ..create_img import CreateImg
+from ..build_image import BuildImage
 
 
 class Operator(BaseData):
@@ -30,7 +30,7 @@ class Operator(BaseData):
 
 class PrtsHandle(BaseHandle[Operator]):
     def __init__(self):
-        super().__init__("prts", "明日方舟")
+        super().__init__("prts", "明日方舟", "#eff2f5")
         self.max_star = 6
         self.config = draw_config.prts
 
@@ -72,11 +72,11 @@ class PrtsHandle(BaseHandle[Operator]):
             acquire_operator = random.choice(all_operators)
         return acquire_operator
 
-    def get_cards(self, count: int) -> List[Operator]:
+    def get_cards(self, count: int) -> List[Tuple[Operator, int]]:
         card_list = []  # 获取所有角色
         add = 0.0
         count_idx = 0
-        for _ in range(count):
+        for i in range(count):
             count_idx += 1
             card = self.get_card(add)
             if card.star == self.max_star:
@@ -84,7 +84,7 @@ class PrtsHandle(BaseHandle[Operator]):
                 count_idx = 0
             elif count_idx > 50:
                 add += 0.02
-            card_list.append(card)
+            card_list.append((card, i + 1))
         return card_list
 
     def format_pool_info(self) -> str:
@@ -103,24 +103,25 @@ class PrtsHandle(BaseHandle[Operator]):
         return info.strip()
 
     def draw(self, count: int, **kwargs) -> Message:
-        cards = self.get_cards(count)
+        index2card = self.get_cards(count)
+        cards = [card[0] for card in self.get_cards(count)]
         up_list = [x.name for x in self.UP_EVENT.up_char] if self.UP_EVENT else []
-        result = self.format_result(cards, up_list=up_list)
+        result = self.format_result(index2card, up_list=up_list)
         pool_info = self.format_pool_info()
-        return pool_info + MessageSegment.image(self.generate_img(cards)) + result
+        return pool_info + MessageSegment.image(self.generate_img(cards).pic2bs4()) + result
 
-    def generate_card_img(self, card: Operator) -> CreateImg:
+    def generate_card_img(self, card: Operator) -> BuildImage:
         sep_w = 5
         sep_h = 5
         star_h = 15
         img_w = 120
         img_h = 120
         font_h = 20
-        bg = CreateImg(img_w + sep_w * 2, img_h + font_h + sep_h * 2, color="#EFF2F5")
+        bg = BuildImage(img_w + sep_w * 2, img_h + font_h + sep_h * 2, color="#EFF2F5")
         star_path = str(self.img_path / "star.png")
-        star = CreateImg(star_h, star_h, background=star_path)
+        star = BuildImage(star_h, star_h, background=star_path)
         img_path = str(self.img_path / f"{cn2py(card.name)}.png")
-        img = CreateImg(img_w, img_h, background=img_path)
+        img = BuildImage(img_w, img_h, background=img_path)
         bg.paste(img, (sep_w, sep_h), alpha=True)
         for i in range(card.star):
             bg.paste(star, (sep_w + img_w - 5 - star_h * (i + 1), sep_h), alpha=True)
@@ -142,13 +143,7 @@ class PrtsHandle(BaseHandle[Operator]):
             Operator(
                 name=value["名称"],
                 star=int(value["星级"]),
-                limited=True
-                if "限定寻访" in value["获取途径"]
-                or (
-                    "干员寻访" not in value["获取途径"]
-                    and value["获取途径"][0] in ["凭证交易所", "信用累计奖励"]
-                )
-                else False,
+                limited="干员寻访" not in value["获取途径"],
                 recruit_only=True
                 if "干员寻访" not in value["获取途径"] and "公开招募" in value["获取途径"]
                 else False,

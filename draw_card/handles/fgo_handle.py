@@ -1,6 +1,6 @@
 import random
 from lxml import etree
-from typing import List
+from typing import List, Tuple
 from PIL import ImageDraw
 from nonebot.log import logger
 
@@ -12,7 +12,7 @@ except ModuleNotFoundError:
 from .base_handle import BaseHandle, BaseData
 from ..config import draw_config
 from ..util import remove_prohibited_str, cn2py, load_font
-from ..create_img import CreateImg
+from ..build_image import BuildImage
 
 
 class FgoData(BaseData):
@@ -69,11 +69,11 @@ class FgoHandle(BaseHandle[FgoData]):
             chars = [x for x in self.ALL_CARD if x.star == star and not x.limited]
         return random.choice(chars)
 
-    def get_cards(self, count: int, **kwargs) -> List[FgoData]:
+    def get_cards(self, count: int, **kwargs) -> List[Tuple[FgoData, int]]:
         card_list = []  # 获取所有角色
         servant_count = 0  # 保底计算
         card_count = 0  # 保底计算
-        for _ in range(count):
+        for i in range(count):
             servant_count += 1
             card_count += 1
             if card_count == 9:  # 四星卡片保底
@@ -87,18 +87,18 @@ class FgoHandle(BaseHandle[FgoData]):
                 card_count = 0
             if isinstance(card, FgoChar):
                 servant_count = 0
-            card_list.append(card)
+            card_list.append((card, i + 1))
         return card_list
 
-    def generate_card_img(self, card: FgoData) -> CreateImg:
+    def generate_card_img(self, card: FgoData) -> BuildImage:
         sep_w = 5
         sep_t = 5
         sep_b = 20
         w = 128
         h = 140
-        bg = CreateImg(w + sep_w * 2, h + sep_t + sep_b)
+        bg = BuildImage(w + sep_w * 2, h + sep_t + sep_b)
         img_path = str(self.img_path / f"{cn2py(card.name)}.png")
-        img = CreateImg(w, h, background=img_path)
+        img = BuildImage(w, h, background=img_path)
         bg.paste(img, (sep_w, sep_t), alpha=True)
         # 加名字
         text = card.name[:6] + "..." if len(card.name) > 7 else card.name

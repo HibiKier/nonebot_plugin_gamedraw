@@ -1,9 +1,9 @@
 import platform
 import pypinyin
 from pathlib import Path
+from PIL.ImageFont import FreeTypeFont
 from PIL import Image, ImageDraw, ImageFont
 from PIL.Image import Image as IMG
-from PIL.ImageFont import FreeTypeFont
 
 dir_path = Path(__file__).parent.absolute()
 
@@ -54,3 +54,4 @@ def circled_number(num: int) -> IMG:
         stroke_fill="white",
     )
     return img
+

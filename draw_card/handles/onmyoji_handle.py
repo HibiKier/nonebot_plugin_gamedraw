@@ -1,6 +1,6 @@
 import random
 from lxml import etree
-from typing import List
+from typing import List, Tuple
 from nonebot.log import logger
 from PIL import Image, ImageDraw
 from PIL.Image import Image as IMG
@@ -13,7 +13,7 @@ except ModuleNotFoundError:
 from .base_handle import BaseHandle, BaseData
 from ..config import draw_config
 from ..util import remove_prohibited_str, cn2py, load_font
-from ..create_img import CreateImg
+from ..build_image import BuildImage
 
 
 class OnmyojiChar(BaseData):
@@ -42,9 +42,9 @@ class OnmyojiHandle(BaseHandle[OnmyojiChar]):
         chars = [x for x in self.ALL_CHAR if x.star == star and not x.limited]
         return random.choice(chars)
 
-    def format_max_star(self, card_list: List[OnmyojiChar]) -> str:
+    def format_max_star(self, card_list: List[Tuple[OnmyojiChar, int]]) -> str:
         rst = ""
-        for index, card in enumerate(card_list, start=1):
+        for card, index in card_list:
             if card.star == self.max_star:
                 rst += f"第 {index} 抽获取SP {card.name}\n"
             elif card.star == self.max_star - 1:
@@ -91,13 +91,13 @@ class OnmyojiHandle(BaseHandle[OnmyojiChar]):
         bg.paste(base, (0, 0), base)
         return bg
 
-    def generate_img(self, card_list: List[OnmyojiChar]) -> str:
+    def generate_img(self, card_list: List[OnmyojiChar]) -> BuildImage:
         return super().generate_img(card_list, num_per_line=10)
 
-    def generate_card_img(self, card: OnmyojiChar) -> CreateImg:
-        bg = CreateImg(73, 240, color="#F1EFE9")
+    def generate_card_img(self, card: OnmyojiChar) -> BuildImage:
+        bg = BuildImage(73, 240, color="#F1EFE9")
         img_path = str(self.img_path / f"{cn2py(card.name)}_mark_btn.png")
-        img = CreateImg(0, 0, background=img_path)
+        img = BuildImage(0, 0, background=img_path)
         img = Image.open(img_path).convert("RGBA")
         label = self.star_label(card.star).resize((60, 33), Image.ANTIALIAS)
         bg.paste(img, (0, 0), alpha=True)

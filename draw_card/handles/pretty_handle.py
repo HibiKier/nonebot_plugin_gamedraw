@@ -6,7 +6,7 @@ from PIL import ImageDraw
 from bs4 import BeautifulSoup
 from datetime import datetime
 from urllib.parse import unquote
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from pydantic import ValidationError
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.log import logger
@@ -19,7 +19,7 @@ except ModuleNotFoundError:
 from .base_handle import BaseHandle, BaseData, UpChar, UpEvent
 from ..config import draw_config
 from ..util import remove_prohibited_str, cn2py, load_font
-from ..create_img import CreateImg
+from ..build_image import BuildImage
 
 
 class PrettyData(BaseData):
@@ -38,7 +38,7 @@ class PrettyCard(PrettyData):
 
 class PrettyHandle(BaseHandle[PrettyData]):
     def __init__(self):
-        super().__init__("pretty", "赛马娘")
+        super().__init__("pretty", "赛马娘", "#eff2f5")
         self.data_files.append("pretty_card.json")
         self.max_star = 3
         self.config = draw_config.pretty
@@ -86,10 +86,10 @@ class PrettyHandle(BaseHandle[PrettyData]):
             acquire_char = random.choice(all_char)
         return acquire_char
 
-    def get_cards(self, count: int, pool_name: str) -> List[PrettyData]:
+    def get_cards(self, count: int, pool_name: str) -> List[Tuple[PrettyData, int]]:
         card_list = []
         card_count = 0  # 保底计算
-        for _ in range(count):
+        for i in range(count):
             card_count += 1
             # 十连保底
             if card_count == 10:
@@ -99,7 +99,7 @@ class PrettyHandle(BaseHandle[PrettyData]):
                 card = self.get_card(pool_name, 1)
                 if card.star > self.max_star - 2:
                     card_count = 0
-            card_list.append(card)
+            card_list.append((card, i + 1))
         return card_list
 
     def format_pool_info(self, pool_name: str) -> str:
@@ -129,24 +129,25 @@ class PrettyHandle(BaseHandle[PrettyData]):
 
     def draw(self, count: int, pool_name: str, **kwargs) -> Message:
         pool_name = "char" if not pool_name else pool_name
-        cards = self.get_cards(count, pool_name)
+        index2card = self.get_cards(count, pool_name)
+        cards = [card[0] for card in index2card]
         up_event = self.UP_CHAR if pool_name == "char" else self.UP_CARD
         up_list = [x.name for x in up_event.up_char] if up_event else []
-        result = self.format_result(cards, up_list=up_list)
+        result = self.format_result(index2card, up_list=up_list)
         pool_info = self.format_pool_info(pool_name)
-        return pool_info + MessageSegment.image(self.generate_img(cards)) + result
+        return pool_info + MessageSegment.image(self.generate_img(cards).pic2bs4()) + result
 
-    def generate_card_img(self, card: PrettyData) -> CreateImg:
+    def generate_card_img(self, card: PrettyData) -> BuildImage:
         if isinstance(card, PrettyChar):
             star_h = 30
             img_w = 200
             img_h = 219
             font_h = 50
-            bg = CreateImg(img_w, img_h + font_h, color="#EFF2F5")
+            bg = BuildImage(img_w, img_h + font_h, color="#EFF2F5")
             star_path = str(self.img_path / "star.png")
-            star = CreateImg(star_h, star_h, background=star_path)
+            star = BuildImage(star_h, star_h, background=star_path)
             img_path = str(self.img_path / f"{cn2py(card.name)}.png")
-            img = CreateImg(img_w, img_h, background=img_path)
+            img = BuildImage(img_w, img_h, background=img_path)
             star_w = star_h * card.star
             for i in range(card.star):
                 bg.paste(star, (int((img_w - star_w) / 2) + star_h * i, 0), alpha=True)
@@ -168,11 +169,11 @@ class PrettyHandle(BaseHandle[PrettyData]):
             img_w = 200
             img_h = 267
             font_h = 75
-            bg = CreateImg(img_w + sep_w * 2, img_h + font_h, color="#EFF2F5")
+            bg = BuildImage(img_w + sep_w * 2, img_h + font_h, color="#EFF2F5")
             label_path = str(self.img_path / f"{card.star}_label.png")
-            label = CreateImg(40, 40, background=label_path)
+            label = BuildImage(40, 40, background=label_path)
             img_path = str(self.img_path / f"{cn2py(card.name)}.png")
-            img = CreateImg(img_w, img_h, background=img_path)
+            img = BuildImage(img_w, img_h, background=img_path)
             bg.paste(img, (sep_w, 0), alpha=True)
             bg.paste(label, (30, 3), alpha=True)
             # 加名字
