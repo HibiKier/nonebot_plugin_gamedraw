@@ -116,6 +116,10 @@
     
 ## 更新：
 
+### 2022/2/26
+
+ * 优化代码 [pull/40](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/40)
+
 ### 2022/2/25
  * 优化抽卡结果
  * 修复原神抽卡统计
