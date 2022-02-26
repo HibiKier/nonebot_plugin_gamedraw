@@ -38,9 +38,10 @@ class PrettyCard(PrettyData):
 
 class PrettyHandle(BaseHandle[PrettyData]):
     def __init__(self):
-        super().__init__("pretty", "赛马娘", "#eff2f5")
+        super().__init__("pretty", "赛马娘")
         self.data_files.append("pretty_card.json")
         self.max_star = 3
+        self.game_card_color = "#eff2f5"
         self.config = draw_config.pretty
 
         self.ALL_CHAR: List[PrettyChar] = []

@@ -1,7 +1,7 @@
 import random
 import dateparser
 from lxml import etree
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from PIL import ImageDraw
 from urllib.parse import unquote
 from pydantic import ValidationError
@@ -28,7 +28,7 @@ class AzurChar(BaseData):
 
 
 class UpChar(_UpChar):
-    type_: str   # 舰娘类型
+    type_: str  # 舰娘类型
 
 
 class UpEvent(_UpEvent):
@@ -52,17 +52,19 @@ class AzurHandle(BaseHandle[AzurChar]):
             type_ = ["维修", "潜艇", "重巡", "轻航", "航母"]
         up_pool_flag = pool_name == "活动"
         # Up
-        up_ship = [x for x in self.UP_EVENT.up_char if x.zoom > 0]
+        up_ship = (
+            [x for x in self.UP_EVENT.up_char if x.zoom > 0] if self.UP_EVENT else []
+        )
         # print(up_ship)
         acquire_char = None
         if up_ship and up_pool_flag:
-            up_zoom = [(0, up_ship[0].zoom / 100)]
+            up_zoom: List[Tuple[float, float]] = [(0, up_ship[0].zoom / 100)]
             # 初始化概率
             cur_ = up_ship[0].zoom / 100
             for i in range(len(up_ship)):
                 try:
-                    up_zoom.append((cur_, cur_ + up_ship[i+1].zoom / 100))
-                    cur_ += up_ship[i+1].zoom / 100
+                    up_zoom.append((cur_, cur_ + up_ship[i + 1].zoom / 100))
+                    cur_ += up_ship[i + 1].zoom / 100
                 except IndexError:
                     pass
             rand = random.random()
@@ -70,7 +72,9 @@ class AzurHandle(BaseHandle[AzurChar]):
             for i, zoom in enumerate(up_zoom):
                 if zoom[0] <= rand <= zoom[1]:
                     try:
-                        acquire_char = [x for x in self.ALL_CHAR if x.name == up_ship[i].name][0]
+                        acquire_char = [
+                            x for x in self.ALL_CHAR if x.name == up_ship[i].name
+                        ][0]
                     except IndexError:
                         pass
         # 没有up或者未抽取到up
@@ -84,17 +88,19 @@ class AzurHandle(BaseHandle[AzurChar]):
                     self.config.AZUR_ONE_P,
                 ],
             )
-            acquire_char = random.choice([
-                x
-                for x in self.ALL_CHAR
-                if x.star == star and x.type_ in type_ and not x.limited
-            ])
+            acquire_char = random.choice(
+                [
+                    x
+                    for x in self.ALL_CHAR
+                    if x.star == star and x.type_ in type_ and not x.limited
+                ]
+            )
         return acquire_char
 
     def draw(self, count: int, **kwargs) -> Message:
         index2card = self.get_cards(count, **kwargs)
         cards = [card[0] for card in index2card]
-        up_list = [x.name for x in self.UP_EVENT.up_char] if self.UP_EVENT.up_char else []
+        up_list = [x.name for x in self.UP_EVENT.up_char] if self.UP_EVENT else []
         result = self.format_result(index2card, **{**kwargs, "up_list": up_list})
         return MessageSegment.image(self.generate_img(cards).pic2bs4()) + result
 
@@ -289,7 +295,7 @@ class AzurHandle(BaseHandle[AzurChar]):
             up_chars = []
             for ship in ships:
                 name = ship.xpath("./tbody/tr/td[2]/p/a/@title")[0]
-                type_ = ship.xpath("./tbody/tr/td[2]/p/small/text()")[0]        # 舰船类型
+                type_ = ship.xpath("./tbody/tr/td[2]/p/small/text()")[0]  # 舰船类型
                 try:
                     p = float(str(ship.xpath(".//sup/text()")[0]).strip("%"))
                 except IndexError:
@@ -297,7 +303,9 @@ class AzurHandle(BaseHandle[AzurChar]):
                 star = self.parse_star(
                     ship.xpath("./tbody/tr/td[1]/div/div/div/a/img/@alt")[0]
                 )
-                up_chars.append(UpChar(name=name, star=star, limited=False, zoom=p, type_=type_))
+                up_chars.append(
+                    UpChar(name=name, star=star, limited=False, zoom=p, type_=type_)
+                )
             self.UP_EVENT = UpEvent(
                 title=title,
                 pool_img="",

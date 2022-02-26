@@ -35,9 +35,10 @@ class GenshinArms(GenshinData):
 
 class GenshinHandle(BaseHandle[GenshinData]):
     def __init__(self):
-        super().__init__("genshin", "原神", "#ebebeb")
+        super().__init__("genshin", "原神")
         self.data_files.append("genshin_arms.json")
         self.max_star = 5
+        self.game_card_color = "#ebebeb"
         self.config = draw_config.genshin
 
         self.ALL_CHAR: List[GenshinData] = []
@@ -108,7 +109,6 @@ class GenshinHandle(BaseHandle[GenshinData]):
         card_list = []  # 获取角色列表
         add = 0.0
         count_manager = self.count_manager
-        count_manager.check_timeout(user_id)  # 检查上次抽卡次数是否超时
         count_manager.check_count(user_id, count)  # 检查次数累计
         pool = self.UP_CHAR if pool_name == "char" else self.UP_ARMS
         for i in range(count):
@@ -145,7 +145,6 @@ class GenshinHandle(BaseHandle[GenshinData]):
             else:
                 count_manager.set_is_up(user_id, False)
             card_list.append((card, count_manager.get_user_count(user_id)))
-        count_manager.update_time(user_id)
         return card_list
 
     def generate_card_img(self, card: GenshinData) -> BuildImage:

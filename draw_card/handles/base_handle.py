@@ -53,17 +53,17 @@ TC = TypeVar("TC", bound="BaseData")
 
 
 class BaseHandle(Generic[TC]):
-    def __init__(self, game_name: str, game_name_cn: str, game_card_color: str = "#ffffff"):
+    def __init__(self, game_name: str, game_name_cn: str):
         self.game_name = game_name
         self.game_name_cn = game_name_cn
         self.max_star = 1  # 最大星级
+        self.game_card_color: str = "#ffffff"
         self.data_path = DRAW_PATH
         self.img_path = DRAW_PATH / f"draw_card/{self.game_name}"
         self.up_path = DRAW_PATH / "draw_card_up"
         self.img_path.mkdir(parents=True, exist_ok=True)
         self.up_path.mkdir(parents=True, exist_ok=True)
         self.data_files: List[str] = [f"{self.game_name}.json"]
-        self.game_card_color: str = game_card_color
 
     def draw(self, count: int, **kwargs) -> Message:
         index2card = self.get_cards(count, **kwargs)
