@@ -52,7 +52,7 @@ class PrtsHandle(BaseHandle[Operator]):
         all_operators = [
             x
             for x in self.ALL_OPERATOR
-            if x.star == star and not any([x.limited, x.recruit_only, x.event_only])  # 限定、公招、活动
+            if x.star == star and not any([x.limited, x.recruit_only, x.event_only])
         ]
         acquire_operator = None
 
