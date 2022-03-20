@@ -118,8 +118,8 @@
 
 ### 2022/3/20
 
- * 修复了方舟抽卡图文不符的bug (pull/44)[https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/44]
- * 修复了方舟许多干员抽不出来的bug (pull/44)[https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/44]
+ * 修复了方舟抽卡图文不符的bug [pull/44](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/44)
+ * 修复了方舟许多干员抽不出来的bug [pull/44](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/44)
 
 ### 2022/2/26
 
@@ -133,7 +133,7 @@
 
 ### 2022/2/22
 
- * 优化抽卡图片结果 [@pull 35](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/35)
+ * 优化抽卡图片结果 [@pull/35](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/35)
 
 ### 2022/2/18
 
@@ -141,7 +141,7 @@
 
 ### 2022/2/11
 
- * 优化代码，使用pydantic解析配置等 [@pull 31](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/31)
+ * 优化代码，使用pydantic解析配置等 [@pull/31](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/31)
 
 ### 2022/2/7
 
@@ -149,7 +149,7 @@
 
 ### 2022/1/27
 
- * 适配nb beat1 [@pull 27](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/27)
+ * 适配nb beat1 [@pull/27](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/27)
 
 ### 2022/1/6
 
