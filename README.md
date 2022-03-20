@@ -116,6 +116,11 @@
     
 ## 更新：
 
+### 2022/3/20
+
+ * 修复了方舟抽卡图文不符的bug (pull/44)[https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/44]
+ * 修复了方舟许多干员抽不出来的bug (pull/44)[https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/44]
+
 ### 2022/2/26
 
  * 优化代码 [pull/40](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/40)
