@@ -23,6 +23,7 @@ from .handles.onmyoji_handle import OnmyojiHandle
 from .handles.pcr_handle import PcrHandle
 from .handles.pretty_handle import PrettyHandle
 from .handles.prts_handle import PrtsHandle
+from .handles.ba_handle import BaHandle
 
 from .config import draw_config
 
@@ -37,7 +38,7 @@ class Game:
 
 
 games = (
-    Game({"azur", "碧蓝", "碧蓝航线"}, AzurHandle(), draw_config.AZUR_FLAG),
+    Game({"azur", "碧蓝航线"}, AzurHandle(), draw_config.AZUR_FLAG),
     Game({"fgo", "命运冠位指定"}, FgoHandle(), draw_config.FGO_FLAG),
     Game(
         {"genshin", "原神"},
@@ -62,6 +63,7 @@ games = (
         reload_time=4,
     ),
     Game({"prts", "方舟", "明日方舟"}, PrtsHandle(), draw_config.PRTS_FLAG, reload_time=4),
+    Game({"ba","碧蓝档案"},BaHandle(),draw_config.BA_FLAG),
 )
 
 
@@ -143,7 +145,7 @@ def create_matchers():
                 draw_handler(game)
             )
             on_keyword(
-                update_keywords, permission=SUPERUSER, priority=1, block=True
+                update_keywords, priority=1, block=True
             ).append_handler(update_handler(game))
             on_keyword(reload_keywords, priority=1, block=True).append_handler(
                 reload_handler(game)
