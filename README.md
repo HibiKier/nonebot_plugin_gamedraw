@@ -103,6 +103,7 @@
     AZUR_FLAG = False       # 碧蓝航线
     FGO_FLAG = False        # 命运-冠位指定（FGO）
     ONMYOJI_FLAG = False    # 阴阳师
+    BA_FLAG = False         # 碧蓝档案
   
   3.是否需要更改一些其他配置呢？（不添加或不设置默认为 False）
     在.env文件中添加对应 属性，以下为默认值
@@ -115,6 +116,11 @@
   ```
     
 ## 更新：
+
+### 2022/4/18
+
+* 修复了某些池子六星名称显示错误的问题 [pull/45](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/45)
+* 添加碧蓝档案卡池 [pull/46](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/46)
 
 ### 2022/3/20
 
