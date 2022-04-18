@@ -247,6 +247,10 @@ class PrtsHandle(BaseHandle[Operator]):
                         if match:
                             time = match.group(1)
                         if "★" in line:
+                            """这里修复了某些池子六星名称显示错误的问题(如奔崖号角)"""
+                            if line[0] != '★':
+                                idx = line.find('★')
+                                line = line[idx:]
                             chars.append(line)
                     if not time:
                         continue
