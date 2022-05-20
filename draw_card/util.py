@@ -9,8 +9,9 @@ dir_path = Path(__file__).parent.absolute()
 
 
 def cn2py(word) -> str:
+    """保存声调，防止出现类似方舟干员红与吽拼音相同声调不同导致红照片无法保存的问题"""
     temp = ""
-    for i in pypinyin.pinyin(word, style=pypinyin.NORMAL):
+    for i in pypinyin.pinyin(word, style=pypinyin.pypinyin.TONE3):
         temp += "".join(i)
     return temp
 
