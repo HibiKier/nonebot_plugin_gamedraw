@@ -117,6 +117,10 @@
     
 ## 更新：
 
+### 2022/5/24
+
+* fix: 干员图片文件重名问题 [pull/54](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/54)
+
 ### 2022/4/18
 
 * 修复了某些池子六星名称显示错误的问题 [pull/45](https://github.com/HibiKier/nonebot_plugin_gamedraw/pull/45)
