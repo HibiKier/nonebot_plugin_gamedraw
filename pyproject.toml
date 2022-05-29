@@ -20,7 +20,7 @@ cachetools = "^5.0.0"
 cn2an = "^0.5.16"
 dateparser = "^1.1.0"
 lxml = "^4.6.3"
-Pillow = "^8.2.0"
+Pillow = "^9.0.0"
 pypinyin = "^0.42.0"
 typing-extensions = ">=3.10.0,<5.0.0"
 ujson = {version = "^4.0.2", optional = true}
