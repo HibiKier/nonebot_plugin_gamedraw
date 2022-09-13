@@ -167,22 +167,22 @@ class AzurHandle(BaseHandle[AzurChar]):
             return
         dom = etree.HTML(result, etree.HTMLParser())
         contents = dom.xpath(
-            "//div[@class='resp-tabs-container']/div[@class='resp-tab-content']"
+            "//div[@class='mw-body-content mw-content-ltr']/div[@class='mw-parser-output']"
         )
         for index, content in enumerate(contents):
-            char_list = content.xpath("./table/tbody/tr[2]/td/div/div/div/div")
+            char_list = content.xpath("./div[@id='CardSelectTr']/div")
             for char in char_list:
                 try:
-                    name = char.xpath("./a/@title")[0]
-                    frame = char.xpath("./div/a/img/@alt")[0]
-                    avatar = char.xpath("./a/img/@srcset")[0]
+                    name = char.xpath("./div/a/@title")[0]
+                    frame = char.xpath("./div/div/a/img/@alt")[0]
+                    avatar = char.xpath("./div/a/img/@srcset")[0]
                 except IndexError:
                     continue
                 member_dict = {
                     "名称": remove_prohibited_str(name),
                     "头像": unquote(str(avatar).split(" ")[-2]),
                     "星级": self.parse_star(frame),
-                    "类型": self.parse_type(index),
+                    "类型": char.xpath("./@data-param1")[0].split(",")[1],
                 }
                 info[member_dict["名称"]] = member_dict
         # 更新额外信息
@@ -249,28 +249,6 @@ class AzurHandle(BaseHandle[AzurChar]):
             return 6
         else:
             return 6
-
-    @staticmethod
-    def parse_type(index: int) -> str:
-        azur_types = [
-            "驱逐",
-            "轻巡",
-            "重巡",
-            "超巡",
-            "战巡",
-            "战列",
-            "航母",
-            "航站",
-            "轻航",
-            "重炮",
-            "维修",
-            "潜艇",
-            "运输",
-        ]
-        try:
-            return azur_types[index]
-        except IndexError:
-            return azur_types[0]
 
     async def update_up_char(self):
         url = "https://wiki.biligame.com/blhx/游戏活动表"
