@@ -4,6 +4,7 @@ from typing import List, Tuple
 from PIL import ImageDraw
 from urllib.parse import unquote
 from nonebot.log import logger
+import requests
 
 from .base_handle import BaseHandle, BaseData
 from ..config import draw_config
@@ -109,25 +110,23 @@ class BaHandle(BaseHandle[BaChar]):
 
     async def _update_info(self):
         info = {}
-        url = "https://wiki.biligame.com/bluearchive/学生筛选"
-        result = await self.get_url(url)
+        url = "https://lonqie.github.io/SchaleDB/data/cn/students.min.json?v=49"
+        result = requests.get(url).json()
         if not result:
             logger.warning(f"更新 {self.game_name_cn} 出错")
             return
         else:
-            dom = etree.HTML(result, etree.HTMLParser())
-            char_list = dom.xpath("//div[@class='filters']/table[2]/tbody/tr")
-            for char in char_list:
+            for char in result:
                 try:
-                    name = char.xpath("./td[2]/a/div/text()")[0]
-                    avatar = char.xpath("./td[1]/div/div/a/img/@data-src")[0]
-                    star_pic = char.xpath("./td[4]/img/@alt")[0]
+                    name = char["Name"]
+                    avatar = "https://github.com/lonqie/SchaleDB/raw/main/images/student/icon/"+char["CollectionTexture"]+".png"
+                    star = char["StarGrade"]
                 except IndexError:
                     continue
                 member_dict = {
-                    "头像": unquote(str(avatar)),
-                    "名称": remove_prohibited_str(name),
-                    "星级": self.title2star(star_pic),
+                    "头像": avatar,
+                    "名称": name,
+                    "星级": star,
                 }
                 info[member_dict["名称"]] = member_dict
         self.dump_data(info)
