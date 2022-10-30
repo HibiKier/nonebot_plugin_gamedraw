@@ -1,8 +1,8 @@
 import math
+import anyio
 import random
 import aiohttp
 import asyncio
-import aiofiles
 from PIL import Image
 from datetime import datetime
 from pydantic import BaseModel, Extra
@@ -267,7 +267,7 @@ class BaseHandle(Generic[TC]):
             return True
         try:
             async with self.session.get(url, timeout=10) as response:
-                async with aiofiles.open(str(img_path), "wb") as f:
+                async with await anyio.open_file(img_path, "wb") as f:
                     await f.write(await response.read())
             return True
         except TimeoutError:
