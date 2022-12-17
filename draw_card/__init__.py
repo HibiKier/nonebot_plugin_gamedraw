@@ -25,8 +25,6 @@ from .handles.pretty_handle import PrettyHandle
 from .handles.prts_handle import PrtsHandle
 from .handles.ba_handle import BaHandle
 
-from .config import draw_config
-
 
 @dataclass
 class Game:
@@ -35,36 +33,10 @@ class Game:
     flag: bool
     max_count: int = 300  # 一次最大抽卡数
     reload_time: Optional[int] = None  # 重载UP池时间（小时）
+    has_other_pool: bool = False
 
 
-games = (
-    Game({"azur", "碧蓝航线"}, AzurHandle(), draw_config.AZUR_FLAG),
-    Game({"fgo", "命运冠位指定"}, FgoHandle(), draw_config.FGO_FLAG),
-    Game(
-        {"genshin", "原神"},
-        GenshinHandle(),
-        draw_config.GENSHIN_FLAG,
-        max_count=180,
-        reload_time=18,
-    ),
-    Game(
-        {"guardian", "坎公骑冠剑"},
-        GuardianHandle(),
-        draw_config.GUARDIAN_FLAG,
-        reload_time=4,
-    ),
-    Game({"onmyoji", "阴阳师"}, OnmyojiHandle(), draw_config.ONMYOJI_FLAG),
-    Game({"pcr", "公主连结", "公主连接", "公主链接", "公主焊接"}, PcrHandle(), draw_config.PCR_FLAG),
-    Game(
-        {"pretty", "马娘", "赛马娘"},
-        PrettyHandle(),
-        draw_config.PRETTY_FLAG,
-        max_count=200,
-        reload_time=4,
-    ),
-    Game({"prts", "方舟", "明日方舟"}, PrtsHandle(), draw_config.PRTS_FLAG, reload_time=4),
-    Game({"ba","碧蓝档案"},BaHandle(),draw_config.BA_FLAG),
-)
+games = None
 
 
 def create_matchers():
@@ -72,7 +44,7 @@ def create_matchers():
         async def handler(
             matcher: Matcher, event: MessageEvent, args: Tuple[str, ...] = RegexGroup()
         ):
-            pool_name, num, unit = args
+            pool_name, pool_type_,  num, unit = args
             if num == "单":
                 num = 1
             else:
@@ -93,7 +65,10 @@ def create_matchers():
                 .replace("卡牌", "card")
                 .replace("卡", "card")
             )
+
             try:
+                if pool_type_ in ['2池', '二池']:
+                    pool_name = pool_name + '1'
                 res = game.handle.draw(num, pool_name=pool_name, user_id=event.user_id)
             except:
                 logger.warning(traceback.format_exc())
@@ -134,9 +109,13 @@ def create_matchers():
         pool_pattern = r"([^\s单0-9零一二三四五六七八九百十]{0,3})"
         num_pattern = r"(单|[0-9零一二三四五六七八九百十]{1,3})"
         unit_pattern = r"([抽|井|连])"
-        draw_regex = r".*?(?:{})\s*{}\s*{}\s*{}".format(
-            "|".join(game.keywords), pool_pattern, num_pattern, unit_pattern
+        pool_type = "()"
+        if game.has_other_pool:
+            pool_type = r"([2二]池)"
+        draw_regex = r".*?(?:{})\s*{}\s*{}\s*{}\s*{}".format(
+            "|".join(game.keywords), pool_pattern, pool_type, num_pattern, unit_pattern
         )
+        print(draw_regex)
         update_keywords = {f"更新{keyword}信息" for keyword in game.keywords}
         reload_keywords = {f"重载{keyword}卡池" for keyword in game.keywords}
         reset_keywords = {f"重置{keyword}抽卡" for keyword in game.keywords}
@@ -144,9 +123,9 @@ def create_matchers():
             on_regex(draw_regex, priority=5, block=True).append_handler(
                 draw_handler(game)
             )
-            on_keyword(
-                update_keywords, priority=1, block=True
-            ).append_handler(update_handler(game))
+            on_keyword(update_keywords, priority=1, block=True).append_handler(
+                update_handler(game)
+            )
             on_keyword(reload_keywords, priority=1, block=True).append_handler(
                 reload_handler(game)
             )
@@ -159,7 +138,7 @@ def create_matchers():
                 )
 
 
-create_matchers()
+# create_matchers()
 
 
 # 更新资源
@@ -181,6 +160,39 @@ driver = nonebot.get_driver()
 
 @driver.on_startup
 async def _():
+    global games
+    if not games:
+        from .config import draw_config
+        games = (
+            Game({"azur", "碧蓝航线"}, AzurHandle(), draw_config.AZUR_FLAG),
+            Game({"fgo", "命运冠位指定"}, FgoHandle(), draw_config.FGO_FLAG),
+            Game(
+                {"genshin", "原神"},
+                GenshinHandle(),
+                draw_config.GENSHIN_FLAG,
+                max_count=180,
+                reload_time=18,
+                has_other_pool=True
+            ),
+            Game(
+                {"guardian", "坎公骑冠剑"},
+                GuardianHandle(),
+                draw_config.GUARDIAN_FLAG,
+                reload_time=4,
+            ),
+            Game({"onmyoji", "阴阳师"}, OnmyojiHandle(), draw_config.ONMYOJI_FLAG),
+            Game({"pcr", "公主连结", "公主连接", "公主链接", "公主焊接"}, PcrHandle(), draw_config.PCR_FLAG),
+            Game(
+                {"pretty", "马娘", "赛马娘"},
+                PrettyHandle(),
+                draw_config.PRETTY_FLAG,
+                max_count=200,
+                reload_time=4,
+            ),
+            Game({"prts", "方舟", "明日方舟"}, PrtsHandle(), draw_config.PRTS_FLAG, reload_time=4),
+            Game({"ba", "碧蓝档案"}, BaHandle(), draw_config.BA_FLAG),
+        )
+        create_matchers()
     tasks = []
     for game in games:
         if game.flag:

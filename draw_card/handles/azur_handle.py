@@ -156,6 +156,7 @@ class AzurHandle(BaseHandle[AzurChar]):
         if self.UP_EVENT:
             data = {"char": json.loads(self.UP_EVENT.json())}
             self.dump_data(data, f"draw_card_up/{self.game_name}_up_char.json")
+            self.dump_data(data, f"draw_card_up/{self.game_name}_up_char.json")
 
     async def _update_info(self):
         info = {}

@@ -233,9 +233,12 @@ class GuardianHandle(BaseHandle[GuardianData]):
             char_list = dom.xpath("//table[@id='CardSelectTr']/tbody/tr")
             for char in char_list:
                 try:
-                    name = char.xpath("./td[1]/a/@title")[0]
-                    avatar = char.xpath("./td[1]/a/img/@src")[0]
-                    star = char.xpath("./td[1]/span/img/@alt")[0]
+                    # name = char.xpath("./td[1]/a/@title")[0]
+                    # avatar = char.xpath("./td[1]/a/img/@src")[0]
+                    # star = char.xpath("./td[1]/span/img/@alt")[0]
+                    name = char.xpath("./th[1]/a[1]/@title")[0]
+                    avatar = char.xpath("./th[1]/a/img/@src")[0]
+                    star = char.xpath("./th[1]/span/img/@alt")[0]
                 except IndexError:
                     continue
                 member_dict = {
