@@ -115,7 +115,6 @@ def create_matchers():
         draw_regex = r".*?(?:{})\s*{}\s*{}\s*{}\s*{}".format(
             "|".join(game.keywords), pool_pattern, pool_type, num_pattern, unit_pattern
         )
-        print(draw_regex)
         update_keywords = {f"更新{keyword}信息" for keyword in game.keywords}
         reload_keywords = {f"重载{keyword}卡池" for keyword in game.keywords}
         reset_keywords = {f"重置{keyword}抽卡" for keyword in game.keywords}
