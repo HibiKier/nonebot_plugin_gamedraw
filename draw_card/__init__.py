@@ -2,7 +2,7 @@ import asyncio
 import traceback
 from cn2an import cn2an
 from dataclasses import dataclass
-from typing import Optional, Set, Tuple
+from typing import Optional, Set, Tuple, Any
 
 import nonebot
 from nonebot import on_regex, on_keyword
@@ -42,7 +42,7 @@ games = None
 def create_matchers():
     def draw_handler(game: Game) -> T_Handler:
         async def handler(
-            matcher: Matcher, event: MessageEvent, args: Tuple[str, ...] = RegexGroup()
+            matcher: Matcher, event: MessageEvent, args: Tuple[Any, ...] = RegexGroup()
         ):
             pool_name, pool_type_,  num, unit = args
             if num == "单":
@@ -111,7 +111,7 @@ def create_matchers():
         unit_pattern = r"([抽|井|连])"
         pool_type = "()"
         if game.has_other_pool:
-            pool_type = r"([2二]池)"
+            pool_type = r"([2二]池)?"
         draw_regex = r".*?(?:{})\s*{}\s*{}\s*{}\s*{}".format(
             "|".join(game.keywords), pool_pattern, pool_type, num_pattern, unit_pattern
         )
