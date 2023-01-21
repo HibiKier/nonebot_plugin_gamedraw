@@ -21,6 +21,7 @@ lxml = "^4.6.3"
 Pillow = "^9.0.0"
 pypinyin = ">=0.42.0"
 ujson = {version = "^5.1.0", optional = true}
+beautifulsoup4 = "^4.11.1"
 
 [tool.poetry.dev-dependencies]
 nb-cli = "^0.6.0"
