@@ -149,9 +149,9 @@ class PrtsHandle(BaseHandle[Operator]):
             Operator(
                 name=value["名称"],
                 star=int(value["星级"]),
-                limited="干员寻访" not in value["获取途径"],
+                limited= "寻访" not in ''.join(value["获取途径"]),
                 recruit_only=True
-                if "干员寻访" not in value["获取途径"] and "公开招募" in value["获取途径"]
+                if "寻访" not in ''.join(value["获取途径"]) and "公开招募" in value["获取途径"]
                 else False,
                 event_only=True if "活动获取" in value["获取途径"] else False,
             )
