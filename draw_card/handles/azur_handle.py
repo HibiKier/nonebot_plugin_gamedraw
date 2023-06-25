@@ -174,9 +174,9 @@ class AzurHandle(BaseHandle[AzurChar]):
             char_list = content.xpath("./div[@id='CardSelectTr']/div")
             for char in char_list:
                 try:
-                    name = char.xpath("./div/a/@title")[0]
+                    name = char.xpath("./span/a/@title")[0]
                     frame = char.xpath("./div/div/a/img/@alt")[0]
-                    avatar = char.xpath("./div/a/img/@srcset")[0]
+                    avatar = char.xpath("./div/img/@srcset")[0]
                 except IndexError:
                     continue
                 member_dict = {
