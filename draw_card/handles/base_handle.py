@@ -236,7 +236,7 @@ class BaseHandle(Generic[TC]):
         headers = {
             "User-Agent": '"Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)"'
         }
-        return aiohttp.ClientSession(headers=headers)
+        return aiohttp.ClientSession(trust_env=True, headers=headers)
 
     async def update_info(self):
         try:
